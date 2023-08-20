@@ -1,4 +1,5 @@
 import math
+import numpy as np
 
 def get_max_size(imglist):
     """
@@ -16,4 +17,38 @@ def get_crop_box(w, h):
     Returns params to pass to Image.crop()
     Note that coord (0,0) of an Image is the top-left corner
     """
-    return 0, 0, w-1, h-1
+    return 0, 0, 0+w, 0+h
+
+def make_basic_rgb_array(w, h):
+    """
+    Make a basic 'RGB'-mode numpy array,
+        which can be passed into Image.fromarray()
+    :param int w: Width
+    :param int h: Height
+    :return:
+    """
+    pixel = [255, 40, 255]
+    grid = np.array([[pixel] * w] * h)
+    return np.uint8(grid)
+
+def simple_mask_swap(im1, im2, mask):
+    """
+    im1, im2, and mask all have to have the same dimensions
+    :param Image.Image im1:
+    :param Image.Image im2:
+    :param mask:
+    :return:
+    """
+    collage_1 = im1.copy()
+    collage_2 = im2.copy()
+    w, h = im1.size
+
+    for x in range(w):
+        for y in range(h):
+            xy = (x, y)
+            if mask[x][y] == 1:
+                val = im1.getpixel(xy)
+                collage_1.putpixel(xy, collage_2.getpixel(xy))
+                collage_2.putpixel(xy, val)
+
+    return collage_1, collage_2

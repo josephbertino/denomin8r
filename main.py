@@ -1,6 +1,6 @@
-from PIL import Image
-import math
+from PIL import Image, ImageFont, ImageDraw
 import utils
+import numpy as np
 
 def main():
     # Import photo1 and photo2
@@ -11,16 +11,15 @@ def main():
     MASK = 'D_mask.jpg'
     mask = Image.open(MASK)
 
-    # Resize image1, image2, and mask to same size
+    # Get max dimensions for image1, image2, and mask
     w, h = utils.get_max_size([image1, image2, mask])
 
-    crop_box = utils.get_crop_box(image1, w, h)
+    # Crop an image
+    im1 = image1.crop(utils.get_crop_box(w, h))
+    im2 = image2.crop(utils.get_crop_box(w, h))
 
-    image1.show()
-    image1 = image1.crop(crop_box)
-    image1.show()
-
-    # TODO get all pixel locations where the D_mask is black
+    mask = 0 # TODO generate a bitmask from the 'D_mask', then use utils.simple_mask_swap()
+    collage1, collage2 = utils.simple_mask_swap(im1, im2, mask)
 
     # TODO import a bitmap or some sort of 2D vector, to use as mask
     # TODO get the vector of Arial's "D" and rasterize

@@ -1,2 +1,11 @@
 # PIL Image object methods
-'_Image__transformer', '__array_interface__', '__class__', '__copy__', '__delattr__', '__dict__', '__dir__', '__doc__', '__enter__', '__eq__', '__exit__', '__format__', '__ge__', '__getattribute__', '__getstate__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__le__', '__lt__', '__module__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__setstate__', '__sizeof__', '__str__', '__subclasshook__', '__weakref__', '_close_exclusive_fp_after_loading', '_copy', '_crop', '_dump', '_ensure_mutable', '_exclusive_fp', '_exif', '_exif_offset', '_expand', '_get_safe_box', '_getexif', '_getmp', '_getxmp', '_min_frame', '_new', '_open', '_reload_exif', '_repr_image', '_repr_jpeg_', '_repr_png_', '_repr_pretty_', '_seek_check', '_size', 'alpha_composite', 'app', 'applist', 'apply_transparency', 'bits', 'close', 'convert', 'copy', 'crop', 'custom_mimetype', 'decoderconfig', 'decodermaxblock', 'draft', 'effect_spread', 'entropy', 'filename', 'filter', 'format', 'format_description', 'fp', 'frombytes', 'get_child_images', 'get_format_mimetype', 'getbands', 'getbbox', 'getchannel', 'getcolors', 'getdata', 'getexif', 'getextrema', 'getim', 'getpalette', 'getpixel', 'getprojection', 'getxmp', 'height', 'histogram', 'huffman_ac', 'huffman_dc', 'icclist', 'im', 'info', 'layer', 'layers', 'load', 'load_djpeg', 'load_end', 'load_prepare', 'load_read', 'mode', 'palette', 'paste', 'point', 'putalpha', 'putdata', 'putpalette', 'putpixel', 'pyaccess', 'quantization', 'quantize', 'readonly', 'reduce', 'remap_palette', 'resize', 'rotate', 'save', 'seek', 'show', 'size', 'split', 'tell', 'thumbnail', 'tile', 'tobitmap', 'tobytes', 'toqimage', 'toqpixmap', 'transform', 'transpose', 'verify', 'width'
+
+## On Image modes
++ https://pillow.readthedocs.io/en/latest/handbook/concepts.html#modes
++ The mode of an image describes the type and depth of each pixel in an image.
++ '1' == (1-bit pixels, black and white, stored with one pixel per byte)
++ 'RGB' == (3x8-bit pixels, true color)
+  + An 'RBG' image's pixel is simple a 3-tuple (representing R, G, B)
+
+## Gotchas
++ Keep in mind: Image.crop() takes a 4-tuple (x1, y1, x2, y2), but 

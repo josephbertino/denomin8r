@@ -52,3 +52,12 @@ def simple_mask_swap(im1, im2, mask):
                 collage_2.putpixel(xy, val)
 
     return collage_1, collage_2
+
+def simple_bitmask_from_rgb(mask_src):
+    """
+    :param Image.Image mask_src:
+    :return:
+    """
+    arr = np.array(mask_src)
+    bitmask = np.where(np.all(arr == [0, 0, 0], axis=-1), 1, 0).transpose()
+    return bitmask

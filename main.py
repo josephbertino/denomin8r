@@ -18,15 +18,18 @@ def main():
     im1 = image1.crop(utils.get_crop_box(w, h))
     im2 = image2.crop(utils.get_crop_box(w, h))
 
-    mask = 0 # TODO generate a bitmask from the 'D_mask', then use utils.simple_mask_swap()
+    mask = 0
     collage1, collage2 = utils.simple_mask_swap(im1, im2, mask)
 
-    # TODO import a bitmap or some sort of 2D vector, to use as mask
+    # TODO make a smarter filter to grab imperfect blacks... maybe a lambda
+    # TODO generate a bitmask from a font file
+    # TODO rename project to denomin8r
     # TODO get the vector of Arial's "D" and rasterize
     # TODO determine regions in photo1 and photo2 where we'll swap information
     # TODO stretch out mask to fit swap-regions of photo1 and photo2
     # TODO swap information between photo1 and photo2 using mask
     # TODO save new photo1 and photo2
+    # TODO integrate with shutterstock API to get unlimited images
 
 if __name__ == '__main__':
     main()

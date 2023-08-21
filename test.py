@@ -1,8 +1,12 @@
 from PIL import Image
 import numpy as np
+import utils
 
 # SUCCESS :
-
+PHOTO1 = 'photo1.jpg'
+PHOTO2 = 'photo2.jpg'
+image1 = Image.open(PHOTO1)
+image2 = Image.open(PHOTO2)
 color1 = [40, 100, 200]
 color2 = [200, 100, 40]
 box1 = [[color1] * 4] * 4
@@ -11,34 +15,21 @@ mask = [[0,0,0,0], [0, 1, 1, 0], [0,1,1,0], [0,0,0,0]]
 im2 = Image.fromarray(np.uint8(np.array(box2)), mode='RGB')
 im1 = Image.fromarray(np.uint8(np.array(box1)), mode='RGB')
 
-def simple_mask_swap(im1, im2, mask):
-    """
-    im1, im2, and mask all have to have the same dimensions
-    :param Image.Image im1:
-    :param Image.Image im2:
-    :param mask:
-    :return:
-    """
-    collage_1 = im1.copy()
-    collage_2 = im2.copy()
-    w, h = im1.size
+# Generate a bitmask from a mode-'RGB' JPEG
+D_MASK = 'D_mask.jpg'
+d_mask = Image.open(D_MASK)
+w, h = utils.get_max_size([image1, image2, d_mask])
+image1 = image1.crop(utils.get_crop_box(w, h))
+image2 = image2.crop(utils.get_crop_box(w, h))
+d_mask = d_mask.crop(utils.get_crop_box(w, h))
 
-    for x in range(w):
-        for y in range(h):
-            xy = (x, y)
-            if mask[x][y] == 1:
-                val = im1.getpixel(xy)
-                collage_1.putpixel(xy, collage_2.getpixel(xy))
-                collage_2.putpixel(xy, val)
+blacks = utils.simple_bitmask_from_rgb(d_mask)
 
-    return collage_1, collage_2
+print(image1.size, image2.size, blacks.shape)
 
-# Crop an image
-image1 = image1.crop(utils.get_crop_box(w,h))
-n = utils.make_basic_rgb_array(w,h)
-test = Image.fromarray(np.uint8(n))
-test.show()
-mask.show()
+collage_1, collage_2 = utils.simple_mask_swap(image1, image2, blacks)
+collage_1.show()
+collage_2.show()
 
 # Use a TrueType font
 # font = ImageFont.truetype("arial.ttf", 400)

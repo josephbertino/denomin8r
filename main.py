@@ -21,7 +21,7 @@ def main():
     mask = 0
     collage1, collage2 = utils.simple_mask_swap(im1, im2, mask)
 
-    # TODO make a smarter filter to grab imperfect blacks... maybe a lambda
+    # TODO is there a numpy way to swap stamps between two images using a bitmask (2D or 3D)?
     # TODO generate a bitmask from a font file
     # TODO rename project to denomin8r
     # TODO get the vector of Arial's "D" and rasterize
@@ -30,6 +30,9 @@ def main():
     # TODO swap information between photo1 and photo2 using mask
     # TODO save new photo1 and photo2
     # TODO integrate with shutterstock API to get unlimited images
+    # TODO experiments with flipping same image
+    # TODO experiments with rotating same image
+    # TODO experiments with putting all image transformation methods and bitmask application methods into a list that randomly selects what to do so every time I run it's unexpected what will happen
 
 if __name__ == '__main__':
     main()

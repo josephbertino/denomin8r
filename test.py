@@ -3,8 +3,8 @@ import numpy as np
 import utils
 
 # SUCCESS :
-PHOTO1 = 'photo1.jpg'
-PHOTO2 = 'photo2.jpg'
+PHOTO1 = 'photo3.jpg'
+PHOTO2 = 'photo4.jpg'
 image1 = Image.open(PHOTO1)
 image2 = Image.open(PHOTO2)
 color1 = [40, 100, 200]
@@ -23,7 +23,7 @@ image1 = image1.crop(utils.get_crop_box(w, h))
 image2 = image2.crop(utils.get_crop_box(w, h))
 d_mask = d_mask.crop(utils.get_crop_box(w, h))
 
-blacks = utils.simple_bitmask_from_rgb(d_mask)
+blacks = utils.make_bitmask_from_black_white(d_mask)
 
 print(image1.size, image2.size, blacks.shape)
 

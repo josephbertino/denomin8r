@@ -53,11 +53,28 @@ def simple_mask_swap(im1, im2, mask):
 
     return collage_1, collage_2
 
-def simple_bitmask_from_rgb(mask_src):
+def img_filter_black_white(imgarr):
     """
+    Filters a 3D array of RGB pixels so that all pixels "close to" black become
+        black and all pixels "close to" white become white
+    :param Image.Image imgarr:
+    :return: Image.Image
+    """
+    LOHI_THRESHOLD = 128
+    filtered = np.copy(imgarr)
+    blacks = (filtered[:,:,0] < LOHI_THRESHOLD) & (filtered[:,:,1] < LOHI_THRESHOLD) & (filtered[:,:,2] < LOHI_THRESHOLD)
+    filtered[blacks] = [0, 0, 0]
+    filtered[~blacks] = [255, 255, 255]
+    return filtered
+
+def make_bitmask_from_black_white(mask_src):
+    """
+    Convert a 3-dimensional Image (mode-'RGB') into a 2-dimensional bitmask
+        Criteria: Foreground/Background (Black/White)
     :param Image.Image mask_src:
     :return:
     """
-    arr = np.array(mask_src)
-    bitmask = np.where(np.all(arr == [0, 0, 0], axis=-1), 1, 0).transpose()
+    mask_arr = np.array(mask_src)
+    filtered_mask_arr = img_filter_black_white(mask_arr)
+    bitmask = np.where(np.all(filtered_mask_arr == [0, 0, 0], axis=-1), 1, 0).transpose()
     return bitmask

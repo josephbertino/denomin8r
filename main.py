@@ -29,14 +29,13 @@ def main():
     # TODO learn about the structure of a font file, and how a font is transformed into pixels
     # TODO generate a bitmask from a font file
     # TODO get the vector of Arial's "D" and rasterize
-    # TODO determine regions in photo1 and photo2 where we'll swap information
     # TODO stretch out mask to fit swap-regions of photo1 and photo2
-    # TODO swap information between photo1 and photo2 using mask
-    # TODO save new photo1 and photo2
+    # TODO automatically make collages with an entire fontface.
     # TODO integrate with shutterstock API to get unlimited images
     # TODO experiments with flipping same image
     # TODO experiments with rotating same image
     # TODO experiments with putting all image transformation methods and bitmask application methods into a list that randomly selects what to do so every time I run it's unexpected what will happen
+    # TODO Make a mask out of 2 letters side by side
 
 if __name__ == '__main__':
     main()

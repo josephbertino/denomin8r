@@ -1,11 +1,10 @@
-from PIL import Image, ImageFont, ImageDraw
+from PIL import Image
 import utils
-import numpy as np
 
 def main():
     # Import photo1 and photo2
-    PHOTO1 = 'photo1.jpg'
-    PHOTO2 = 'photo2.jpg'
+    PHOTO1 = 'photo5.webp'
+    PHOTO2 = 'photo6.jpg'
     image1 = Image.open(PHOTO1)
     image2 = Image.open(PHOTO2)
     MASK = 'D_mask.jpg'
@@ -15,15 +14,20 @@ def main():
     w, h = utils.get_max_size([image1, image2, mask])
 
     # Crop an image
-    im1 = image1.crop(utils.get_crop_box(w, h))
-    im2 = image2.crop(utils.get_crop_box(w, h))
+    box = utils.get_crop_box(w, h)
+    im1 = utils.crop_central(image1, w, h)
+    im2 = utils.crop_central(image2, w, h)
+    mask = mask.resize(size=(w,h))
 
-    mask = 0
-    collage1, collage2 = utils.simple_mask_swap(im1, im2, mask)
+    bitmask = utils.make_bitmask_from_black_white(mask)
+    collage1, collage2 = utils.simple_mask_swap(im1, im2, bitmask)
 
-    # TODO is there a numpy way to swap stamps between two images using a bitmask (2D or 3D)?
+    Image.fromarray(collage1).save('collage1.jpg')
+    Image.fromarray(collage2).save('collage2.jpg')
+
+    # TODO make a resize method for the bitmask that keeps original proportion and adds False in the buffer margins
+    # TODO learn about the structure of a font file, and how a font is transformed into pixels
     # TODO generate a bitmask from a font file
-    # TODO rename project to denomin8r
     # TODO get the vector of Arial's "D" and rasterize
     # TODO determine regions in photo1 and photo2 where we'll swap information
     # TODO stretch out mask to fit swap-regions of photo1 and photo2
@@ -36,5 +40,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-# TODO learn about the structure of a font file, and how a font is transformed into pixels

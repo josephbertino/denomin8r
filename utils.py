@@ -1,5 +1,29 @@
+import os
 import math
 import numpy as np
+from PIL import Image
+
+# Load the webp image
+image = Image.open("image.webp")
+
+# Convert the image to jpg
+image.save("image.jpg", format="JPEG")
+
+
+def prep():
+    """
+    1) All .webp files converted to .jpg
+    2) All files with extension '.jpeg' renamed to '.jpg'
+    """
+    for root, dirs, files in os.walk("./"):
+        for file in files:
+            fname = file.rsplit('.', maxsplit=1)[0]
+            new_name = fname + '.jpg'
+            if file.endswith('.jpeg'):
+                os.rename(file, new_name)
+            elif file.endswith('.webp'):
+                image = Image.open(file)
+                image.save(new_name, format="JPEG")
 
 
 def get_max_size(imglist):
@@ -34,6 +58,17 @@ def crop_central(image, crop_w, crop_h):
     box = ((img_w - crop_w) // 2, (img_h - crop_h) // 2, (img_w + crop_w) // 2, (img_h + crop_h) // 2)
     cropped = image.crop(box)
     return cropped
+
+
+def crop_square(image):
+    """
+    Crop an image to a square based on its smaller side
+    :param Image.Image image:
+    :return:
+    """
+    w, h = image.size
+    s = w if w < h else h
+    return crop_central(image, s, s)
 
 
 def make_basic_rgb_array(w, h):

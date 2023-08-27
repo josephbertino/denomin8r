@@ -13,6 +13,8 @@ image1 = Image.open(PHOTO1)
 image2 = Image.open(PHOTO2)
 mask_im = Image.open(MASK)
 
+image1.transpose()
+
 # Use a TrueType font
 # font = ImageFont.truetype("arial.ttf", 400)
 # d = font.getmask("D")

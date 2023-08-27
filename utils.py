@@ -1,13 +1,10 @@
 import os
 import math
+import random
 import numpy as np
 from PIL import Image
 
-# Load the webp image
-image = Image.open("image.webp")
-
-# Convert the image to jpg
-image.save("image.jpg", format="JPEG")
+random.seed()
 
 
 def prep():
@@ -15,18 +12,31 @@ def prep():
     1) All .webp files converted to .jpg
     2) All files with extension '.jpeg' renamed to '.jpg'
     """
-    for root, dirs, files in os.walk("./"):
+    for root, dirs, files in os.walk("./sources/"):
         for file in files:
+            if file == '.DS_Store':
+                continue
             fname = file.rsplit('.', maxsplit=1)[0]
-            new_name = fname + '.jpg'
-            if file.endswith('.jpeg'):
-                os.rename(file, new_name)
-            elif file.endswith('.webp'):
-                image = Image.open(file)
-                image.save(new_name, format="JPEG")
+            new_file_path = os.path.join(root, fname + '.jpg')
+            if not file.endswith('.jpg'):
+                filepath = os.path.join(root, file)
+                image = Image.open(filepath)
+                if does_image_have_alpha(image):
+                    image = image.convert(mode='RGB')
+                image.save(new_file_path, format="JPEG")
+                os.remove(filepath)
 
 
-def get_max_size(imglist):
+def does_image_have_alpha(image):
+    """Test if an image has an alpha channel"""
+    try:
+        image.getbands().index('A')
+        return True
+    except ValueError:
+        return False
+
+
+def get_crop_size(imglist):
     """
     Returns max size (w, h) that is not larger than any of the images in the passed list
     """
@@ -46,14 +56,14 @@ def get_crop_box(w, h):
     return 0, 0, 0+w, 0+h
 
 
-def crop_central(image, crop_w, crop_h):
+def crop_central(image, shape):
     """
     Crop the image to the given w, h but from the center of the image
     :param Image.Image image:
-    :param int crop_w:
-    :param int crop_h:
+    :param tuple[int] shape:
     :return Image.Image:
     """
+    crop_w, crop_h = shape
     img_w, img_h = image.size
     box = ((img_w - crop_w) // 2, (img_h - crop_h) // 2, (img_w + crop_w) // 2, (img_h + crop_h) // 2)
     cropped = image.crop(box)
@@ -68,7 +78,7 @@ def crop_square(image):
     """
     w, h = image.size
     s = w if w < h else h
-    return crop_central(image, s, s)
+    return crop_central(image, (s, s))
 
 
 def make_basic_rgb_array(w, h):
@@ -111,3 +121,28 @@ def make_bitmask_from_black_white(mask_src):
     bitmask = (arr[:,:,0] < LOHI_THRESHOLD) & (arr[:,:,1] < LOHI_THRESHOLD) & (arr[:,:,2] < LOHI_THRESHOLD)
     bitmask = bitmask[:,:,np.newaxis]
     return bitmask
+
+
+def random_transform(image, crop_size):
+    """
+    Apply a series of transforms to an image, determined by change
+        + Flip over vertical axis
+        + Crop vs. Resize
+            + If Crop, Crop from Top/Left vs. Bottom/Right vs. Center
+    :param Image.Image image:
+    :param tuple[int, int] crop_size:
+    :return Image.Image:
+    """
+    # Flip Left-Right
+    if random.random() > .5:
+        image = image.transpose(Image.FLIP_LEFT_RIGHT)
+
+    # Crop vs. Resize
+    if random.random() > .5:
+        # Crop
+        image = crop_central(image, crop_size)
+    else:
+        # Resize
+        image = image.resize(crop_size)
+
+    return image

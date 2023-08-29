@@ -4,7 +4,12 @@ import random
 import numpy as np
 from PIL import Image
 
-random.seed()
+ROOT = '/Users/josephbertino/PycharmProjects/denomin8r'
+SOURCE_DIR = os.path.join(ROOT, 'sources')
+FONT_DIR = os.path.join(ROOT, 'fonts')
+
+SOURCE_IMAGES = []
+FONTFACE = 'Bookman Old Style Bold'
 
 
 def prep():
@@ -12,6 +17,8 @@ def prep():
     1) All .webp files converted to .jpg
     2) All files with extension '.jpeg' renamed to '.jpg'
     """
+    global SOURCE_IMAGES
+
     for root, dirs, files in os.walk("./sources/"):
         for file in files:
             if file == '.DS_Store':
@@ -25,6 +32,31 @@ def prep():
                     image = image.convert(mode='RGB')
                 image.save(new_file_path, format="JPEG")
                 os.remove(filepath)
+
+    os.chdir(SOURCE_DIR)
+    files = os.listdir()
+    files = [f for f in files if f != '.DS_Store']
+    SOURCE_IMAGES = sorted(files, key=os.path.getmtime)
+    os.chdir(ROOT)
+
+
+def load_images(latest=True):
+    """
+    Return 2 images from the sources directory
+
+    :param bool latest: If True, get latest images according to name (numeric id)
+    :return:
+    """
+    random.seed()
+    if latest:
+        imfiles = SOURCE_IMAGES[-2:]
+    else:
+        imfiles = random.sample(SOURCE_IMAGES,2)
+
+    images = []
+    for f in imfiles:
+        images.append(Image.open(os.path.join(SOURCE_DIR, f)))
+    return images
 
 
 def does_image_have_alpha(image):
@@ -133,6 +165,7 @@ def random_transform(image, crop_size):
     :param tuple[int, int] crop_size:
     :return Image.Image:
     """
+    random.seed()
     # Flip Left-Right
     if random.random() > .5:
         image = image.transpose(Image.FLIP_LEFT_RIGHT)

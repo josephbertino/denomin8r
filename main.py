@@ -22,10 +22,10 @@ def main():
         util.crop_square(Image.fromarray(collage_A)).save(f'collage{x}_A.jpg')
         util.crop_square(Image.fromarray(collage_B)).save(f'collage{x}_B.jpg')
 
-    # TODO figure out kerning of the text
     # TODO turn stuff in 'test' into a proper method that returns an image
     # TODO play around with margins when generating the fontmask image...especially the right margin
     # TODO util.get_random_mask() where 'D' or '8' is returned
+    # TODO expand the auto-generated bitmask by fitting it to the cropped size of the source images
     # TODO if ever I am at a loss for enhancements or experiments, read the docstrings of Image methods I use to get inspiration
     # TODO get the vector of Arial's "D" and rasterize
     # TODO stretch out vectorizded font mask to fit source images

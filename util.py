@@ -2,7 +2,7 @@ import os
 import math
 import random
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageFont, ImageDraw
 
 ROOT = '/Users/josephbertino/PycharmProjects/denomin8r'
 SOURCE_DIR = os.path.join(ROOT, 'sources')
@@ -10,6 +10,9 @@ FONT_DIR = os.path.join(ROOT, 'fonts')
 
 SOURCE_IMAGES = []
 FONTFACE = 'Bookman Old Style Bold'
+
+COLOR_WHITE = "#FFFFFF"
+COLOR_BLACK = "#000000"
 
 
 def prep():
@@ -179,3 +182,44 @@ def random_transform(image, crop_size):
         image = image.resize(crop_size)
 
     return image
+
+
+def image_from_text(text, size, kern_rate):
+    """
+    Build an Image.Image from input text
+    :param string text:
+    :param int size:
+    :param float kern_rate: > 1.0 means stretch the text, < 1.0 means squeeze the text
+    :return Image.Image:
+
+    ** Credit to "Harsha" @ https://gist.github.com/bornfree for providing code to generate
+        a "draw pad" on which to convert text to an image
+    ** Credit to Steven Woerpel  @ https://stackoverflow.com/a/63182161/1975297
+        for providing a method to kern text one character at a time
+
+    """
+    MAX_PADDING = 18
+
+    # Create a Font object from the .ttf
+    fontfile = os.path.join(FONT_DIR, 'bookman.ttf')
+    font = ImageFont.truetype(fontfile, size)
+
+    # Determine the text's dimensions when printing to image
+    left, top, right, bottom = font.getbbox(text)
+    text_width = right - left
+    text_height = bottom - top
+    kerned_width = int(text_width * kern_rate)
+
+    # Create a new Image, which will serve as the canvas for drawing the image
+    text_image = Image.new(mode='RGB', size=(kerned_width + MAX_PADDING * 2, text_height + MAX_PADDING * 2), color=COLOR_WHITE)
+    # Create a 'Drawing Pad' which will draw text to your image canvas
+    draw = ImageDraw.Draw(text_image)
+
+    # Draw text to your image canvas, one character at a time
+    xpos = MAX_PADDING - 2
+    for letter in text:
+        draw.text((xpos, MAX_PADDING - top), letter, font=font, fill=COLOR_BLACK)
+        _, _, letter_width, _ = draw.textbbox((0, 0), letter, font=font)
+        xpos += int(kern_rate * letter_width)
+
+    return text_image

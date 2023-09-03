@@ -183,7 +183,7 @@ def random_transform(image, crop_size):
         image = image.resize(crop_size)
 
     # Rotate
-    rotate = random.sample([0,1,2,3], 1)
+    rotate = random.sample([0,1,2,3], 1)[0]
     image = image.rotate(angle=rotate * 90)
 
     return image

@@ -3,6 +3,7 @@ import math
 import random
 import numpy as np
 from PIL import Image, ImageFont, ImageDraw
+import pillow_avif
 
 ROOT = '/Users/josephbertino/PycharmProjects/denomin8r'
 SOURCE_DIR = os.path.join(ROOT, 'sources')
@@ -181,6 +182,10 @@ def random_transform(image, crop_size):
         # Resize
         image = image.resize(crop_size)
 
+    # Rotate
+    rotate = random.sample([0,1,2,3], 1)
+    image = image.rotate(angle=rotate * 90)
+
     return image
 
 
@@ -208,18 +213,28 @@ def image_from_text(text, size, kern_rate):
     left, top, right, bottom = font.getbbox(text)
     text_width = right - left
     text_height = bottom - top
-    kerned_width = int(text_width * kern_rate)
+    char_widths = get_char_widths(text, font)
+    kerned_width = int(kern_rate * sum(char_widths[:-1])) + char_widths[-1]
+    print(f"{text_width=}")
+    print(text_width * kern_rate)
 
     # Create a new Image, which will serve as the canvas for drawing the image
-    text_image = Image.new(mode='RGB', size=(kerned_width + MAX_PADDING * 2, text_height + MAX_PADDING * 2), color=COLOR_WHITE)
+    text_image = Image.new(mode='RGB', size=(kerned_width + (MAX_PADDING * 2), text_height + (MAX_PADDING * 2)), color=COLOR_WHITE)
     # Create a 'Drawing Pad' which will draw text to your image canvas
     draw = ImageDraw.Draw(text_image)
 
     # Draw text to your image canvas, one character at a time
-    xpos = MAX_PADDING - 2
-    for letter in text:
+    xpos = MAX_PADDING
+    for letter, width in zip(text, char_widths):
         draw.text((xpos, MAX_PADDING - top), letter, font=font, fill=COLOR_BLACK)
-        _, _, letter_width, _ = draw.textbbox((0, 0), letter, font=font)
-        xpos += int(kern_rate * letter_width)
+        xpos += int(kern_rate * width)
 
     return text_image
+
+
+def get_char_widths(text, font):
+    char_widths = []
+    for letter in text:
+        letter_left, letter_top, letter_right, letter_bottom = font.getbbox(letter)
+        char_widths.append(letter_right-letter_left)
+    return char_widths

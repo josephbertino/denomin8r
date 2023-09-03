@@ -35,7 +35,11 @@ def main():
 # TODO get the vector of Arial's "D" and rasterize
 # TODO things to randomize: text margin, text size, text style, text kerning
 # TODO chaos_crop_resize where it crops and resizes over and over again
+# TODO Incoprorate Alpha channel to make the 'boundaries' between source elements blurred
 # TODO tesselating multiple images to become a "source"
+# TODO website to generate one-of-a-kind totes and t-shirts
+# TODO warping and shifting, corrupting the bitmask
+# TODO non-D or non-8's are extremely rare and aberrant
 # TODO allow the crop method to accept cropping from any specified origin point
 # TODO experiments with putting all image transformation methods and bitmask application methods into a list that randomly selects what to do so every time I run it's unexpected what will happen
 # TODO randomize the order of operations in random_transform. Allow for multiple occurences of an operation, not necessarily in sequence
@@ -43,6 +47,7 @@ def main():
 # TODO integrate with shutterstock API to get unlimited images
 # TODO experiments with flipping same image
 # TODO experiments with rotating same image
+# TODO create my own font
 # TODO swap 2 stamps across 2 pictures. Swap X stamps across X pictures
 # TODO website where users can generate a custom one of a kind image to put on a tote bag or tshirt
 

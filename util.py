@@ -72,16 +72,23 @@ def does_image_have_alpha(image):
         return False
 
 
-def get_crop_size(imglist):
+def get_crop_size(imglist, square=True):
     """
     Returns max size (w, h) that is not larger than any of the images in the passed list
+    :param list imglist: List of Image.Image
+    :param bool square: If True, crop dimensions should be square
+    :return:
     """
     w, h = math.inf, math.inf
     for img in imglist:
         tw, th = img.size
         w = tw if tw < w else w
         h = th if th < h else h
-    return w, h
+
+    if square:
+        return [min([w, h])] * 2
+    else:
+        return w, h
 
 
 def get_crop_box(w, h):
@@ -164,7 +171,6 @@ def random_transform(image, crop_size):
     Apply a series of transforms to an image, determined by change
         + Flip over vertical axis
         + Crop vs. Resize
-            + If Crop, Crop from Top/Left vs. Bottom/Right vs. Center
     :param Image.Image image:
     :param tuple[int, int] crop_size:
     :return Image.Image:

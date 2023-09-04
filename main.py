@@ -9,26 +9,30 @@ def main():
     mask = Image.open(MASK)
 
     for x in range(4):
-        image1, image2 = util.load_images(latest=True)
+        image1, image2 = util.load_images(latest=False)
         # Get max dimensions for image1, image2, and mask
-        crop_size = util.get_crop_size([image1, image2, mask])
+        crop_size = util.get_crop_size([image1, image2], square=True)
 
         # Randomly transform an image
         im1 = util.random_transform(image1, crop_size)
         im2 = util.random_transform(image2, crop_size)
 
+        # This code assumes that the 'mask' is a pre-fab image, so we adjust the mask to the sources, which may or may
+        # not be square. Alternatively, we build the mask from scratch to have the proportions we want
         mask = mask.resize(crop_size)
 
         bitmask = util.make_bitmask_from_black_white(mask)
         collage_A, collage_B = util.simple_mask_swap(im1, im2, bitmask)
 
-        util.crop_square(Image.fromarray(collage_A)).save(f'{random_id}_{x}_A.jpg')
-        util.crop_square(Image.fromarray(collage_B)).save(f'{random_id}_{x}_B.jpg')
+        Image.fromarray(collage_A).save(f'{random_id}_{x}_A.jpg')
+        Image.fromarray(collage_B).save(f'{random_id}_{x}_B.jpg')
 
-# TODO expand the auto-generated bitmask by fitting it to the cropped size of the source images. Probably the most important thing is determining the SIZE of the font before you type it out, and consider the length of the text
+# TODO expand the auto-generated bitmask by fitting it to the cropped size of the source images. Probably the most important thing is determining the SIZE of the font before you type it out, and consider the length of the text. Resize/Expand a font image to fit the source images, before turning it into a bitmask
 # TODO util.get_random_mask() where 'D' or '8' is returned
 # TODO MAKE STICKERS NOW!!!!!!!!
 # TODO make logo for PUSH
+# TODO make a bunch of sources based on a bunch of images, and save the individual pieces derived from masking into
+#  separate lists (one for the Inner shape, one for the outer), and recombine randomly
 # TODO expand the random transforms... random cropping and resize (within parameters)
 # TODO allow for breaking up the text into multiple lines
 # TODO if ever I am at a loss for enhancements or experiments, read the docstrings of Image methods I use to get inspiration

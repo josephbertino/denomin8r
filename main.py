@@ -9,7 +9,7 @@ def main():
     mask = Image.open(MASK)
 
     for x in range(4):
-        image1, image2 = util.load_images(latest=False)
+        image1, image2 = util.load_images(latest=True)
         # Get max dimensions for image1, image2, and mask
         crop_size = util.get_crop_size([image1, image2], square=True)
 
@@ -27,7 +27,9 @@ def main():
         Image.fromarray(collage_A).save(f'{random_id}_{x}_A.jpg')
         Image.fromarray(collage_B).save(f'{random_id}_{x}_B.jpg')
 
-# TODO expand the auto-generated bitmask by fitting it to the cropped size of the source images. Probably the most important thing is determining the SIZE of the font before you type it out, and consider the length of the text. Resize/Expand a font image to fit the source images, before turning it into a bitmask
+# TODO Build the font bitmask according to the dimensions of the source images
+# TODO after calling fit_text_to_size, need to stretch out bitmask or mask a little... actually, just resize and then crop it
+# TODO have MAX_PADDING in util be a function (fraction) of fontsize
 # TODO util.get_random_mask() where 'D' or '8' is returned
 # TODO MAKE STICKERS NOW!!!!!!!!
 # TODO make logo for PUSH

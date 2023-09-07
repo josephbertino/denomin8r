@@ -153,7 +153,7 @@ def simple_mask_swap(image1, image2, mask):
     return collage_1, collage_2
 
 
-def make_bitmask_from_black_white(mask_src):
+def make_bitmask_from_bw_image(mask_src):
     """
     Convert a 3-dimensional Image (mode-'RGB') into a 2-dimensional bitmask
         Criteria: Foreground/Background (Black/White)
@@ -196,12 +196,12 @@ def random_transform(image, shape):
     return image
 
 
-def image_from_text(text, fontsize, fontfile, kern_rate):
+def image_from_text(text, fontfile, fontsize, kern_rate):
     """
     Build an Image.Image from input text
     :param string text:
-    :param int fontsize:
     :param str fontfile:
+    :param int fontsize:
     :param float kern_rate: > 1.0 means stretch the text, < 1.0 means squeeze the text
     :return Image.Image:
 
@@ -215,13 +215,13 @@ def image_from_text(text, fontsize, fontfile, kern_rate):
 
     # Create a Font object from the .ttf
     fontfile = os.path.join(FONT_DIR, fontfile)
-    font = ImageFont.truetype(fontfile, fontsize)
+    font_obj = ImageFont.truetype(fontfile, fontsize)
 
     # Determine the text's dimensions when printing to image
-    left, top, right, bottom = font.getbbox(text)
+    left, top, right, bottom = font_obj.getbbox(text)
     text_width = right - left
     text_height = bottom - top
-    char_widths = get_char_widths(text, font)
+    char_widths = get_char_widths(text, font_obj)
     kerned_width = int(kern_rate * sum(char_widths[:-1])) + char_widths[-1]
 
     # Create a new Image, which will serve as the canvas for drawing the image
@@ -232,7 +232,7 @@ def image_from_text(text, fontsize, fontfile, kern_rate):
     # Draw text to your image canvas, one character at a time
     xpos = MAX_PADDING
     for letter, width in zip(text, char_widths):
-        draw.text((xpos, MAX_PADDING - top), letter, font=font, fill=COLOR_BLACK)
+        draw.text((xpos, MAX_PADDING - top), letter, font=font_obj, fill=COLOR_BLACK)
         xpos += int(kern_rate * width)
 
     return text_image
@@ -255,17 +255,47 @@ def build_mask_to_size(text, fontfile, shape, kern_rate):
     :param float kern_rate:
     :return Image.Image :
     """
-    best_size = fit_text_to_size(text, fontfile, shape, kern_rate)
-    text_image = image_from_text(text, best_size, fontfile, kern_rate)
-    return text_image
+    best_size = fit_text_to_shape(text, fontfile, shape, kern_rate)
+    text_image = image_from_text(text, fontfile, best_size, kern_rate)
+    bitmask = make_bitmask_from_bw_image(text_image)
+    return bitmask
 
 
-def fit_text_to_size(text, fontfile, shape, kern_rate):
-    # I want to set the size of the text to as large as possible while still being able to fit into *shape* without
-    # having to squeeze the text in any way
-    # Shape is width x height. the text will have a width and a height. but I don't know offhand how wide or high the
-    # text will be. I can maybe create an exhaustive lookup table
-    # One easy thing to do would be to first generate the text at a fixed size, like 100, with given margins. Then
-    # see how much more space you have, find the ratio, and re-generate the text according to the known size you can
-    # work with
-    pass
+def fit_text_to_shape(text, fontfile, shape, kern_rate):
+    """
+
+    :param str text:
+    :param str fontfile:
+    :param tuple(int) shape:
+    :param float kern_rate:
+    :return int:            The font_size to get the text_mask closest to shape without exceeding
+    """
+    shape_w, shape_h = shape
+    # TODO due to the trial-and-error nature of this method, there's no 'best' font_size to start with. I guess smaller is better. This method can probably be improved by not shrinking font_size by increments of 1 in the second while loop
+    best_size = 100
+    text_image = image_from_text(text, fontfile, best_size, kern_rate)
+    w, h = text_image.size
+
+    # Get text_image as large as possible using fontfile
+    while (w < shape_w) and (h < shape_h):
+        WL = (shape_w - w) / (shape_h - h)
+        WGR = (w / h)
+        if WGR >= WL:
+            # text_image will bump into source sides as it continues to grow
+            size_rate = shape_w / w
+        else:
+            # text_image will bump into top/bottom as it continues to grow
+            size_rate = shape_h / h
+
+        # math.ceil() might push the font size slighty above optimal
+        best_size = math.ceil(size_rate * best_size)
+        text_image = image_from_text(text, fontfile, best_size, kern_rate)
+        w, h = text_image.size
+
+    # Reduce fontsize gradually until we are in bounds of the source images
+    while (w > shape_w) or (h > shape_h):
+        best_size -= 1
+        text_image = image_from_text(text, fontfile, best_size, kern_rate)
+        w, h = text_image.size
+
+    return best_size

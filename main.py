@@ -21,17 +21,18 @@ def main():
         # not be square. Alternatively, we build the mask from scratch to have the proportions we want
         mask = mask.resize(crop_size)
 
-        bitmask = util.make_bitmask_from_black_white(mask)
+        bitmask = util.make_bitmask_from_bw_image(mask)
         collage_A, collage_B = util.simple_mask_swap(im1, im2, bitmask)
 
         Image.fromarray(collage_A).save(f'{random_id}_{x}_A.jpg')
         Image.fromarray(collage_B).save(f'{random_id}_{x}_B.jpg')
 
-# TODO Build the font bitmask according to the dimensions of the source images
-# TODO after calling fit_text_to_size, need to stretch out bitmask or mask a little... actually, just resize and then crop it
-# TODO have MAX_PADDING in util be a function (fraction) of fontsize
-# TODO util.get_random_mask() where 'D' or '8' is returned
+# TODO In build_mask_to_size(), expand bitmask to shape in case one or either of its dimensions are slightly smaller than source shape
+# TODO util.get_random_mask() where 'D' or '8' is returned, using build_mask_to_size()
+# TODO 3x3 DENOMIN8R grid for the gram
 # TODO MAKE STICKERS NOW!!!!!!!!
+# TODO have MAX_PADDING in util be a function (fraction) of fontsize
+# TODO in build_mask_to_size, have an option of just resizing (stretching) the text_image then converting to bitmask, rather than expanding the bitmask with whitespace. This will fuck with the proportions of the mask, which is cool
 # TODO make logo for PUSH
 # TODO make a bunch of sources based on a bunch of images, and save the individual pieces derived from masking into
 #  separate lists (one for the Inner shape, one for the outer), and recombine randomly

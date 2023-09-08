@@ -2,38 +2,47 @@ from PIL import Image
 import util
 import uuid
 
+BUILD_BITMASK_FROM_TEXT = True
+
 
 def main():
     random_id = uuid.uuid4().__str__().split('-')[0]
-    MASK = 'D_mask.jpg'
-    mask = Image.open(MASK)
+    MASK = 'D_mask.jpg'  # If I am using a pre-built mask image
+    mask_img = Image.open(MASK)
 
     for x in range(4):
         image1, image2 = util.load_images(latest=True)
         # Get max dimensions for image1, image2, and mask
         crop_size = util.get_crop_size([image1, image2], square=True)
 
-        # Randomly transform an image
+        # Randomly transform images
         im1 = util.random_transform(image1, crop_size)
         im2 = util.random_transform(image2, crop_size)
 
-        # This code assumes that the 'mask' is a pre-fab image, so we adjust the mask to the sources, which may or may
-        # not be square. Alternatively, we build the mask from scratch to have the proportions we want
-        mask = mask.resize(crop_size)
+        if BUILD_BITMASK_FROM_TEXT:
+            bitmask = util.build_mask_to_size(text='D', fontfile=util.BOOKMAN, shape=crop_size, kern_rate=1.0)
+        else:
+            mask_img = mask_img.resize(crop_size)
+            bitmask = util.make_bitmask_from_bw_image(mask_img)
 
-        bitmask = util.make_bitmask_from_bw_image(mask)
         collage_A, collage_B = util.simple_mask_swap(im1, im2, bitmask)
 
         Image.fromarray(collage_A).save(f'{random_id}_{x}_A.jpg')
         Image.fromarray(collage_B).save(f'{random_id}_{x}_B.jpg')
 
-# TODO In build_mask_to_size(), expand bitmask to shape in case one or either of its dimensions are slightly smaller than source shape
-# TODO util.get_random_mask() where 'D' or '8' is returned, using build_mask_to_size()
+
+# TODO util.get_random_mask() where 'D' or '8' is returned, using build_mask_to_size(). Just make a build_random_string as well
 # TODO 3x3 DENOMIN8R grid for the gram
+# TODO boost my page
 # TODO MAKE STICKERS NOW!!!!!!!!
+# TODO experiment with building bitmask with kerning... actually have not done this yet
+# TODO allow for line breaks in the mask text
+# TODO use Robert Indiana's LOVE as a stamp... I <3 NY as a stamp...
 # TODO have MAX_PADDING in util be a function (fraction) of fontsize
 # TODO in build_mask_to_size, have an option of just resizing (stretching) the text_image then converting to bitmask, rather than expanding the bitmask with whitespace. This will fuck with the proportions of the mask, which is cool
 # TODO make logo for PUSH
+# TODO integrate with shutterstock API
+# TODO autogenerate posts daily so I no longer have to lol
 # TODO make a bunch of sources based on a bunch of images, and save the individual pieces derived from masking into
 #  separate lists (one for the Inner shape, one for the outer), and recombine randomly
 # TODO expand the random transforms... random cropping and resize (within parameters)

@@ -158,7 +158,7 @@ def make_bitmask_from_bw_image(mask_src):
     Convert a 3-dimensional Image (mode-'RGB') into a 2-dimensional bitmask
         Criteria: Foreground/Background (Black/White)
     :param Image.Image mask_src:
-    :return:
+    :return np.array:
     """
     LOHI_THRESHOLD = 128
     arr = np.array(mask_src)
@@ -258,8 +258,38 @@ def build_mask_to_size(text, fontfile, shape, kern_rate):
     best_size = fit_text_to_shape(text, fontfile, shape, kern_rate)
     text_image = image_from_text(text, fontfile, best_size, kern_rate)
     bitmask = make_bitmask_from_bw_image(text_image)
+    bitmask = expand_bitmask_to_shape(bitmask, shape)
     return bitmask
 
+
+def expand_bitmask_to_shape(bitmask, shape):
+    """
+    If bitmask is lacking in some dimension, add rows/columns of False to fit shape
+    :param np.array bitmask:
+    :param tuple(int) shape:
+    :return np.array:
+    """
+    w, h = shape
+    # np.array.shape returns (height, width)
+    w_diff = w - bitmask.shape[1]
+    h_diff = h - bitmask.shape[0]
+
+    # use numpy to stack extra columns / rows around the bitmask
+    if w_diff:
+        curr_h = bitmask.shape[0]
+        left_add, right_add = math.floor(w_diff / 2), math.ceil(w_diff / 2)
+        left_stack = np.full((curr_h, left_add, 1), False)
+        right_stack = np.full((curr_h, right_add, 1), False)
+        bitmask = np.hstack((left_stack, bitmask, right_stack))
+
+    if h_diff:
+        curr_w = bitmask.shape[1]
+        top_add, bottom_add = math.ceil(h_diff / 2), math.floor(h_diff / 2)
+        top_stack = np.full((top_add, curr_w, 1), False)
+        bottom_stack = np.full((bottom_add, curr_w, 1), False)
+        bitmask = np.vstack((top_stack, bitmask, bottom_stack))
+
+    return bitmask
 
 def fit_text_to_shape(text, fontfile, shape, kern_rate):
     """
@@ -274,28 +304,28 @@ def fit_text_to_shape(text, fontfile, shape, kern_rate):
     # TODO due to the trial-and-error nature of this method, there's no 'best' font_size to start with. I guess smaller is better. This method can probably be improved by not shrinking font_size by increments of 1 in the second while loop
     best_size = 100
     text_image = image_from_text(text, fontfile, best_size, kern_rate)
-    w, h = text_image.size
+    text_w, text_h = text_image.size
 
     # Get text_image as large as possible using fontfile
-    while (w < shape_w) and (h < shape_h):
-        WL = (shape_w - w) / (shape_h - h)
-        WGR = (w / h)
+    while (text_w < shape_w) and (text_h < shape_h):
+        WL = (shape_w - text_w) / (shape_h - text_h)
+        WGR = (text_w / text_h)
         if WGR >= WL:
             # text_image will bump into source sides as it continues to grow
-            size_rate = shape_w / w
+            size_rate = shape_w / text_w
         else:
             # text_image will bump into top/bottom as it continues to grow
-            size_rate = shape_h / h
+            size_rate = shape_h / text_h
 
         # math.ceil() might push the font size slighty above optimal
         best_size = math.ceil(size_rate * best_size)
         text_image = image_from_text(text, fontfile, best_size, kern_rate)
-        w, h = text_image.size
+        text_w, text_h = text_image.size
 
     # Reduce fontsize gradually until we are in bounds of the source images
-    while (w > shape_w) or (h > shape_h):
+    while (text_w > shape_w) or (text_h > shape_h):
         best_size -= 1
         text_image = image_from_text(text, fontfile, best_size, kern_rate)
-        w, h = text_image.size
+        text_w, text_h = text_image.size
 
     return best_size

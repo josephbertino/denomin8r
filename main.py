@@ -20,7 +20,8 @@ def main():
         im2 = util.random_transform(image2, crop_size)
 
         if BUILD_BITMASK_FROM_TEXT:
-            bitmask = util.build_mask_to_size(text='D', fontfile=util.BOOKMAN, shape=crop_size, kern_rate=1.0)
+            text = util.build_random_string(2)
+            bitmask = util.build_mask_to_size(text=text, fontfile=util.BOOKMAN, shape=crop_size, kern_rate=1.0)
         else:
             mask_img = mask_img.resize(crop_size)
             bitmask = util.make_bitmask_from_bw_image(mask_img)
@@ -31,7 +32,6 @@ def main():
         Image.fromarray(collage_B).save(f'{random_id}_{x}_B.jpg')
 
 
-# TODO util.get_random_mask() where 'D' or '8' is returned, using build_mask_to_size(). Just make a build_random_string as well
 # TODO 3x3 DENOMIN8R grid for the gram
 # TODO boost my page
 # TODO MAKE STICKERS NOW!!!!!!!!
@@ -64,6 +64,8 @@ def main():
 # TODO experiments with flipping same image
 # TODO experiments with rotating same image
 # TODO create my own font
+# TODO create TRUE border around bitmask so that it gets a cool border from swapping
+# TODO overlaying multiple letters in the bitmask, centered at different coords so they spill off the canvas
 # TODO swap 2 stamps across 2 pictures. Swap X stamps across X pictures
 # TODO website where users can generate a custom one of a kind image to put on a tote bag or tshirt
 
@@ -74,7 +76,6 @@ if __name__ == '__main__':
 '''
 Big Goals
 
-1) Be able to Collage entire words using the 2-source format 
 2) Once the mask and 2 source images are established, randomize the process of transforming and aligning the source images
 3) Be able to pull N source images and generate M combinations of them, using some automated process or API
 4) Swapping X stamps across Y sources

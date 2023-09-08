@@ -1,6 +1,7 @@
 import os
 import math
 import random
+import string
 import numpy as np
 from PIL import Image, ImageFont, ImageDraw
 import pillow_avif
@@ -329,3 +330,13 @@ def fit_text_to_shape(text, fontfile, shape, kern_rate):
         text_w, text_h = text_image.size
 
     return best_size
+
+
+def build_random_string(k=1):
+    """
+    Build a random string of the given length. Only AlphaNum chars
+    :param int k:
+    :return:
+    """
+    res = ''.join(random.choices(string.ascii_uppercase + string.digits, k=k))
+    return res

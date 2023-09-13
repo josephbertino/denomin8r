@@ -3,6 +3,7 @@ import math
 import random
 import string
 import numpy as np
+from enum import IntEnum, auto
 from PIL import Image, ImageFont, ImageDraw
 import pillow_avif
 
@@ -15,6 +16,12 @@ BOOKMAN = 'bookman.ttf'  # 'Bookman Old Style Bold'
 
 COLOR_WHITE = "#FFFFFF"
 COLOR_BLACK = "#000000"
+
+
+class BitmaskMethod(IntEnum):
+    MASK_IMG = auto()   #
+    STATIC_TEXT = auto()    # User supplies the text
+    RANDOM_TEXT = auto()    # util.build_random_text_bitmask
 
 
 def prep():
@@ -220,7 +227,6 @@ def image_from_text(text, fontfile, fontsize, kern_rate):
 
     # Determine the text's dimensions when printing to image
     left, top, right, bottom = font_obj.getbbox(text)
-    text_width = right - left
     text_height = bottom - top
     char_widths = get_char_widths(text, font_obj)
     kerned_width = int(kern_rate * sum(char_widths[:-1])) + char_widths[-1]
@@ -302,8 +308,8 @@ def fit_text_to_shape(text, fontfile, shape, kern_rate):
     :return int:            The font_size to get the text_mask closest to shape without exceeding
     """
     shape_w, shape_h = shape
-    # TODO due to the trial-and-error nature of this method, there's no 'best' font_size to start with. I guess smaller is better. This method can probably be improved by not shrinking font_size by increments of 1 in the second while loop
-    best_size = 100
+    # TODO due to the trial-and-error nature of this method, there's no 'best' font_size to start with. I guess smaller is better. As long as the starting text is not too large, 80 should be a good initial size
+    best_size = 80
     text_image = image_from_text(text, fontfile, best_size, kern_rate)
     text_w, text_h = text_image.size
 
@@ -340,3 +346,11 @@ def build_random_string(k=1):
     """
     res = ''.join(random.choices(string.ascii_uppercase + string.digits, k=k))
     return res
+
+
+def build_random_text_bitmask(fontfile, shape):
+    k = math.floor(random.random() * 4) + 1
+    text = build_random_string(k=k)
+    kern_rate = random.choice([0.75, 0.8, 0.9, 1.0])
+    bitmask = build_mask_to_size(text, fontfile=fontfile, shape=shape, kern_rate=kern_rate)
+    return bitmask

@@ -11,7 +11,7 @@ def main():
     mask_img = Image.open(MASK)
 
     for x in range(4):
-        image1, image2 = util.load_images(latest=True)
+        image1, image2 = util.load_images(latest=False)
         # Get max dimensions for image1, image2, and mask
         crop_size = util.get_crop_size([image1, image2], square=True)
 
@@ -36,6 +36,9 @@ def main():
         Image.fromarray(collage_A).save(f'{random_id}_{x}_A.jpg')
         Image.fromarray(collage_B).save(f'{random_id}_{x}_B.jpg')
 
+# TODO test out MARGIN padding for 'R' and similar letters
+# TODO expand the random transforms... random cropping and resize (within parameters)
+# TODO things to randomize: text margin, text size, text style, text kerning
 # TODO 3x3 DENOMIN8R grid for the gram
 # TODO boost my page again
 # TODO MAKE STICKERS For Myself!!!!!!!!
@@ -47,13 +50,10 @@ def main():
 # TODO QR code to access website, premiered on Insta
 # TODO integrate with shutterstock API
 # TODO autogenerate posts daily so I no longer have to lol
-# TODO make a bunch of sources based on a bunch of images, and save the individual pieces derived from masking into
-#  separate lists (one for the Inner shape, one for the outer), and recombine randomly
-# TODO expand the random transforms... random cropping and resize (within parameters)
+# TODO make a bunch of sources based on a bunch of images, and save the individual pieces derived from masking into separate lists (one for the Inner shape, one for the outer), and recombine randomly
 # TODO allow for breaking up the text into multiple lines
 # TODO if ever I am at a loss for enhancements or experiments, read the docstrings of Image methods I use to get inspiration
 # TODO get the vector of Arial's "D" and rasterize
-# TODO things to randomize: text margin, text size, text style, text kerning
 # TODO for NFTs... start coming up with the concept of "Rare" sources
 # TODO chaos_crop_resize where it crops and resizes over and over again
 # TODO Incoprorate Alpha channel to make the 'boundaries' between source elements blurred

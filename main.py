@@ -36,12 +36,14 @@ def main():
         Image.fromarray(collage_A).save(f'{random_id}_{x}_A.jpg')
         Image.fromarray(collage_B).save(f'{random_id}_{x}_B.jpg')
 
+# TODO Test and formalize crop_central_with_jitter, then apply it to some camo patterns
 # TODO test out MARGIN padding for 'R' and similar letters
 # TODO expand the random transforms... random cropping and resize (within parameters)
 # TODO things to randomize: text margin, text size, text style, text kerning
 # TODO 3x3 DENOMIN8R grid for the gram
 # TODO boost my page again
 # TODO MAKE STICKERS For Myself!!!!!!!!
+# TODO collect all current methods for selecting and transforming sources, and put them all into a big randomizer
 # TODO allow for line breaks in the mask text
 # TODO have MAX_PADDING in util be a function (fraction) of fontsize
 # TODO in build_mask_to_size, have an option of just resizing (stretching) the text_image then converting to bitmask, rather than expanding the bitmask with whitespace. This will fuck with the proportions of the mask, which is cool
@@ -61,7 +63,6 @@ def main():
 # TODO website to generate one-of-a-kind totes and t-shirts
 # TODO warping and shifting, corrupting the bitmask
 # TODO non-D or non-8's are extremely rare and aberrant
-# TODO allow the crop method to accept cropping from any specified origin point
 # TODO experiments with putting all image transformation methods and bitmask application methods into a list that randomly selects what to do so every time I run it's unexpected what will happen
 # TODO randomize the order of operations in random_transform. Allow for multiple occurences of an operation, not necessarily in sequence
 # TODO automatically make collages with an entire fontface.

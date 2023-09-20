@@ -52,18 +52,19 @@ def prep():
     os.chdir(ROOT)
 
 
-def load_images(latest=True):
+def load_images(latest=True, n=2):
     """
     Return 2 images from the sources directory
 
     :param bool latest: If True, get latest images according to name (numeric id)
+    :param int n:       Number of source images to grab
     :return:
     """
     random.seed()
     if latest:
-        imfiles = SOURCE_IMAGES[-2:]
+        imfiles = SOURCE_IMAGES[(-1 * n):]
     else:
-        imfiles = random.sample(SOURCE_IMAGES,2)
+        imfiles = random.sample(SOURCE_IMAGES,n)
 
     images = []
     for f in imfiles:
@@ -94,35 +95,37 @@ def get_crop_size(imglist, square=True):
         h = th if th < h else h
 
     if square:
-        return [min([w, h])] * 2
+        return [min(w, h)] * 2
     else:
         return w, h
 
 
-def get_crop_box(shape):
+def get_crop_box_central(img_size, crop_shape):
     """
-    Returns params to pass to Image.crop()
-    Note that coord (0,0) of an Image is the top-left corner
+    Return the crop_box for an image, where you crop from the center for a given shape
+    :param tuple(int) img_size:     (w, h) of the Image
+    :param tuple(int) crop_shape:   (w, h) of the desired crop shape
+    :return tuple(int):
     """
-    w, h = shape
-    return 0, 0, 0+w, 0+h
+    crop_w, crop_h = crop_shape
+    img_w, img_h = img_size
+    left, top, right, bottom = (img_w - crop_w) // 2, (img_h - crop_h) // 2, (img_w + crop_w) // 2, (img_h + crop_h) // 2
+    central_crop_box = (left, top, right, bottom)
+    return central_crop_box
 
 
 def crop_central(image, shape):
     """
-    Crop the image to the given w, h but from the center of the image
+    Crop the image to the given shape, from the center of the image
     :param Image.Image image:
     :param tuple[int] shape:
     :return Image.Image:
     """
-    crop_w, crop_h = shape
-    img_w, img_h = image.size
-    box = ((img_w - crop_w) // 2, (img_h - crop_h) // 2, (img_w + crop_w) // 2, (img_h + crop_h) // 2)
-    cropped = image.crop(box)
-    return cropped
+    box = get_crop_box_central(image.size, shape)
+    return image.crop(box)
 
 
-def crop_square(image):
+def crop_to_square(image):
     """
     Crop an image to a square based on its smaller side
     :param Image.Image image:

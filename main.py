@@ -1,23 +1,29 @@
 from PIL import Image
 import util
 import uuid
-from util import BitmaskMethod
+from util import BitmaskMethod, ImageGetter
 
 BITMASK_METHOD = BitmaskMethod.STATIC_TEXT
+IMAGE_GETTER = ImageGetter.GRAB_TWO
+USE_LATEST = True
+JITTER = 0.07
 
 def main():
     random_id = uuid.uuid4().__str__().split('-')[0]
     MASK = 'D_mask.jpg'  # If I am using a pre-built mask image
     mask_img = Image.open(MASK)
 
-    for x in range(4):
-        image1, image2 = util.load_images(latest=False)
-        # Get max dimensions for image1, image2, and mask
-        crop_size = util.get_crop_size([image1, image2], square=True)
+    for x in range(4 ):
 
-        # Randomly transform images
-        im1 = util.random_transform(image1, crop_size)
-        im2 = util.random_transform(image2, crop_size)
+        match IMAGE_GETTER:
+            case ImageGetter.OFF_CROPPED:
+                im1, im2 = util.get_off_cropped_images(latest=USE_LATEST, jitter=JITTER)
+                crop_size = util.get_crop_size([im1, im2], square=True)
+            case ImageGetter.GRAB_TWO:
+                im1, im2 = util.load_images(latest=USE_LATEST)
+                crop_size = util.get_crop_size([im1, im2], square=True)
+                im1 = util.random_transform(im1, crop_size)
+                im2 = util.random_transform(im2, crop_size)
 
         match BITMASK_METHOD:
             case BitmaskMethod.MASK_IMG:
@@ -25,7 +31,7 @@ def main():
                 bitmask = util.make_bitmask_from_bw_image(mask_img)
             case BitmaskMethod.STATIC_TEXT:
                 # text = util.build_random_string(2)
-                text = 'D'
+                text = 'I'
                 kern_rate = 1.0
                 bitmask = util.build_mask_to_size(text=text, fontfile=util.BOOKMAN, shape=crop_size, kern_rate=kern_rate)
             case BitmaskMethod.RANDOM_TEXT:
@@ -36,7 +42,6 @@ def main():
         Image.fromarray(collage_A).save(f'{random_id}_{x}_A.jpg')
         Image.fromarray(collage_B).save(f'{random_id}_{x}_B.jpg')
 
-# TODO Test and formalize crop_central_with_jitter, then apply it to some camo patterns
 # TODO test out MARGIN padding for 'R' and similar letters
 # TODO expand the random transforms... random cropping and resize (within parameters)
 # TODO things to randomize: text margin, text size, text style, text kerning
@@ -45,6 +50,7 @@ def main():
 # TODO MAKE STICKERS For Myself!!!!!!!!
 # TODO collect all current methods for selecting and transforming sources, and put them all into a big randomizer
 # TODO allow for line breaks in the mask text
+# TODO make a "runner" like bobFns that I can tune the parameters before running??
 # TODO have MAX_PADDING in util be a function (fraction) of fontsize
 # TODO in build_mask_to_size, have an option of just resizing (stretching) the text_image then converting to bitmask, rather than expanding the bitmask with whitespace. This will fuck with the proportions of the mask, which is cool
 # TODO make logo for PUSH

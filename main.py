@@ -13,36 +13,37 @@ def main():
     MASK = 'D_mask.jpg'  # If I am using a pre-built mask image
     mask_img = Image.open(MASK)
 
-    for x in range(4 ):
+    image1 = image2 = bitmask = None
+    crop_size = (100, 100,)
+
+    for x in range(4):
 
         match IMAGE_GETTER:
             case ImageGetter.OFF_CROPPED:
-                im1, im2 = util.get_off_cropped_images(latest=USE_LATEST, jitter=JITTER)
-                crop_size = util.get_crop_size([im1, im2], square=True)
+                image1, image2 = util.get_off_cropped_images(latest=USE_LATEST, jitter=JITTER)
+                crop_size = util.get_crop_shape([image1, image2], square=True)
             case ImageGetter.GRAB_TWO:
-                im1, im2 = util.load_images(latest=USE_LATEST)
-                crop_size = util.get_crop_size([im1, im2], square=True)
-                im1 = util.random_transform(im1, crop_size)
-                im2 = util.random_transform(im2, crop_size)
+                image1, image2 = util.load_images(latest=USE_LATEST)
+                crop_size = util.get_crop_shape([image1, image2], square=True)
+                image1 = util.random_transform(image1, crop_size)
+                image2 = util.random_transform(image2, crop_size)
 
         match BITMASK_METHOD:
-            case BitmaskMethod.MASK_IMG:
+            case BitmaskMethod.BITMASK_IMG:
                 mask_img = mask_img.resize(crop_size)
                 bitmask = util.make_bitmask_from_bw_image(mask_img)
             case BitmaskMethod.STATIC_TEXT:
-                # text = util.build_random_string(2)
-                text = 'I'
+                text = 'M'
                 kern_rate = 1.0
-                bitmask = util.build_mask_to_size(text=text, fontfile=util.BOOKMAN, shape=crop_size, kern_rate=kern_rate)
+                bitmask = util.build_bitmask_to_size(text=text, fontfile=util.BOOKMAN, shape=crop_size, kern_rate=kern_rate)
             case BitmaskMethod.RANDOM_TEXT:
                 bitmask = util.build_random_text_bitmask(fontfile=util.BOOKMAN, shape=crop_size)
 
-        collage_A, collage_B = util.simple_mask_swap(im1, im2, bitmask)
+        collage_A, collage_B = util.simple_bitmask_swap(image1, image2, bitmask)
 
         Image.fromarray(collage_A).save(f'{random_id}_{x}_A.jpg')
         Image.fromarray(collage_B).save(f'{random_id}_{x}_B.jpg')
 
-# TODO test out MARGIN padding for 'R' and similar letters
 # TODO expand the random transforms... random cropping and resize (within parameters)
 # TODO things to randomize: text margin, text size, text style, text kerning
 # TODO 3x3 DENOMIN8R grid for the gram

@@ -19,7 +19,7 @@ COLOR_BLACK = "#000000"
 
 
 class BitmaskMethod(IntEnum):
-    MASK_IMG = auto()   #
+    BITMASK_IMG = auto()   #
     STATIC_TEXT = auto()    # User supplies the text
     RANDOM_TEXT = auto()    # util.build_random_text_bitmask
 
@@ -85,7 +85,7 @@ def does_image_have_alpha(image):
         return False
 
 
-def get_crop_size(imglist, square=True):
+def get_crop_shape(imglist, square=True):
     """
     Returns max size (w, h) that is not larger than any of the images in the passed list
     :param list imglist: List of Image.Image
@@ -156,7 +156,7 @@ def make_basic_rgb_array(shape):
     return np.uint8(grid)
 
 
-def simple_mask_swap(image1, image2, mask):
+def simple_bitmask_swap(image1, image2, mask):
     """
     im1, im2, and mask all have to have the same dimensions
     :param Image.Image image1:
@@ -187,7 +187,7 @@ def make_bitmask_from_bw_image(mask_src):
 
 def random_transform(image, shape):
     """
-    Apply a series of transforms to an image, determined by change
+    Apply a series of transforms to an image, determined by chance
         + Flip over vertical axis
         + Crop vs. Resize
     :param Image.Image image:
@@ -263,7 +263,7 @@ def get_char_widths(text, font):
     return char_widths
 
 
-def build_mask_to_size(text, fontfile, shape, kern_rate):
+def build_bitmask_to_size(text, fontfile, shape, kern_rate=1.0):
     """
     Generate Image.Image from text and font, to fit the given shape (w, h)
     :param str text:
@@ -362,7 +362,7 @@ def build_random_text_bitmask(fontfile, shape):
     k = math.floor(random.random() * 4) + 1
     text = build_random_string(k=k)
     kern_rate = random.choice([0.75, 0.8, 0.9, 1.0])
-    bitmask = build_mask_to_size(text, fontfile=fontfile, shape=shape, kern_rate=kern_rate)
+    bitmask = build_bitmask_to_size(text, fontfile=fontfile, shape=shape, kern_rate=kern_rate)
     return bitmask
 
 

@@ -6,12 +6,17 @@ import numpy as np
 from enum import IntEnum, auto
 from PIL import Image, ImageFont, ImageDraw
 import pillow_avif
+from sortedcontainers import SortedSet
+import logging
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 ROOT = '/Users/josephbertino/PycharmProjects/denomin8r'
 SOURCE_DIR = os.path.join(ROOT, 'sources')
 FONT_DIR = os.path.join(ROOT, 'fonts')
 
-SOURCE_IMAGES = []
+SOURCE_FILES = None
 BOOKMAN = 'bookman.ttf'  # 'Bookman Old Style Bold'
 
 COLOR_WHITE = "#FFFFFF"
@@ -23,7 +28,7 @@ class BitmaskMethod(IntEnum):
     STATIC_TEXT = auto()    # User supplies the text
     RANDOM_TEXT = auto()    # util.build_random_text_bitmask
 
-class ImageGetter(IntEnum):
+class SourceGetter(IntEnum):
     OFF_CROPPED = auto()
     GRAB_TWO = auto()
 
@@ -33,7 +38,7 @@ def prep():
     1) All .webp files converted to .jpg
     2) All files with extension '.jpeg' renamed to '.jpg'
     """
-    global SOURCE_IMAGES
+    global SOURCE_FILES
 
     for root, dirs, files in os.walk("./sources/"):
         for file in files:
@@ -43,37 +48,55 @@ def prep():
             new_file_path = os.path.join(root, fname + '.jpg')
             if not file.endswith('.jpg'):
                 filepath = os.path.join(root, file)
-                image = Image.open(filepath)
-                if does_image_have_alpha(image):
-                    image = image.convert(mode='RGB')
+                image = Image.open(filepath).convert(mode='RGB')
                 image.save(new_file_path, format="JPEG")
                 os.remove(filepath)
 
     os.chdir(SOURCE_DIR)
-    files = os.listdir()
-    files = [f for f in files if f != '.DS_Store']
-    SOURCE_IMAGES = sorted(files, key=os.path.getmtime)
+    SOURCE_FILES = SortedSet([f for f in os.listdir() if f != '.DS_Store'], key=os.path.getmtime)
     os.chdir(ROOT)
 
 
-def load_images(latest=True, n=2):
+def get_specific_sources(srcs):
+    """
+
+    :param list(str) srcs:
+    :return list(str):
+    """
+    filenames = []
+    for s in srcs:
+        fname = s + '.jpg'
+        if fname in SOURCE_FILES:
+            filenames.append(fname)
+        else:
+            logger.warning(f"Source file with name {s} not found!")
+
+    return filenames
+
+
+def load_sources(latest=True, n=2, specific_srcs=None):
     """
     Return 2 images from the sources directory
 
     :param bool latest: If True, get latest images according to name (numeric id)
     :param int n:       Number of source images to grab
+    :param list(str) specific_srcs: If not empty, a list of source files to grab before grabbing the rest
     :return:
     """
     random.seed()
-    if latest:
-        imfiles = SOURCE_IMAGES[(-1 * n):]
-    else:
-        imfiles = random.sample(SOURCE_IMAGES,n)
 
-    images = []
-    for f in imfiles:
-        images.append(Image.open(os.path.join(SOURCE_DIR, f)))
-    return images
+    filenames = []
+    if specific_srcs:
+        filenames = get_specific_sources(specific_srcs)
+        n -= len(filenames)
+
+    if latest:
+        filenames.extend(SOURCE_FILES[(-1 * n):])
+    else:
+        filenames.extend(random.sample(SOURCE_FILES, n))
+
+    sources = [Image.open(os.path.join(SOURCE_DIR, f)) for f in filenames]
+    return sources
 
 
 def does_image_have_alpha(image):
@@ -378,7 +401,7 @@ def ffloor(n):
         return math.floor(n) + 1
 
 
-def get_off_cropped_images(latest=False, jitter=0.05):
+def get_off_cropped_images(latest=False, jitter=0.07):
     """
     Return two images which are from the same source but slightly off-crapped from center
     :param bool latest: Use the latest image from sources?
@@ -389,7 +412,7 @@ def get_off_cropped_images(latest=False, jitter=0.05):
     crop_cap = 1.0 - jitter
 
     # load both images
-    image1, = load_images(latest=latest, n=1)
+    image1, = load_sources(latest=latest, n=1)
     image2 = image1.copy()
 
     # Determine size of image

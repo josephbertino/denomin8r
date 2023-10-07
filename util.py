@@ -8,6 +8,7 @@ from PIL import Image, ImageFont, ImageDraw
 import pillow_avif
 from sortedcontainers import SortedSet
 import logging
+import inspect
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -442,3 +443,19 @@ def get_off_cropped_images(latest=False, jitter=0.07):
     image2 = image2.crop(jitter_crop_boxes[1])
 
     return image1, image2
+
+
+def get_sig_details(func):
+    """
+    Return list of parameter details for func
+    :param func: Every param must have a type and a default value
+        e.g. arg_one:str="Default"
+    :return: list[(arg_name, arg_type, arg_default)]
+    """
+    spec = inspect.getfullargspec(func)
+    defaults = spec.defaults
+    annots = spec.annotations
+    names, types = list(zip(*annots.items()))
+    return list(zip(names, types, defaults))
+
+

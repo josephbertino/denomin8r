@@ -8,7 +8,7 @@ BITMASK_METHOD = BitmaskMethod.STATIC_TEXT
 SOURCE_GETTER = SourceGetter.GRAB_TWO
 USE_LATEST = True
 JITTER = 0.07
-SPEC_SRCS = ['pop']
+SPEC_SRCS = ['kfc']
 MASK = 'D_mask.jpg'  # If I am using a pre-built mask image
 
 
@@ -37,7 +37,7 @@ def main():
                 mask_img = mask_img.resize(crop_shape)
                 bitmask = util.make_bitmask_from_bw_image(mask_img)
             case BitmaskMethod.STATIC_TEXT:
-                text = 'N'
+                text = 'E'
                 kern_rate = 1.0
                 bitmask = util.build_bitmask_to_size(text=text, fontfile=util.BOOKMAN, shape=crop_shape, kern_rate=kern_rate)
             case BitmaskMethod.RANDOM_TEXT:
@@ -53,6 +53,7 @@ def main():
 # TODO can I self-tesselate an image?
 # TODO text things to randomize: text margin, text size, text style, text kerning
 # TODO 3x3 DENOMIN8R grid for the gram
+# TODO RANDOM WORDS generated, Pulled from where???
 # TODO boost my page again
 # TODO turning any image into a bitmask by running it through a filter
 # TODO MAKE STICKERS For Myself!!!!!!!!

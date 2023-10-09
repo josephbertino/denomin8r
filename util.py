@@ -9,6 +9,8 @@ import pillow_avif
 from sortedcontainers import SortedSet
 import logging
 import inspect
+import PySimpleGUI as sg
+
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -459,3 +461,52 @@ def get_sig_details(func):
     return list(zip(names, types, defaults))
 
 
+def fn_runner(func):
+    sg.set_options(font=("Helvetica", 16))
+    sg.theme('dark grey 9')  # Add a touch of color
+    func_args = get_sig_details(func)
+    layout = []
+    for name, datatype, default_val in func_args:
+        typename = datatype.__name__
+        if typename in ('str', 'list', 'int', 'float'):
+            layout.append([sg.Text(name), sg.Input(default_text=default_val, key=name)])
+        elif typename == 'bool':
+            layout.append([sg.Checkbox(text=name, default=default_val, key=name)])
+        elif typename == 'Enum':
+            enum_name = default_val.__class__.__name__
+            row = [sg.Text(enum_name)]
+            for opt in default_val._member_names_:
+                d = (opt == default_val.name)
+                row.append(sg.Radio(text=opt, group_id=enum_name, default=d, key=f"{enum_name}_{opt}"))
+            layout.append(row)
+        else:
+            raise Exception(f"Unexpected datatype, {name=}, {datatype=}, {default_val=}")
+
+    layout.append([sg.Button('Run'), sg.Button('Cancel')])
+
+    # Create the Window
+    window = sg.Window('Runner', layout)
+
+    # Event Loop to process "events" and get the "values" of the inputs
+    while True:
+        event, values = window.read()
+        if event in (sg.WIN_CLOSED, 'Cancel', 'Run'):
+            window.close()
+            break
+
+    if event == 'Run':
+        # For each argument in the function signature, get its value from the popup and set it, then call the runner
+        arg_dict = {}
+        for name, datatype, default_val in func_args:
+            arg_val = None
+            if datatype.__name__ == 'Enum':
+                # Get the Enum class hosting the options
+                enum_class = default_val.__class__
+                for opt in default_val._member_names_:
+                    opt_key = f"{enum_class.__name__}_{opt}"
+                    if values[opt_key]:
+                        arg_val = enum_class[opt]
+            else:
+                arg_val = values[name]
+            arg_dict[name] = arg_val
+        func(**arg_dict)

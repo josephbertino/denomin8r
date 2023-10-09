@@ -1,5 +1,4 @@
 import enum
-
 import math
 import os
 from PIL import Image, ImageFont, ImageDraw
@@ -17,30 +16,28 @@ fontfile = util.BOOKMAN
 kern_rate = 1.0
 
 # -----DO NOT DELETE ABOVE THIS LINE---------------------------
-# TODO make a "runner" like bobFns that I can tune the parameters before running??
-
 
 sg.set_options(font=("Helvetica", 16))
 sg.theme('dark grey 9')   # Add a touch of color
 
-
-def simple(arg1:str = 'One', arg2:bool = True):
+def simple(arg1:enum.Enum = util.BitmaskMethod.BITMASK_IMG, arg2:str = "one"):
     print(f"{arg1=}, {arg2=}")
 
 func_args = util.get_sig_details(simple)
-
 layout = []
 for name, datatype, default_val in func_args:
     typename = datatype.__name__
     if typename in ('str', 'list', 'int', 'float'):
-        # TODO Label and Text Input
-        pass
+        layout.append([sg.Text(name), sg.Input(default_text=default_val, key=name)])
     elif typename == 'bool':
-        # TODO Checkbox
-        pass
+        layout.append([sg.Checkbox(text=name, default=default_val, key=name)])
     elif typename == 'Enum':
-        # TODO Label and radio buttons for all options
-        pass
+        enum_name = default_val.__class__.__name__
+        row = [sg.Text(enum_name)]
+        for opt in default_val._member_names_:
+            d = (opt == default_val.name)
+            row.append(sg.Radio(text=opt, group_id=enum_name, default=d, key=f"{enum_name}_{opt}"))
+        layout.append(row)
     else:
         raise Exception(f"Unexpected datatype, {name=}, {datatype=}, {default_val=}")
 
@@ -57,5 +54,16 @@ while True:
         break
 
 if event == 'Run':
-    # TODO run method with parameters set
-    pass
+    # For each argument in the function signature, get its value from the popup and set it, then call the runner
+    arg_dict = {}
+    for name, datatype, default_val in func_args:
+        if datatype.__name__ == 'Enum':
+            optclass = default_val.__class__
+            for opt in default_val._member_names_:
+                opt_key = f"{optclass.__name__}_{opt}"
+                if values[opt_key]:
+                    arg_val = optclass[opt]
+        else:
+            arg_val = values[name]
+        arg_dict[name] = arg_val
+    simple(**arg_dict)

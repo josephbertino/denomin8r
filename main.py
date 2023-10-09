@@ -49,14 +49,15 @@ def main():
         Image.fromarray(collage_A).save(f'{random_id}_{x}_A.jpg')
         Image.fromarray(collage_B).save(f'{random_id}_{x}_B.jpg')
 
+# TODO implement util.fn_runner on main()... this requires adding arguments to main for all the settings I set at the top
 # TODO Big Project 1: "Chaos Source Transforms"
 # TODO can I self-tesselate an image?
 # TODO text things to randomize: text margin, text size, text style, text kerning
-# TODO 3x3 DENOMIN8R grid for the gram
 # TODO RANDOM WORDS generated, Pulled from where???
 # TODO boost my page again
 # TODO turning any image into a bitmask by running it through a filter
 # TODO MAKE STICKERS For Myself!!!!!!!!
+# TODO should util.get_func_args return a list of tuples, or 3 lists?
 # TODO random transform of the bitmask! (rotation, tesselation, resizing (stretching) the text_image then converting to bitmask, rather than expanding the bitmask with whitespace. This will fuck with the proportions of the mask, which is cool)
 # TODO integrate with shutterstock API
 # TODO allow for line breaks in the mask text

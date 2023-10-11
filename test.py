@@ -14,30 +14,33 @@ import inspect
 util.prep()
 fontfile = util.BOOKMAN
 kern_rate = 1.0
-foreground_color = 'darkgoldenrod'  # 0xb8860b
-background_color = 'royalblue'  # 0x4169e1
-background_comp = 0xb83d0b  # BGR!   RGB would be 0x0b3db8
-og_foreground = 0xC86428
-og_background = 0x2864C8
 
 # -----DO NOT DELETE ABOVE THIS LINE---------------------------
 TEXT = "@ denomin8r"
-for num in range(1,4):
-    img = Image.open(f'D{num}.jpg')
+for x in range(1,4):
+    img = Image.open(f'./stickers/set 1 - 20231010/D{x}.jpg')
     w, h = img.size
-    position = (math.floor(.72 * w),math.floor(.93 * h))
-    fontsize = math.floor(h * .04)
-    font_obj = ImageFont.truetype(fontfile, fontsize)
 
     draw = ImageDraw.Draw(img)
 
+    position = (math.floor(.78 * w),math.floor(.94 * h))
+    fontsize = math.floor(h * .03)
+    font_obj = ImageFont.truetype(fontfile, fontsize)
+
+    at_left, _, at_right, _ = draw.textbbox(position, "@", font=font_obj)
     left, top, right, bottom = draw.textbbox(position, TEXT, font=font_obj)
     extra = math.ceil((bottom - top) * 0.1)
     diameter = bottom + extra - top + extra
-    draw.rectangle(((left - extra, top - extra), (right - (diameter//2) + (extra*2), bottom+extra)), fill=og_foreground)
-    draw.ellipse(((left - extra - (diameter // 2), top - extra),(left - extra + (diameter // 2), bottom + extra)), fill=background_comp)
-    draw.text((position[0] - (diameter // 2), position[1]), TEXT, font=font_obj, fill=foreground_color)
 
-    # draw.text(position, "@denomin8r", fill='darkgoldenrod', background='black', font=font_obj)
+    draw.ellipse(
+        ((left - extra - (diameter // 2), top - extra),(left - extra + (diameter // 2), bottom + extra)),
+        fill=util.RGB2BGR(util.COLORS.OG_ORANGE)
+    )
+    draw.rectangle(
+        ((left - extra, top - extra), (right - (diameter//2) + extra, bottom+extra)),
+        fill=util.RGB2BGR(util.COLORS.OG_ORANGE)
+    )
+    draw.text((position[0] - (diameter // 2), position[1]), "@", font=font_obj, fill="black")
+    draw.text((position[0] + extra + (at_right - at_left) - (diameter // 2), position[1] + extra), "denomin8r", font=font_obj, fill="white")
 
     img.show()

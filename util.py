@@ -35,6 +35,10 @@ class SourceGetter(IntEnum):
     OFF_CROPPED = auto()
     GRAB_TWO = auto()
 
+class COLORS(IntEnum):
+    OG_ORANGE = 0xC86428
+    OG_BLUE = 0x2864C8
+
 
 def prep():
     """
@@ -510,3 +514,19 @@ def fn_runner(func):
                 arg_val = values[name]
             arg_dict[name] = arg_val
         func(**arg_dict)
+
+
+def RGB2BGR(rgb):
+    """
+    Convert an RGB value (0xAABBCC) to BGR (0xCCBBAA)
+    :param int rgb:
+    :return int:
+    """
+    one = 16 ** 2
+    two = 16 ** 4
+    r = rgb % one
+    m = (rgb % two) - r
+    l = rgb - m - r
+    bgr = (r * two) + m + (l // two)
+    return bgr
+

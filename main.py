@@ -8,7 +8,7 @@ BITMASK_METHOD = BitmaskMethod.STATIC_TEXT
 SOURCE_GETTER = SourceGetter.GRAB_TWO
 USE_LATEST = False
 JITTER = 0.07
-SPEC_SRCS = ['1','3' ]
+SPEC_SRCS = []
 MASK = 'D_mask.jpg'  # If I am using a pre-built mask image
 TEXT = 'D'
 KERN_RATE = 1.0
@@ -20,7 +20,7 @@ def main():
     image1 = image2 = bitmask = None
     crop_shape = (100, 100,)
 
-    for x in range(1):
+    for x in range(20):
 
         # Get Source Images
         match SOURCE_GETTER:
@@ -49,7 +49,7 @@ def main():
         Image.fromarray(collage_A).save(f'{random_id}_{x}_A.jpg')
         Image.fromarray(collage_B).save(f'{random_id}_{x}_B.jpg')
 
-# TODO add ability to "watermark" collages with "@denomin8r" at the bottom
+# TODO add ability to "watermark" collages with "@denomin8r" at the bottom... Play around with colors for the @ watermark
 # TODO MAKE STICKERS For Myself!!!!!!!!
 # TODO add capability for lists as args in fn_runner
 # TODO implement util.fn_runner on main()... this requires adding arguments to main for all the settings I set at the top

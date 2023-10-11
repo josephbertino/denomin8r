@@ -6,10 +6,12 @@ from util import BitmaskMethod, SourceGetter
 # Options
 BITMASK_METHOD = BitmaskMethod.STATIC_TEXT
 SOURCE_GETTER = SourceGetter.GRAB_TWO
-USE_LATEST = True
+USE_LATEST = False
 JITTER = 0.07
-SPEC_SRCS = ['kfc']
+SPEC_SRCS = ['1','3' ]
 MASK = 'D_mask.jpg'  # If I am using a pre-built mask image
+TEXT = 'D'
+KERN_RATE = 1.0
 
 
 def main():
@@ -18,7 +20,7 @@ def main():
     image1 = image2 = bitmask = None
     crop_shape = (100, 100,)
 
-    for x in range(8):
+    for x in range(1):
 
         # Get Source Images
         match SOURCE_GETTER:
@@ -37,9 +39,7 @@ def main():
                 mask_img = mask_img.resize(crop_shape)
                 bitmask = util.make_bitmask_from_bw_image(mask_img)
             case BitmaskMethod.STATIC_TEXT:
-                text = 'E'
-                kern_rate = 1.0
-                bitmask = util.build_bitmask_to_size(text=text, fontfile=util.BOOKMAN, shape=crop_shape, kern_rate=kern_rate)
+                bitmask = util.build_bitmask_to_size(text=TEXT, fontfile=util.BOOKMAN, shape=crop_shape, kern_rate=KERN_RATE)
             case BitmaskMethod.RANDOM_TEXT:
                 bitmask = util.build_random_text_bitmask(fontfile=util.BOOKMAN, shape=crop_shape)
 
@@ -49,19 +49,21 @@ def main():
         Image.fromarray(collage_A).save(f'{random_id}_{x}_A.jpg')
         Image.fromarray(collage_B).save(f'{random_id}_{x}_B.jpg')
 
+# TODO add ability to "watermark" collages with "@denomin8r" at the bottom
+# TODO MAKE STICKERS For Myself!!!!!!!!
+# TODO add capability for lists as args in fn_runner
 # TODO implement util.fn_runner on main()... this requires adding arguments to main for all the settings I set at the top
 # TODO Big Project 1: "Chaos Source Transforms"
 # TODO can I self-tesselate an image?
 # TODO text things to randomize: text margin, text size, text style, text kerning
 # TODO RANDOM WORDS generated, Pulled from where???
-# TODO boost my page again
 # TODO turning any image into a bitmask by running it through a filter
-# TODO MAKE STICKERS For Myself!!!!!!!!
 # TODO should util.get_func_args return a list of tuples, or 3 lists?
 # TODO random transform of the bitmask! (rotation, tesselation, resizing (stretching) the text_image then converting to bitmask, rather than expanding the bitmask with whitespace. This will fuck with the proportions of the mask, which is cool)
 # TODO integrate with shutterstock API
 # TODO allow for line breaks in the mask text
 # TODO generate bitmasks from other images, LOVE, I <3 NY... ask Nadia for others
+# TODO experiment with ImageFont.getmask() for making a bitmask
 # TODO have MAX_PADDING in util be a function (fraction) of fontsize... or maybe just have left and right padding be a parameter
 # TODO make logo for PUSH
 # TODO Make website to sell stickers, tshirts, and totes... images are randomly generated, or "classic collection". In fact, have different types of "collections"... users can generate a custom one of a kind image to put on a tote bag or tshirt, and they have the option of "obliterating" their design so that no one else can use it.

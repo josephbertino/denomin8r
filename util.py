@@ -341,11 +341,11 @@ def fit_text_to_shape(text, fontfile, shape, kern_rate):
     :param str fontfile:
     :param tuple(int) shape:
     :param float kern_rate:
-    :return int:            The font_size to get the text_mask closest to shape without exceeding
+    :return int:                The font_size to get the text_mask closest to shape without exceeding
     """
     shape_w, shape_h = shape
     # TODO due to the trial-and-error nature of this method, there's no 'best' font_size to start with. I guess smaller is better. As long as the starting text is not too large, 80 should be a good initial size
-    best_size = 80
+    best_size = 20
     text_image = image_from_text(text, fontfile, best_size, kern_rate)
     text_w, text_h = text_image.size
 

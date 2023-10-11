@@ -14,56 +14,30 @@ import inspect
 util.prep()
 fontfile = util.BOOKMAN
 kern_rate = 1.0
+foreground_color = 'darkgoldenrod'  # 0xb8860b
+background_color = 'royalblue'  # 0x4169e1
+background_comp = 0xb83d0b  # BGR!   RGB would be 0x0b3db8
+og_foreground = 0xC86428
+og_background = 0x2864C8
 
 # -----DO NOT DELETE ABOVE THIS LINE---------------------------
+TEXT = "@ denomin8r"
+for num in range(1,4):
+    img = Image.open(f'D{num}.jpg')
+    w, h = img.size
+    position = (math.floor(.72 * w),math.floor(.93 * h))
+    fontsize = math.floor(h * .04)
+    font_obj = ImageFont.truetype(fontfile, fontsize)
 
-sg.set_options(font=("Helvetica", 16))
-sg.theme('dark grey 9')   # Add a touch of color
+    draw = ImageDraw.Draw(img)
 
-def simple(arg1:enum.Enum = util.BitmaskMethod.BITMASK_IMG, arg2:str = "one"):
-    print(f"{arg1=}, {arg2=}")
+    left, top, right, bottom = draw.textbbox(position, TEXT, font=font_obj)
+    extra = math.ceil((bottom - top) * 0.1)
+    diameter = bottom + extra - top + extra
+    draw.rectangle(((left - extra, top - extra), (right - (diameter//2) + (extra*2), bottom+extra)), fill=og_foreground)
+    draw.ellipse(((left - extra - (diameter // 2), top - extra),(left - extra + (diameter // 2), bottom + extra)), fill=background_comp)
+    draw.text((position[0] - (diameter // 2), position[1]), TEXT, font=font_obj, fill=foreground_color)
 
-func_args = util.get_sig_details(simple)
-layout = []
-for name, datatype, default_val in func_args:
-    typename = datatype.__name__
-    if typename in ('str', 'list', 'int', 'float'):
-        layout.append([sg.Text(name), sg.Input(default_text=default_val, key=name)])
-    elif typename == 'bool':
-        layout.append([sg.Checkbox(text=name, default=default_val, key=name)])
-    elif typename == 'Enum':
-        enum_name = default_val.__class__.__name__
-        row = [sg.Text(enum_name)]
-        for opt in default_val._member_names_:
-            d = (opt == default_val.name)
-            row.append(sg.Radio(text=opt, group_id=enum_name, default=d, key=f"{enum_name}_{opt}"))
-        layout.append(row)
-    else:
-        raise Exception(f"Unexpected datatype, {name=}, {datatype=}, {default_val=}")
+    # draw.text(position, "@denomin8r", fill='darkgoldenrod', background='black', font=font_obj)
 
-layout.append([sg.Button('Run'), sg.Button('Cancel')])
-
-# Create the Window
-window = sg.Window('Runner', layout)
-# Event Loop to process "events" and get the "values" of the inputs
-
-while True:
-    event, values = window.read()
-    if event in (sg.WIN_CLOSED, 'Cancel', 'Run'):
-        window.close()
-        break
-
-if event == 'Run':
-    # For each argument in the function signature, get its value from the popup and set it, then call the runner
-    arg_dict = {}
-    for name, datatype, default_val in func_args:
-        if datatype.__name__ == 'Enum':
-            optclass = default_val.__class__
-            for opt in default_val._member_names_:
-                opt_key = f"{optclass.__name__}_{opt}"
-                if values[opt_key]:
-                    arg_val = optclass[opt]
-        else:
-            arg_val = values[name]
-        arg_dict[name] = arg_val
-    simple(**arg_dict)
+    img.show()

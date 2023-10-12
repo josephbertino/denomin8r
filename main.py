@@ -49,8 +49,7 @@ def main():
         Image.fromarray(collage_A).save(f'{random_id}_{x}_A.jpg')
         Image.fromarray(collage_B).save(f'{random_id}_{x}_B.jpg')
 
-# TODO add ability to "watermark" collages with "@denomin8r" at the bottom... Play around with colors for the @ watermark
-# TODO MAKE STICKERS For Myself!!!!!!!!
+# TODO Modularize and refactor code to draw @-handle
 # TODO add capability for lists as args in fn_runner
 # TODO implement util.fn_runner on main()... this requires adding arguments to main for all the settings I set at the top
 # TODO Big Project 1: "Chaos Source Transforms"

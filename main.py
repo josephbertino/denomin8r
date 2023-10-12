@@ -6,12 +6,13 @@ from util import BitmaskMethod, SourceGetter
 # Options
 BITMASK_METHOD = BitmaskMethod.STATIC_TEXT
 SOURCE_GETTER = SourceGetter.GRAB_TWO
-USE_LATEST = False
+USE_LATEST = True
 JITTER = 0.07
 SPEC_SRCS = []
 MASK = 'D_mask.jpg'  # If I am using a pre-built mask image
 TEXT = 'D'
 KERN_RATE = 1.0
+ADD_HANDLE = True
 
 
 def main():
@@ -20,7 +21,7 @@ def main():
     image1 = image2 = bitmask = None
     crop_shape = (100, 100,)
 
-    for x in range(20):
+    for x in range(4):
 
         # Get Source Images
         match SOURCE_GETTER:
@@ -45,11 +46,16 @@ def main():
 
         # Apply Bitmask to Source Images
         collage_A, collage_B = util.simple_bitmask_swap(image1, image2, bitmask)
+        collage_A = Image.fromarray(collage_A)
+        collage_B = Image.fromarray(collage_B)
 
-        Image.fromarray(collage_A).save(f'{random_id}_{x}_A.jpg')
-        Image.fromarray(collage_B).save(f'{random_id}_{x}_B.jpg')
+        if ADD_HANDLE:
+            collage_A = util.draw_handle(collage_A)
+            collage_B = util.draw_handle(collage_B)
 
-# TODO Modularize and refactor code to draw @-handle
+        collage_A.save(f'{random_id}_{x}_A.jpg')
+        collage_B.save(f'{random_id}_{x}_B.jpg')
+
 # TODO add capability for lists as args in fn_runner
 # TODO implement util.fn_runner on main()... this requires adding arguments to main for all the settings I set at the top
 # TODO Big Project 1: "Chaos Source Transforms"
@@ -65,6 +71,7 @@ def main():
 # TODO experiment with ImageFont.getmask() for making a bitmask
 # TODO have MAX_PADDING in util be a function (fraction) of fontsize... or maybe just have left and right padding be a parameter
 # TODO make logo for PUSH
+# TODO as a joke be able to add watermarks to my collages...the watermarks are bitmasked
 # TODO Make website to sell stickers, tshirts, and totes... images are randomly generated, or "classic collection". In fact, have different types of "collections"... users can generate a custom one of a kind image to put on a tote bag or tshirt, and they have the option of "obliterating" their design so that no one else can use it.
 # TODO if SOURCE_FILES gets large enough or the rendering process starts to slow down, will have to consider refactoring for speed
 # TODO QR code to access website, premiered on Insta

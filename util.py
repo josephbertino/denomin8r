@@ -537,11 +537,11 @@ def draw_handle(img):
     :param img:
     :return:
     """
-    TEXT = "@ denomin8r"
+    TEXT = "@denomin8r"
     w, h = img.size
     draw = ImageDraw.Draw(img)
 
-    position = (math.floor(.78 * w), math.floor(.94 * h))
+    position = (math.floor(.75 * w), math.floor(.94 * h))
     ultimate_left, ultimate_top = position
     fontsize = math.floor(h * .03)
     fontfile = os.path.join(FONT_DIR, BOOKMAN)
@@ -549,29 +549,28 @@ def draw_handle(img):
 
     # Determine key coordinates for placing handle
     at_left, _, at_right, _ = draw.textbbox(position, "@", font=font_obj)
-    at_width = at_right - at_left
     text_left, text_top, text_right, text_bottom = draw.textbbox(position, TEXT, font=font_obj)
     text_width = text_right - text_left
     text_height = text_bottom - text_top
     extra = math.ceil(text_height * 0.1)  # padding
+    lilextra = math.ceil(text_height * 0.05)
     diameter = text_height + (2 * extra)
     at_radius = diameter // 2
-
-    ellipse_left = text_left - extra
+    ultimate_bottom = ultimate_top + diameter
+    rectangle_left = ultimate_left + at_radius
 
     # Draw handle region backgrounds
     draw.ellipse(
-        ((text_left - extra - at_radius, text_top - extra), (text_left - extra + at_radius, text_bottom + extra)),
+        ((ultimate_left, ultimate_top), (ultimate_left + diameter, ultimate_bottom)),  # (lefttop, rightbottom)
         fill=RGB2BGR(COLORS.OG_ORANGE)
     )
     draw.rectangle(
-        ((text_left - extra, text_top - extra), (text_right - at_radius + extra, text_bottom + extra)),
+        ((rectangle_left, ultimate_top), (rectangle_left + text_width + (2 * extra), ultimate_bottom)),  # (lefttop, rightbottom)
         fill=RGB2BGR(COLORS.OG_ORANGE)
     )
 
     # Draw handle region text
-    draw.text((text_left - at_radius, position[1]), "@", font=font_obj, fill="black")
-    draw.text((position[0] + extra + (at_right - text_left) - at_radius, position[1] + extra), "denomin8r",
-              font=font_obj, fill="white")
+    draw.text((ultimate_left + extra + lilextra, ultimate_top - extra - lilextra), "@", font=font_obj, fill="black")
+    draw.text((rectangle_left + at_radius + extra, ultimate_top), "denomin8r", font=font_obj, fill="white")
 
     return img

@@ -56,7 +56,6 @@ def main():
         collage_A.save(f'{random_id}_{x}_A.jpg')
         collage_B.save(f'{random_id}_{x}_B.jpg')
 
-# TODO add capability for lists as args in fn_runner
 # TODO implement util.fn_runner on main()... this requires adding arguments to main for all the settings I set at the top
 # TODO Big Project 1: "Chaos Source Transforms"
 # TODO can I self-tesselate an image?

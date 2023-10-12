@@ -16,7 +16,7 @@ fontfile = util.BOOKMAN
 kern_rate = 1.0
 
 # -----DO NOT DELETE ABOVE THIS LINE---------------------------
-TEXT = "@ denomin8r"
-img = Image.open(f'./stickers/set 1 - 20231010/D{2}.jpg')
-img = util.draw_handle(img)
-img.show()
+def me(arg1:list=['a','b'], arg2:list=[], arg3:list=['d'], arg4:list=['d', 'e']):
+    print(f"{arg1=} {arg2=} {arg3=} {arg4=}")
+
+util.fn_runner(me)

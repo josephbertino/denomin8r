@@ -472,7 +472,9 @@ def fn_runner(func):
     layout = []
     for name, datatype, default_val in func_args:
         typename = datatype.__name__
-        if typename in ('str', 'list', 'int', 'float'):
+        if typename == 'list':
+            layout.append([sg.Text(name), sg.Input(default_text=','.join(default_val), key=name)])
+        elif typename in ('str', 'int', 'float'):
             layout.append([sg.Text(name), sg.Input(default_text=default_val, key=name)])
         elif typename == 'bool':
             layout.append([sg.Checkbox(text=name, default=default_val, key=name)])
@@ -503,20 +505,29 @@ def fn_runner(func):
         arg_dict = {}
         for name, datatype, default_val in func_args:
             arg_val = None
-            if datatype.__name__ == 'Enum':
+            typename = datatype.__name__
+            if typename == 'Enum':
                 # Get the Enum class hosting the options
                 enum_class = default_val.__class__
                 for opt in default_val._member_names_:
                     opt_key = f"{enum_class.__name__}_{opt}"
                     if values[opt_key]:
                         arg_val = enum_class[opt]
-            else:
+            elif typename == 'int':
+                arg_val = int(values[name])
+            elif typename == 'float':
+                arg_val = float(values[name])
+            elif typename == 'list':
+                # Convert comma-delimited string into a list
+                l_str = values[name]
+                arg_val = l_str.split(',') if l_str else []
+            else:  # types [string, bool]
                 arg_val = values[name]
             arg_dict[name] = arg_val
         func(**arg_dict)
 
 
-def RGB2BGR(rgb):
+def rgb2bgr(rgb):
     """
     Convert an RGB value (0xAABBCC) to BGR (0xCCBBAA)
     :param int rgb:
@@ -562,11 +573,11 @@ def draw_handle(img):
     # Draw handle region backgrounds
     draw.ellipse(
         ((ultimate_left, ultimate_top), (ultimate_left + diameter, ultimate_bottom)),  # (lefttop, rightbottom)
-        fill=RGB2BGR(COLORS.OG_ORANGE)
+        fill=rgb2bgr(COLORS.OG_ORANGE)
     )
     draw.rectangle(
         ((rectangle_left, ultimate_top), (rectangle_left + text_width + (2 * extra), ultimate_bottom)),  # (lefttop, rightbottom)
-        fill=RGB2BGR(COLORS.OG_ORANGE)
+        fill=rgb2bgr(COLORS.OG_ORANGE)
     )
 
     # Draw handle region text

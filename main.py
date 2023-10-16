@@ -4,28 +4,28 @@ from PIL import Image
 import util
 import uuid
 from enum import Enum
-from util import BitmaskMethod, SourceGetter
+from util import BitmaskMethod
 
 # Options
 MASK = 'D_mask.jpg'  # If I am using a pre-built mask image
 TEXT = 'D'
 BITMASK_METHOD = BitmaskMethod.STATIC_TEXT
-SOURCE_GETTER = SourceGetter.GRAB_TWO
 USE_LATEST = True
 ADD_HANDLE = False
-JITTER = 0.07
+OFF_CROPPED = False
 KERN_RATE = 1.0
+ITERS = 5
 SPEC_SRCS = []
 
 
 def main(mask:str=MASK,
          text:str=TEXT,
          bitmask_method:Enum=BITMASK_METHOD,
-         source_getter:Enum=SOURCE_GETTER,
          use_latest:bool=USE_LATEST,
          add_handle:bool=ADD_HANDLE,
-         jitter:float=JITTER,
+         off_cropped:bool=OFF_CROPPED,
          kern_rate:float=KERN_RATE,
+         iters:int=ITERS,
          spec_srcs:list=SPEC_SRCS,
          ):
     random_id = uuid.uuid4().__str__().split('-')[0]
@@ -33,18 +33,19 @@ def main(mask:str=MASK,
     image1 = image2 = bitmask = None
     crop_shape = (100, 100,)
 
-    for x in range(4):
+    for x in range(iters):
 
         # Get Source Images
-        match source_getter:
-            case SourceGetter.OFF_CROPPED:
-                image1, image2 = util.get_off_cropped_images(latest=use_latest, jitter=jitter)
-                crop_shape = util.get_crop_shape([image1, image2], square=True)
-            case SourceGetter.GRAB_TWO:
-                image1, image2 = util.load_sources(latest=use_latest, specific_srcs=spec_srcs)
-                crop_shape = util.get_crop_shape([image1, image2], square=True)
-                image1 = util.random_transform(image1, crop_shape)
-                image2 = util.random_transform(image2, crop_shape)
+        image1, image2 = util.load_sources(latest=use_latest, specific_srcs=spec_srcs)
+        crop_shape = util.get_crop_shape([image1, image2], square=True)
+        image1 = util.random_transform(image1, crop_shape)
+        image2 = util.random_transform(image2, crop_shape)
+
+        if off_cropped:
+            # Off-crop each image with a simple random bitmask and jitter
+            # TODO move this transformation to the "Chaos Source Transforms"
+            image1 = util.crop_off_center(image1)
+            image2 = util.crop_off_center(image2)
 
         # Generate Bitmask
         match bitmask_method:
@@ -69,10 +70,8 @@ def main(mask:str=MASK,
         collage_B.save(f'{random_id}_{x}_B.jpg')
 
 
-# TODO collect more patterns: sand, rainbow, water, clouds, camo
-# TODO experiment more with JITTER
 # TODO can I self-tesselate an image? What other transformations can I make on the image?
-# TODO Big Project 1: "Chaos Source Transforms"... requires self-tessellation if possible
+# TODO Big Project 1: "Chaos Source Transforms"... requires self-tessellation if possible... and note that OFF-CROPPED is no longer a SOURCE_GETTER option, it's just a transformation option for a single image...also phase an image so it spills over to the other side
 # TODO make logo for PUSH
 # TODO experiment with ImageFont.getmask() for making a bitmask
 # TODO generate bitmasks from other images, LOVE, I <3 NY... ask Nadia for others
@@ -81,6 +80,7 @@ def main(mask:str=MASK,
 # TODO RANDOM WORDS generated, Pulled from where???
 # TODO turning any image into a bitmask by running it through a filter
 # TODO should util.get_func_args return a list of tuples, or 3 lists?
+# TODO make a method that can crop from center smaller and smaller, using the same char "D" or "O" to produce a tunnel effect
 # TODO random transform of the bitmask! (rotation, tesselation, resizing (stretching) the text_image then converting to bitmask, rather than expanding the bitmask with whitespace. This will fuck with the proportions of the mask, which is cool)
 # TODO integrate with shutterstock API
 # TODO allow for line breaks in the mask text
@@ -123,7 +123,7 @@ Big Goals
 Big Project 1: "Chaos Source Transforms"
     + Modularize all the ways to transform a source. Then repeatedly select those tranformations to apply to a source, kind of like a daisy chain of effects. You can even have the same effect multiple times in a chain. Eventually the chain terminates and the source gets transformed.
     + Maybe there is a "cost" per transform and you only get a certain "budget" for each source image. Once you spend the budget or you have enough of a particular item, you get kicked out
-    + Flip, Rotate, Crop, Resize, **Tessellate**, **Warp**
+    + Flip, Rotate, Crop, Jitter applied to an image, Resize, **Tessellate**, **Warp**
 
 Big Project 2: Gradual Transformation a la Philip Glass
 + First draw a canvas then Start of with painting a portion of a source image on the left hand side (or wherever you decide is the start). Then duplicate, reiterate, replicate the source image across the space but shifting and glitching it, transforming, modulating it, until gradually you transition it into a completely different image, or a combination of multiple images

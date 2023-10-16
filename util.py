@@ -31,9 +31,6 @@ class BitmaskMethod(IntEnum):
     STATIC_TEXT = auto()    # User supplies the text
     RANDOM_TEXT = auto()    # util.build_random_text_bitmask
 
-class SourceGetter(IntEnum):
-    OFF_CROPPED = auto()
-    GRAB_TWO = auto()
 
 class COLORS(IntEnum):
     OG_ORANGE = 0xC86428
@@ -389,10 +386,19 @@ def build_random_string(k=1):
     return res
 
 
-def build_random_text_bitmask(fontfile, shape):
-    k = math.floor(random.random() * 4) + 1
+def build_random_text_bitmask(fontfile, shape, numchars:int=None):
+    """
+
+    :param fontfile:
+    :param shape:
+    :param numchars:
+    :return:
+    """
+    if not numchars:
+        numchars = 4
+    k = math.floor(random.random() * numchars) + 1
     text = build_random_string(k=k)
-    kern_rate = random.choice([0.75, 0.8, 0.9, 1.0])
+    kern_rate = random.uniform(0.75, 1.0)
     bitmask = build_bitmask_to_size(text, fontfile=fontfile, shape=shape, kern_rate=kern_rate)
     return bitmask
 
@@ -409,47 +415,35 @@ def ffloor(n):
         return math.floor(n) + 1
 
 
-def get_off_cropped_images(latest=False, jitter=0.07):
+def crop_off_center(img:Image=None):
     """
-    Return two images which are from the same source but slightly off-crapped from center
-    :param bool latest: Use the latest image from sources?
-    :param float jitter: The %age by which the cropped image can be off from center,
-        relative to smaller dimension of the source image
+    Crop Image off from center
+    :param Image img:
     :return:
     """
+    jitter = float(random.choice(range(7,12)) / 100)
     crop_cap = 1.0 - jitter
 
-    # load both images
-    image1, = load_sources(latest=latest, n=1)
-    image2 = image1.copy()
-
     # Determine size of image
-    w, h = image1.size
+    w, h = img.size
     image_square_side = min(w, h)
     max_jitter = image_square_side * jitter / 2
 
-    # slightly reduce image_shape to make crop_shape,
+    # Slightly reduce image_shape to make crop_shape,
     #   so there is room for jitter of the crop box
     cropped_square_side = math.floor(image_square_side * crop_cap)
     crop_shape = (cropped_square_side, cropped_square_side)
 
     # determine origin point for image crops
-    orig_crop_box = get_crop_box_central(image1.size, crop_shape)
-    jitter_crop_boxes = []
-    for _ in range(2):
-        jitter_w = ffloor(max_jitter * random.uniform(-1, 1))
-        jitter_h = ffloor(max_jitter * random.uniform(-1, 1))
+    orig_crop_box = get_crop_box_central(img.size, crop_shape)
+    jitter_w = ffloor(max_jitter * random.uniform(-1, 1))
+    jitter_h = ffloor(max_jitter * random.uniform(-1, 1))
 
-        # apply jitter_w and jitter_h to crop_box
-        left, top, right, bottom = orig_crop_box
-        jitter_crop_box = (left + jitter_w, top + jitter_h, right + jitter_w, bottom + jitter_h)
+    # apply jitter_w and jitter_h to crop_box
+    left, top, right, bottom = orig_crop_box
+    jitter_crop_box = (left + jitter_w, top + jitter_h, right + jitter_w, bottom + jitter_h)
 
-        jitter_crop_boxes.append(jitter_crop_box)
-
-    image1 = image1.crop(jitter_crop_boxes[0])
-    image2 = image2.crop(jitter_crop_boxes[1])
-
-    return image1, image2
+    return img.crop(jitter_crop_box)
 
 
 def get_sig_details(func):
@@ -586,3 +580,7 @@ def draw_handle(img):
     draw.text((rectangle_left + at_radius + extra, ultimate_top), "denomin8r", font=font_obj, fill="white")
 
     return img
+
+
+def get_bool():
+    return random.choice([True, False])

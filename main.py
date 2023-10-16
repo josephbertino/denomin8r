@@ -1,46 +1,58 @@
+import enum
+
 from PIL import Image
 import util
 import uuid
+from enum import Enum
 from util import BitmaskMethod, SourceGetter
 
 # Options
+MASK = 'D_mask.jpg'  # If I am using a pre-built mask image
+TEXT = 'D'
 BITMASK_METHOD = BitmaskMethod.STATIC_TEXT
 SOURCE_GETTER = SourceGetter.GRAB_TWO
 USE_LATEST = True
-JITTER = 0.07
-SPEC_SRCS = []
-MASK = 'D_mask.jpg'  # If I am using a pre-built mask image
-TEXT = 'D'
-KERN_RATE = 1.0
 ADD_HANDLE = True
+JITTER = 0.07
+KERN_RATE = 1.0
+SPEC_SRCS = []
 
 
-def main():
+def main(mask:str=MASK,
+         text:str=TEXT,
+         bitmask_method:Enum=BITMASK_METHOD,
+         source_getter:Enum=SOURCE_GETTER,
+         use_latest:bool=USE_LATEST,
+         add_handle:bool=ADD_HANDLE,
+         jitter:float=JITTER,
+         kern_rate:float=KERN_RATE,
+         spec_srcs:list=SPEC_SRCS,
+         ):
     random_id = uuid.uuid4().__str__().split('-')[0]
-    mask_img = Image.open(MASK)
+    mask_img = Image.open(mask)
     image1 = image2 = bitmask = None
     crop_shape = (100, 100,)
 
     for x in range(4):
 
         # Get Source Images
-        match SOURCE_GETTER:
+        match source_getter:
             case SourceGetter.OFF_CROPPED:
-                image1, image2 = util.get_off_cropped_images(latest=USE_LATEST, jitter=JITTER)
+                image1, image2 = util.get_off_cropped_images(latest=use_latest, jitter=jitter)
                 crop_shape = util.get_crop_shape([image1, image2], square=True)
             case SourceGetter.GRAB_TWO:
-                image1, image2 = util.load_sources(latest=USE_LATEST, specific_srcs=SPEC_SRCS)
+                image1, image2 = util.load_sources(latest=use_latest, specific_srcs=spec_srcs)
                 crop_shape = util.get_crop_shape([image1, image2], square=True)
                 image1 = util.random_transform(image1, crop_shape)
                 image2 = util.random_transform(image2, crop_shape)
 
         # Generate Bitmask
-        match BITMASK_METHOD:
+        match bitmask_method:
             case BitmaskMethod.BITMASK_IMG:
                 mask_img = mask_img.resize(crop_shape)
                 bitmask = util.make_bitmask_from_bw_image(mask_img)
             case BitmaskMethod.STATIC_TEXT:
-                bitmask = util.build_bitmask_to_size(text=TEXT, fontfile=util.BOOKMAN, shape=crop_shape, kern_rate=KERN_RATE)
+                bitmask = util.build_bitmask_to_size(text=text, fontfile=util.BOOKMAN, shape=crop_shape, kern_rate=kern_rate)
             case BitmaskMethod.RANDOM_TEXT:
                 bitmask = util.build_random_text_bitmask(fontfile=util.BOOKMAN, shape=crop_shape)
 
@@ -49,16 +61,22 @@ def main():
         collage_A = Image.fromarray(collage_A)
         collage_B = Image.fromarray(collage_B)
 
-        if ADD_HANDLE:
+        if add_handle:
             collage_A = util.draw_handle(collage_A)
             collage_B = util.draw_handle(collage_B)
 
         collage_A.save(f'{random_id}_{x}_A.jpg')
         collage_B.save(f'{random_id}_{x}_B.jpg')
 
-# TODO implement util.fn_runner on main()... this requires adding arguments to main for all the settings I set at the top
-# TODO Big Project 1: "Chaos Source Transforms"
-# TODO can I self-tesselate an image?
+
+# TODO collect more patterns: sand, rainbow, water, clouds, camo
+# TODO experiment more with JITTER
+# TODO can I self-tesselate an image? What other transformations can I make on the image?
+# TODO Big Project 1: "Chaos Source Transforms"... requires self-tessellation if possible
+# TODO make logo for PUSH
+# TODO experiment with ImageFont.getmask() for making a bitmask
+# TODO generate bitmasks from other images, LOVE, I <3 NY... ask Nadia for others
+# TODO can I self-tesselate the Bitmask? What other transformation can I make on the bitmask?
 # TODO text things to randomize: text margin, text size, text style, text kerning
 # TODO RANDOM WORDS generated, Pulled from where???
 # TODO turning any image into a bitmask by running it through a filter
@@ -66,39 +84,35 @@ def main():
 # TODO random transform of the bitmask! (rotation, tesselation, resizing (stretching) the text_image then converting to bitmask, rather than expanding the bitmask with whitespace. This will fuck with the proportions of the mask, which is cool)
 # TODO integrate with shutterstock API
 # TODO allow for line breaks in the mask text
-# TODO generate bitmasks from other images, LOVE, I <3 NY... ask Nadia for others
-# TODO experiment with ImageFont.getmask() for making a bitmask
 # TODO have MAX_PADDING in util be a function (fraction) of fontsize... or maybe just have left and right padding be a parameter
-# TODO make logo for PUSH
 # TODO as a joke be able to add watermarks to my collages...the watermarks are bitmasked
 # TODO Make website to sell stickers, tshirts, and totes... images are randomly generated, or "classic collection". In fact, have different types of "collections"... users can generate a custom one of a kind image to put on a tote bag or tshirt, and they have the option of "obliterating" their design so that no one else can use it.
+# TODO for util.fn_runner: group all bool types so the checkboxes can be put on same line... or just organize the runner GUI better
 # TODO if SOURCE_FILES gets large enough or the rendering process starts to slow down, will have to consider refactoring for speed
 # TODO QR code to access website, premiered on Insta
 # TODO Incoprorate Alpha channel to make the 'boundaries' between source elements blurred
 # TODO autogenerate posts daily so I no longer have to lol
 # TODO make a bunch of sources based on a bunch of images, and save the individual pieces derived from masking into separate lists (one for the Inner shape, one for the outer), and recombine randomly
 # TODO if ever I am at a loss for enhancements or experiments, read the docstrings of Image methods I use to get inspiration
-# TODO for NFTs... start coming up with the concept of "Rare" sources
+# TODO for NFTs... start coming up with the concept of "Rare" sources. e.g. non-D or non-8's are extremely rare and aberrant
 # TODO tesselating multiple images to become a "source"
 # TODO website to generate one-of-a-kind totes and t-shirts
 # TODO warping and shifting, corrupting the bitmask
-# TODO non-D or non-8's are extremely rare and aberrant
-# TODO experiments with putting all image transformation methods and bitmask application methods into a list that randomly selects what to do so every time I run it's unexpected what will happen
-# TODO randomize the order of operations in random_transform. Allow for multiple occurences of an operation, not necessarily in sequence
 # TODO create my own font
 # TODO overlaying multiple letters in the bitmask, centered at different coords so they spill off the canvas
 # TODO swap 2 stamps across 2 pictures. Swap X stamps across X pictures
 
 if __name__ == '__main__':
     util.prep()
-    main()
+    util.fn_runner(main)
+
 
 '''
 Big Goals
 + Experiment with many themes (or combinations thereof)
     + 1-source collages where you simply shift/crop one of the copies (UpDown, LeftRight, Half one way and Half the Other)
-    + Specific Patterns: Camo, Sand, Rainbows
-    + Other stamps: Robert Indiana's "LOVE", "I <3 NY"
+    + Specific Patterns: Camo, Sand, Rainbows, Water, Clouds
++ Other stamps: Robert Indiana's "LOVE", "I <3 NY"
 + Once I develop enough distinct methods of transforming or combining source, meta-abstract all those methods so they can be combined randomly 
 + Once the mask and 2 source images are established, randomize the process of transforming and aligning the source images
 + Be able to pull N source images and generate M combinations of them, using some automated process or API
@@ -108,6 +122,7 @@ Big Goals
 '''
 Big Project 1: "Chaos Source Transforms"
     + Modularize all the ways to transform a source. Then repeatedly select those tranformations to apply to a source, kind of like a daisy chain of effects. You can even have the same effect multiple times in a chain. Eventually the chain terminates and the source gets transformed.
+    + Maybe there is a "cost" per transform and you only get a certain "budget" for each source image. Once you spend the budget or you have enough of a particular item, you get kicked out
     + Flip, Rotate, Crop, Resize, **Tessellate**, **Warp**
 
 Big Project 2: Gradual Transformation a la Philip Glass

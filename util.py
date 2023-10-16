@@ -97,10 +97,11 @@ def load_sources(latest=True, n=2, specific_srcs=None):
         filenames = get_specific_sources(specific_srcs)
         n -= len(filenames)
 
-    if latest:
-        filenames.extend(SOURCE_FILES[(-1 * n):])
-    else:
-        filenames.extend(random.sample(SOURCE_FILES, n))
+    if n:
+        if latest:
+            filenames.extend(SOURCE_FILES[(-1 * n):])
+        else:
+            filenames.extend(random.sample(SOURCE_FILES, n))
 
     sources = [Image.open(os.path.join(SOURCE_DIR, f)) for f in filenames]
     return sources

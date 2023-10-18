@@ -113,18 +113,25 @@ def does_image_have_alpha(image):
         return False
 
 
-def get_crop_shape(imglist, square=True):
+def get_crop_shape(crop_list, square=True):
     """
     Returns max size (w, h) that is not larger than any of the images in the passed list
-    :param list imglist: List of Image.Image
+    :param list crop_list: List of Image.Image OR list of crop_boxes (left, top, right, bottom)
     :param bool square: If True, crop dimensions should be square
     :return:
     """
     w, h = math.inf, math.inf
-    for img in imglist:
-        tw, th = img.size
-        w = tw if tw < w else w
-        h = th if th < h else h
+    for item in crop_list:
+        if isinstance(item, Image.Image):
+            curr_w, curr_h = item.size
+        elif isinstance(item, list | tuple) and len(item) == 4:
+            l, t, r, b = item
+            curr_w = r - l
+            curr_h = b - t
+        else:
+            raise Exception(f"Unexpected type passed to get_crop_shape: {item}, {type(item)}")
+        w = curr_w if curr_w < w else w
+        h = curr_h if curr_h < h else h
 
     if square:
         return [min(w, h)] * 2
@@ -415,7 +422,7 @@ def ffloor(n):
         return math.floor(n) + 1
 
 
-def crop_off_center(img:Image=None):
+def get_random_off_center_cropbox(img:Image=None):
     """
     Crop Image off from center
     :param Image img:
@@ -443,7 +450,11 @@ def crop_off_center(img:Image=None):
     left, top, right, bottom = orig_crop_box
     jitter_crop_box = (left + jitter_w, top + jitter_h, right + jitter_w, bottom + jitter_h)
 
-    return img.crop(jitter_crop_box)
+    return jitter_crop_box
+
+
+def crop_off_center(img:Image=None):
+    return img.crop(get_random_off_center_cropbox(img))
 
 
 def get_sig_details(func):
@@ -580,6 +591,41 @@ def draw_handle(img):
     draw.text((rectangle_left + at_radius + extra, ultimate_top), "denomin8r", font=font_obj, fill="white")
 
     return img
+
+
+def recursive_off_crop(img, mask_char:str=None):
+    """
+    Recursively off-crop an image with itself using a 1-character bitmask
+    :param img:
+    :param mask_char: If a char, use that as the bitmask. Otherwise generate a random char for the bitmask.
+    :return:
+    """
+    img_a = img.copy()
+    img_b = img.copy()
+    CLEAN_COPY = get_bool()
+    print(f"Using {CLEAN_COPY=}")
+
+    # Collage off-cropped image with another off-crop of itself
+    times = random.choice(range(1, 5))
+    for _ in range(times):
+        crop_box_a = get_random_off_center_cropbox(img_a)
+        crop_box_b = get_random_off_center_cropbox(img_b)
+        # TODO error I need to crop the images from the off left, top position to the specified shape
+        crop_shape = get_crop_shape([crop_box_a, crop_box_b], square=True)
+        img_a = crop_central(img_a, crop_shape)
+        img_b = crop_central(img_b, crop_shape)
+        if mask_char:
+            bitmask = build_bitmask_to_size(text=mask_char, fontfile=BOOKMAN, shape=crop_shape)
+        else:
+            bitmask = build_random_text_bitmask(fontfile=BOOKMAN, shape=crop_shape, numchars=1)
+        img_a, img_b = simple_bitmask_swap(img_a, img_b, bitmask)
+        img_a = Image.fromarray(img_a)
+        if CLEAN_COPY:
+            img_b = img.copy()
+        else:
+            img_b = Image.fromarray(img_b)
+
+    return img_a
 
 
 def get_bool():

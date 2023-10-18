@@ -139,9 +139,9 @@ def get_crop_shape(crop_list, square=True):
         return w, h
 
 
-def get_crop_box_central(img_size, crop_shape):
+def get_cropbox_central(img_size, crop_shape):
     """
-    Return the crop_box for an image, where you crop from the center for a given shape
+    Return the cropbox for an image, where you crop from the center for a given shape
     :param tuple(int) img_size:     (w, h) of the Image
     :param tuple(int) crop_shape:   (w, h) of the desired crop shape
     :return tuple(int):
@@ -163,7 +163,7 @@ def crop_central(image, shape):
     :param tuple[int] shape:
     :return Image.Image:
     """
-    box = get_crop_box_central(image.size, shape)
+    box = get_cropbox_central(image.size, shape)
     return image.crop(box)
 
 
@@ -424,7 +424,7 @@ def ffloor(n):
 
 def get_random_off_center_cropbox(img:Image=None):
     """
-    Crop Image off from center
+    Get Off-Center cropbox for image based on random "jitter"
     :param Image img:
     :return:
     """
@@ -433,16 +433,15 @@ def get_random_off_center_cropbox(img:Image=None):
 
     # Determine size of image
     w, h = img.size
-    image_square_side = min(w, h)
-    max_jitter = image_square_side * jitter / 2
+    min_side = min(w, h)
+    max_jitter = min_side * jitter / 2
 
-    # Slightly reduce image_shape to make crop_shape,
+    # Slightly reduce image_shape to make smaller crop_shape,
     #   so there is room for jitter of the crop box
-    cropped_square_side = math.floor(image_square_side * crop_cap)
-    crop_shape = (cropped_square_side, cropped_square_side)
+    crop_shape = (math.floor(w * crop_cap), math.floor(h * crop_cap))
 
     # determine origin point for image crops
-    orig_crop_box = get_crop_box_central(img.size, crop_shape)
+    orig_crop_box = get_cropbox_central(img.size, crop_shape)
     jitter_w = ffloor(max_jitter * random.uniform(-1, 1))
     jitter_h = ffloor(max_jitter * random.uniform(-1, 1))
 
@@ -596,24 +595,28 @@ def draw_handle(img):
 def recursive_off_crop(img, mask_char:str=None):
     """
     Recursively off-crop an image with itself using a 1-character bitmask
-    :param img:
-    :param mask_char: If a char, use that as the bitmask. Otherwise generate a random char for the bitmask.
+    :param Image.Image img:
+    :param mask_char: If not None, use that as the bitmask. Otherwise generate a random char for the bitmask.
     :return:
     """
     img_a = img.copy()
     img_b = img.copy()
-    CLEAN_COPY = get_bool()
-    print(f"Using {CLEAN_COPY=}")
+    CLEAN_COPY = random_bool()
 
     # Collage off-cropped image with another off-crop of itself
-    times = random.choice(range(1, 5))
+    times = random.choice(range(1, 6))
     for _ in range(times):
-        crop_box_a = get_random_off_center_cropbox(img_a)
-        crop_box_b = get_random_off_center_cropbox(img_b)
-        # TODO error I need to crop the images from the off left, top position to the specified shape
-        crop_shape = get_crop_shape([crop_box_a, crop_box_b], square=True)
-        img_a = crop_central(img_a, crop_shape)
-        img_b = crop_central(img_b, crop_shape)
+        cropbox_a = get_random_off_center_cropbox(img_a)
+        cropbox_b = get_random_off_center_cropbox(img_b)
+        # Extract topleft coords from cropboxes
+        topleft_a = (cropbox_a[0], cropbox_a[1])
+        topleft_b = (cropbox_b[0], cropbox_b[1])
+
+        crop_shape = get_crop_shape([cropbox_a, cropbox_b], square=False)
+
+        img_a = crop_shape_from_coord(img_a, crop_shape, topleft_a)
+        img_b = crop_shape_from_coord(img_b, crop_shape, topleft_b)
+
         if mask_char:
             bitmask = build_bitmask_to_size(text=mask_char, fontfile=BOOKMAN, shape=crop_shape)
         else:
@@ -628,5 +631,21 @@ def recursive_off_crop(img, mask_char:str=None):
     return img_a
 
 
-def get_bool():
+def crop_shape_from_coord(img, crop_shape, lefttop):
+    """
+    Crop an Image from the lefttop coordinate, to the specified crop_shape
+    :param Image.Image img:
+    :param tuple(int) crop_shape:
+    :param tuple(int) lefttop:
+    :return:
+    """
+    left, top = lefttop
+    w, h = crop_shape
+    right = left + w
+    bottom = top + h
+    cropbox = (left, top, right, bottom)
+    return img.crop(cropbox)
+
+
+def random_bool():
     return random.choice([True, False])

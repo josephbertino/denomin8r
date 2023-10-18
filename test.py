@@ -19,5 +19,5 @@ kern_rate = 1.0
 # Off-crop an image... have a method simply off-crop an image from center
 images = util.load_sources(latest=False, n=1)
 img_orig = images[0]
-ret_img = util.recursive_off_crop(img_orig, 'O')
+ret_img = util.recursive_off_crop(img_orig)
 ret_img.show()

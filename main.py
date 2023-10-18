@@ -37,15 +37,19 @@ def main(mask:str=MASK,
 
         # Get Source Images
         image1, image2 = util.load_sources(latest=use_latest, specific_srcs=spec_srcs)
-        crop_shape = util.get_crop_shape([image1, image2], square=True)
-        image1 = util.random_transform(image1, crop_shape)
-        image2 = util.random_transform(image2, crop_shape)
 
         if off_cropped:
             # Off-crop each image with a simple random bitmask and jitter
-            # TODO move this transformation to the "Chaos Source Transforms"
-            image1 = util.crop_off_center(image1)
-            image2 = util.crop_off_center(image2)
+            # TODO move this transformation to the "Chaos Source Transforms", and it does not necessarily have to apply to BOTH sources
+            image1 = util.recursive_off_crop(image1, TEXT)
+            image2 = util.recursive_off_crop(image2, TEXT)
+            crop_shape = util.get_crop_shape([image1, image2], square=True)
+            image1 = util.crop_central(image1, crop_shape)
+            image2 = util.crop_central(image2, crop_shape)
+        else:
+            crop_shape = util.get_crop_shape([image1, image2], square=True)
+            image1 = util.random_transform(image1, crop_shape)
+            image2 = util.random_transform(image2, crop_shape)
 
         # Generate Bitmask
         match bitmask_method:

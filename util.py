@@ -661,33 +661,35 @@ def slice_up_image_uniform(img, n=None):
     """
     arr = np.array(img)
     n = n if n else 2 ** random.choice(range(1,6))
-    h = img.size[1]
-    slice_height = math.ceil(h / n)
+    w = img.size[0]  # width
+    slice_width = math.ceil(w / n)
     slices = []
     for i in range(n):
-        slices.append(arr[:,(i * slice_height):((i + 1) * slice_height)])
+        slices.append(arr[:,(i * slice_width):((i + 1) * slice_width)])
     return slices
 
 
-def slice_image_rearrange_random(img):
+def slice_image_rearrange_random(img, n=None):
     """
     Vertically slice up image and rearrange the slices randomly
     :param Image.Image img:
+    :param int n:
     :return Image.Image:
     """
-    slices = slice_up_image_uniform(img)
+    slices = slice_up_image_uniform(img, n)
     random.shuffle(slices)
     slice_stack = np.hstack(slices)
     return Image.fromarray(slice_stack)
 
 
-def slice_image_reverse(img):
+def slice_image_rearrange_reverse(img, n=None):
     """
     Vertically slice up image and reverse the order
     :param Image.Image img:
+    :param int n:
     :return Image.Image:
     """
-    slices = slice_up_image_uniform(img)
+    slices = slice_up_image_uniform(img, n)
     slices = slices[::-1]
     slice_stack = np.hstack(slices)
     return Image.fromarray(slice_stack)

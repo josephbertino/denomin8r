@@ -651,18 +651,43 @@ def random_bool():
     return random.choice([True, False])
 
 
-def slice_up_image_uniform(img):
+def slice_up_image_uniform(img, n=None):
     """
     Slice up image into uniform vertical slices of np.array.
     Number of slices should be a power of 2
     :param Image.Image img:
+    :param int n:               Number of slices to generate
     :return np.array:
     """
     arr = np.array(img)
-    num_slices = 2 ** random.choice(range(1,6))
+    n = n if n else 2 ** random.choice(range(1,6))
     h = img.size[1]
-    slice_height = math.ceil(h / num_slices)
+    slice_height = math.ceil(h / n)
     slices = []
-    for i in range(num_slices):
+    for i in range(n):
         slices.append(arr[:,(i * slice_height):((i + 1) * slice_height)])
     return slices
+
+
+def slice_image_rearrange_random(img):
+    """
+    Vertically slice up image and rearrange the slices randomly
+    :param Image.Image img:
+    :return Image.Image:
+    """
+    slices = slice_up_image_uniform(img)
+    random.shuffle(slices)
+    slice_stack = np.hstack(slices)
+    return Image.fromarray(slice_stack)
+
+
+def slice_image_reverse(img):
+    """
+    Vertically slice up image and reverse the order
+    :param Image.Image img:
+    :return Image.Image:
+    """
+    slices = slice_up_image_uniform(img)
+    slices = slices[::-1]
+    slice_stack = np.hstack(slices)
+    return Image.fromarray(slice_stack)

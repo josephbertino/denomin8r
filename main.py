@@ -41,8 +41,8 @@ def main(mask:str=MASK,
         if off_cropped:
             # Off-crop each image with a simple random bitmask and jitter
             # TODO move this transformation to the "Chaos Source Transforms", and it does not necessarily have to apply to BOTH sources
-            image1 = util.recursive_off_crop(image1, TEXT)
-            image2 = util.recursive_off_crop(image2, TEXT)
+            image1 = util.recursive_off_crop(image1)
+            image2 = util.recursive_off_crop(image2)
             crop_shape = util.get_crop_shape([image1, image2], square=True)
             image1 = util.crop_central(image1, crop_shape)
             image2 = util.crop_central(image2, crop_shape)
@@ -74,7 +74,6 @@ def main(mask:str=MASK,
         collage_B.save(f'{random_id}_{x}_B.jpg')
 
 
-# TODO can I self-tesselate an image? What other transformations can I make on the image?
 # TODO Big Project 1: "Chaos Source Transforms"... requires self-tessellation if possible... and note that OFF-CROPPED is no longer a SOURCE_GETTER option, it's just a transformation option for a single image...also phase an image so it spills over to the other side
 # TODO make logo for PUSH
 # TODO experiment with ImageFont.getmask() for making a bitmask

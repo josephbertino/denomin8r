@@ -649,3 +649,20 @@ def crop_shape_from_coord(img, crop_shape, lefttop):
 
 def random_bool():
     return random.choice([True, False])
+
+
+def slice_up_image_uniform(img):
+    """
+    Slice up image into uniform vertical slices of np.array.
+    Number of slices should be a power of 2
+    :param Image.Image img:
+    :return np.array:
+    """
+    arr = np.array(img)
+    num_slices = 2 ** random.choice(range(1,6))
+    h = img.size[1]
+    slice_height = math.ceil(h / num_slices)
+    slices = []
+    for i in range(num_slices):
+        slices.append(arr[:,(i * slice_height):((i + 1) * slice_height)])
+    return slices

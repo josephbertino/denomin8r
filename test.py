@@ -21,19 +21,21 @@ kern_rate = 1.0
 GOAL:
 Use numpy to create slices of an image, vertically or horizontally
 """
-# TODO rearrange_phase (will require num_slices to be >= 2**4
+# TODO experiment with dupn and n
 random_id = uuid.uuid4().__str__().split('-')[0]
-for i, img in enumerate(util.load_sources(latest=True, n=10)):
-    n = 2 ** random.choice(range(1,5))
-    # Generate the slices, in order
-    img = util.crop_to_square(img)
-    img = util.slice_image_rearrange_phase(img, n, num_phases)
-    img = img.rotate(angle=90, expand=True)
-    # img = util.slice_image_rearrange_random(img, n)
-    # img = img.rotate(angle=270, expand=True)
-    img.save(f'{random_id}_slice_{i}.jpg')
+for i, img in enumerate(util.load_sources(latest=False, n=10)):
+    slice_n = 2 ** random.choice(range(4, 7))
+    dup_n = random.choice([2, 3, 4])
+    slices = util.slice_up_image_uniform(img, slice_n)
+    stack = []
+    print(f"{slice_n=}, {dup_n=}")
+    for i in range(dup_n):
+        stack.extend(slices[i::dup_n])
+    slice_stack = np.hstack(stack)
+    newimg = Image.fromarray(slice_stack)
+    newimg.show()
 
-
-# TODO later steps: do any combination of the following with those slices: rearrange them (phasing, reverse phasing), roll them (np.roll), flip them, (ADVANCED) swap them, (ADV.) rotate canvas and repeat
+# TODO I also like what happens when is unequal between rotation slicing. Produces cool effects with the rectangles, espec. when n1 is v. different from n2
+# TODO later steps: do any combination of the following with those slices: rearrange them (reverse phasing), roll them (np.roll), flip them, (ADVANCED) swap them, (ADV.) rotate canvas and repeat
 
 # TODO should I not call Image.fromarray() until I'm done with all the slicing?

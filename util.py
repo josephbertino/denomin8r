@@ -693,3 +693,35 @@ def slice_image_rearrange_reverse(img, n=None):
     slices = slices[::-1]
     slice_stack = np.hstack(slices)
     return Image.fromarray(slice_stack)
+
+
+def draw_test_params(img, **kwargs):
+    """
+    Draw the passed kwargs key:value pairs onto the image and return the image
+    Primarily used for debugging purposes
+    :param img:
+    :return:
+    """
+    w, h = img.size
+    draw = ImageDraw.Draw(img)
+
+    position = (math.floor(.1 * w), math.floor(.95 * h))
+    pos_left, pos_top = position
+    fontsize = math.floor(h * .03)
+    fontfile = os.path.join(FONT_DIR, BOOKMAN)
+    font_obj = ImageFont.truetype(fontfile, fontsize)
+
+    # Set parameter text
+    text = ""
+    for k, v in kwargs.items():
+        text += f"{k}={v}, "
+    text_left, text_top, text_right, text_bottom = draw.textbbox(position, text, font=font_obj)
+    text_width = text_right - text_left
+    text_height = text_bottom - text_top
+    extra = math.ceil(text_height * 0.1)  # padding
+
+    # Draw background
+    draw.rectangle(((pos_left, pos_top), (pos_left + text_width + extra, pos_top + text_height + extra)), fill="black")
+    draw.text((pos_left, pos_top), text, font=font_obj, fill="red")
+
+    return img

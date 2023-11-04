@@ -75,6 +75,7 @@ def main(mask:str=MASK,
 
 
 # TODO Big Project 1: "Chaos Source Transforms"... requires self-tessellation if possible... and note that OFF-CROPPED is no longer a SOURCE_GETTER option, it's just a transformation option for a single image...also phase an image so it spills over to the other side
+# TODO util to make gifs of sequence images?
 # TODO make logo for PUSH
 # TODO experiment with ImageFont.getmask() for making a bitmask
 # TODO generate bitmasks from other images, LOVE, I <3 NY... ask Nadia for others

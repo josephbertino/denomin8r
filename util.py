@@ -200,10 +200,10 @@ def simple_bitmask_swap(image1, image2, mask):
     :return:
     """
 
-    collage_1 = np.where(mask, image1, image2)
-    collage_2 = np.where(mask, image2, image1)
+    img1_over_img2 = np.where(mask, image1, image2)
+    img2_over_img1 = np.where(mask, image2, image1)
 
-    return collage_1, collage_2
+    return img1_over_img2, img2_over_img1
 
 
 def make_bitmask_from_bw_image(mask_src):
@@ -557,7 +557,8 @@ def draw_handle(img):
     w, h = img.size
     draw = ImageDraw.Draw(img)
 
-    position = (math.floor(.75 * w), math.floor(.94 * h))
+    # TODO might need smarter logic to determine position
+    position = (math.floor(.71 * w), math.floor(.94 * h))
     ultimate_left, ultimate_top = position
     fontsize = math.floor(h * .03)
     fontfile = os.path.join(FONT_DIR, BOOKMAN)
@@ -656,7 +657,7 @@ def slice_up_image_uniform(img, n=None):
     Slice up image into uniform vertical slices of np.array.
     Number of slices should be a power of 2
     :param Image.Image img:
-    :param int n:               Number of slices to generate
+    :param int n: Number of slices to generate
     :return np.array:
     """
     arr = np.array(img)
@@ -673,7 +674,7 @@ def slice_image_rearrange_random(img, n=None):
     """
     Vertically slice up image and rearrange the slices randomly
     :param Image.Image img:
-    :param int n:
+    :param int n: Number of slices to generate
     :return Image.Image:
     """
     slices = slice_up_image_uniform(img, n)
@@ -686,12 +687,28 @@ def slice_image_rearrange_reverse(img, n=None):
     """
     Vertically slice up image and reverse the order
     :param Image.Image img:
-    :param int n:
+    :param int n: Number of slices to generate
     :return Image.Image:
     """
     slices = slice_up_image_uniform(img, n)
     slices = slices[::-1]
     slice_stack = np.hstack(slices)
+    return Image.fromarray(slice_stack)
+
+
+def slice_image_duplicate_sampling(img, num_dups, num_slices):
+    """
+
+    :param img:
+    :param num_dups:
+    :param num_slices: Number of slices to generate
+    :return:
+    """
+    slices = slice_up_image_uniform(img, num_slices)
+    stack = []
+    for dup_i in range(num_dups):
+        stack.extend(slices[dup_i::num_dups])
+    slice_stack = np.hstack(stack)
     return Image.fromarray(slice_stack)
 
 
@@ -705,7 +722,7 @@ def draw_test_params(img, **kwargs):
     w, h = img.size
     draw = ImageDraw.Draw(img)
 
-    position = (math.floor(.1 * w), math.floor(.95 * h))
+    position = (math.floor(.05 * w), math.floor(.95 * h))
     pos_left, pos_top = position
     fontsize = math.floor(h * .03)
     fontfile = os.path.join(FONT_DIR, BOOKMAN)
@@ -725,3 +742,30 @@ def draw_test_params(img, **kwargs):
     draw.text((pos_left, pos_top), text, font=font_obj, fill="red")
 
     return img
+
+
+def classic_D_swap_random(img1=None, img2=None, force_crop_shape=None):
+    """
+    Make a classic collage with 2 random images and the letter 'D'
+    :param img1:
+    :param img2:
+    :param int force_crop_shape:
+    :return:
+    """
+    if img1 is None:
+        img1 = load_sources(latest=False, n=1)[0]
+    if img2 is None:
+        img2 = load_sources(latest=False, n=1)[0]
+
+    if force_crop_shape:
+        if force_crop_shape == 1:
+            crop_shape = img1.size
+        elif force_crop_shape == 2:
+            crop_shape = img2.size
+    else:
+        crop_shape = get_crop_shape([img1, img2], square=False)
+
+    img1 = crop_central(img1, crop_shape)
+    img2 = crop_central(img2, crop_shape)
+    bitmask = build_bitmask_to_size(text='D', fontfile=BOOKMAN, shape=crop_shape)
+    return simple_bitmask_swap(img1, img2, bitmask)

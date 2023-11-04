@@ -116,6 +116,7 @@ Big Goals
 + Experiment with many themes (or combinations thereof)
     + 1-source collages where you simply shift/crop one of the copies (UpDown, LeftRight, Half one way and Half the Other)
     + Specific Patterns: Camo, Sand, Rainbows, Water, Clouds
++ Grid resamplings of geometric and pattern-based art, like Sol Lewitt and Frank Stella
 + Other stamps: Robert Indiana's "LOVE", "I <3 NY"
 + Once I develop enough distinct methods of transforming or combining source, meta-abstract all those methods so they can be combined randomly 
 + Once the mask and 2 source images are established, randomize the process of transforming and aligning the source images

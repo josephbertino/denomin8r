@@ -34,19 +34,16 @@ Horizontal Slicing
         Needs to be larger, like >12
 """
 random_id = uuid.uuid4().__str__().split('-')[0]
-img = util.load_sources(latest=True, n=1, specific_srcs=['scholler_portrait_6'])
+img = util.load_sources(latest=False, n=1, specific_srcs=['lewitt1'])
 img = img[0]
-spd = 9
-dupn = 3
-dupn_h = 5
-dupn_v = 5
-dup_img_grid = util.img_resample_grid(img, dupn_v, dupn_h, spd)
-# TODO img_totem = util.img_totem_stack(dupn_h, spd)
-dup_img_grid = util.draw_test_params(dup_img_grid, spd=spd)
-dup_img_grid = util.draw_handle(dup_img_grid)
-dup_img_grid.show()
+for duph in range(2, 6):
+    for dupv in range(2, 6):
+        dup = util.img_resample_grid(img, dupv, duph, 18)
+        dup = util.draw_handle(dup)
+        # TODO img_totem = util.img_totem_stack(dupn_h, spd)
+        dup.show()
 
-# APHEX TWIN, JEFFREY EPSTEIN
+# TODO APHEX TWIN, JEFFREY EPSTEIN, Frank Stella, Sol Lewitt
 
 # TODO I also like what happens when is unequal between rotation slicing. Produces cool effects with the rectangles, espec. when n1 is v. different from n2
 # TODO later steps: do any combination of the following with those slices: rearrange them (reverse phasing), roll them (np.roll), flip them, (ADVANCED) swap them, (ADV.) rotate canvas and repeat

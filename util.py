@@ -425,7 +425,7 @@ def ffloor(n):
 def get_random_off_center_cropbox(img:Image=None):
     """
     Get Off-Center cropbox for image based on random "jitter"
-    :param Image img:
+    :param Image.Image img:
     :return:
     """
     jitter = float(random.choice(range(7,12)) / 100)
@@ -532,19 +532,43 @@ def fn_runner(func):
         func(**arg_dict)
 
 
+LEFT_ONE = 0x100
+LEFT_TWO = 0x10000
+
+
+def get_color_vals(rgb):
+    """
+    Return individual int values for a color in hex format (0xffffff)
+    :param int rgb:
+    :return tuple(int):
+    """
+    # TODO implement bit shifting here
+    b_val = rgb % LEFT_ONE
+    g_val = ((rgb % LEFT_TWO) - b_val) // LEFT_ONE
+    r_val = (rgb - (g_val * LEFT_ONE) - b_val) // LEFT_TWO
+    return r_val, g_val, b_val
+
+
 def rgb2bgr(rgb):
     """
     Convert an RGB value (0xAABBCC) to BGR (0xCCBBAA)
-    :param int rgb:
-    :return int:
+    :param int rgb:     range == [0x0, 0xffffff]
+    :return int:        range == [0x0, 0xffffff]
     """
-    one = 16 ** 2
-    two = 16 ** 4
-    r = rgb % one
-    m = (rgb % two) - r
-    l = rgb - m - r
-    bgr = (r * two) + m + (l // two)
+    r, g, b = get_color_vals(rgb)
+    bgr = (b * LEFT_TWO) + (g * LEFT_ONE) + r
     return bgr
+
+
+def darken_rgb(rgb):
+    """
+    Darken an RGB value by reducing the intensity of all three colors
+    :param int rgb:     range == [0x0, 0xffffff]
+    :return int:        range == [0x0, 0xffffff]
+    """
+    r, g, b = get_color_vals(rgb)
+    darker = (r // 2 * LEFT_TWO) + (g // 2 * LEFT_ONE) + (b // 2)
+    return darker
 
 
 def draw_handle(img):
@@ -577,13 +601,15 @@ def draw_handle(img):
     rectangle_left = ultimate_left + at_radius
 
     # Draw handle region backgrounds
+    bg_color = int(random.random() * 0xffffff)
+    draw.rectangle(
+        ((rectangle_left, ultimate_top), (rectangle_left + text_width + (2 * extra), ultimate_bottom)),
+        # (lefttop, rightbottom)
+        fill=rgb2bgr(darken_rgb(bg_color))
+    )
     draw.ellipse(
         ((ultimate_left, ultimate_top), (ultimate_left + diameter, ultimate_bottom)),  # (lefttop, rightbottom)
-        fill=rgb2bgr(COLORS.OG_ORANGE)
-    )
-    draw.rectangle(
-        ((rectangle_left, ultimate_top), (rectangle_left + text_width + (2 * extra), ultimate_bottom)),  # (lefttop, rightbottom)
-        fill=rgb2bgr(COLORS.OG_ORANGE)
+        fill=rgb2bgr(bg_color)
     )
 
     # Draw handle region text

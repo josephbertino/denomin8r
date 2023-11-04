@@ -652,66 +652,6 @@ def random_bool():
     return random.choice([True, False])
 
 
-def slice_up_image_uniform(img, n=None):
-    """
-    Slice up image into uniform vertical slices of np.array.
-    Number of slices should be a power of 2
-    :param Image.Image img:
-    :param int n: Number of slices to generate
-    :return np.array:
-    """
-    arr = np.array(img)
-    n = n if n else 2 ** random.choice(range(1,6))
-    w = img.size[0]  # width
-    slice_width = math.ceil(w / n)
-    slices = []
-    for i in range(n):
-        slices.append(arr[:,(i * slice_width):((i + 1) * slice_width)])
-    return slices
-
-
-def slice_image_rearrange_random(img, n=None):
-    """
-    Vertically slice up image and rearrange the slices randomly
-    :param Image.Image img:
-    :param int n: Number of slices to generate
-    :return Image.Image:
-    """
-    slices = slice_up_image_uniform(img, n)
-    random.shuffle(slices)
-    slice_stack = np.hstack(slices)
-    return Image.fromarray(slice_stack)
-
-
-def slice_image_rearrange_reverse(img, n=None):
-    """
-    Vertically slice up image and reverse the order
-    :param Image.Image img:
-    :param int n: Number of slices to generate
-    :return Image.Image:
-    """
-    slices = slice_up_image_uniform(img, n)
-    slices = slices[::-1]
-    slice_stack = np.hstack(slices)
-    return Image.fromarray(slice_stack)
-
-
-def slice_image_duplicate_sampling(img, num_dups, num_slices):
-    """
-
-    :param img:
-    :param num_dups:
-    :param num_slices: Number of slices to generate
-    :return:
-    """
-    slices = slice_up_image_uniform(img, num_slices)
-    stack = []
-    for dup_i in range(num_dups):
-        stack.extend(slices[dup_i::num_dups])
-    slice_stack = np.hstack(stack)
-    return Image.fromarray(slice_stack)
-
-
 def draw_test_params(img, **kwargs):
     """
     Draw the passed kwargs key:value pairs onto the image and return the image
@@ -769,3 +709,109 @@ def classic_D_swap_random(img1=None, img2=None, force_crop_shape=None):
     img2 = crop_central(img2, crop_shape)
     bitmask = build_bitmask_to_size(text='D', fontfile=BOOKMAN, shape=crop_shape)
     return simple_bitmask_swap(img1, img2, bitmask)
+
+
+def slice_image_uniform(img, num_slices=None):
+    """
+    Slice up an image into uniform vertical strips and return an np.array of those slices
+    Number of slices should be a power of 2
+    :param Image.Image img:
+    :param int num_slices: Number of slices to generate
+    :return np.array: Array of image strips, len()==num_slices
+    """
+    arr = np.array(img)
+    num_slices = num_slices if num_slices else 2 ** random.choice(range(1, 6))
+    w = img.size[0]  # width
+    slice_width = math.ceil(w / num_slices)
+    slices = []
+    for i in range(num_slices):
+        slices.append(arr[:,(i * slice_width):((i + 1) * slice_width)])
+    return slices
+
+
+def slice_image_resample_random(img, num_slices=None):
+    """
+    Vertically slice up image and rearrange the slices randomly
+        Return image as np.array
+    :param Image.Image img:
+    :param int num_slices: Number of slices to generate
+    :return np.array:
+    """
+    slices = slice_image_uniform(img, num_slices)
+    random.shuffle(slices)
+    return np.hstack(slices)
+
+
+def slice_image_resample_reverse(img, n=None):
+    """
+    Vertically slice up image and reverse the order
+    :param Image.Image img:
+    :param int n: Number of slices to generate
+    :return np.array:
+    """
+    slices = slice_image_uniform(img, n)
+    slices = slices[::-1]
+    return np.hstack(slices)
+
+
+def slice_resample_image_vertical(img, num_dups, num_slices):
+    """
+    Slice up image into vertical strips and reorder strips
+        to form <num_dups> samples of original image
+    :param img:
+    :param num_dups:
+    :param num_slices: Number of slices to generate
+    :return np.array:
+    """
+    slices = slice_image_uniform(img, num_slices)
+    stack = []
+    for dup_i in range(num_dups):
+        stack.extend(slices[dup_i::num_dups])
+    return np.hstack(stack)
+
+
+def img_resample_stack_vertical(img, num_dups, slices_per_dup):
+    """
+    Reorder vertical slices of an image into a stack of duplicates via uniform sampling
+    :param img:
+    :param num_dups:
+    :param slices_per_dup:
+    :return Image.Image:
+    """
+    slicen = num_dups * slices_per_dup
+    stack = slice_resample_image_vertical(img, num_dups, slicen)
+    return Image.fromarray(stack)
+
+
+def img_resample_stack_horizontal(img, num_dups, slices_per_dup):
+    """
+    Reorder horizontal slices of an image into a stack of duplicates via uniform sampling
+    :param Image.Image img:
+    :param num_dups:
+    :param slices_per_dup:
+    :return Image.Image:
+    """
+    slicen = num_dups * slices_per_dup
+    img = img.rotate(angle=90, expand=True)
+    stack = slice_resample_image_vertical(img, num_dups, slicen)
+    dupimg = Image.fromarray(stack)
+    return dupimg.rotate(angle=270, expand=True)
+
+
+def img_resample_grid(img, dups_v, dups_h, slices_per_dup):
+    """
+    Resample crisscrossed slices of an image into a grip of duplicates via uniform sampling
+    :param Image.Image img:
+    :param dups_v:
+    :param dups_h:
+    :param slices_per_dup:
+    :return Image.Image:
+    """
+    slicen_v = dups_v * slices_per_dup
+    vstack = slice_resample_image_vertical(img, dups_v, slicen_v)
+    img = Image.fromarray(vstack)
+    img = img.rotate(angle=90, expand=True)
+    slicen_h = dups_h * slices_per_dup
+    stack = slice_resample_image_vertical(img, dups_h, slicen_h)
+    dupimg = Image.fromarray(stack)
+    return dupimg.rotate(angle=270, expand=True)

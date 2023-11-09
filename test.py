@@ -32,19 +32,16 @@ Horizontal Slicing
         3 or 4 seems great. Like totems
     slice_per_dup:
         Needs to be larger, like >12
+Grid:
+    I like what happens when dup_n is unequal between rotation slicing. 
+    Produces cool effects with the rectangles.
 """
 random_id = uuid.uuid4().__str__().split('-')[0]
 img = util.load_sources(latest=False, n=1, specific_srcs=['lewitt1'])
 img = img[0]
-for duph in range(2, 6):
-    for dupv in range(2, 6):
+
+for dupv in range(2, 6):
+    for duph in range(2, 6):
         dup = util.img_resample_grid(img, dupv, duph, 18)
         dup = util.draw_handle(dup)
-        # TODO img_totem = util.img_totem_stack(dupn_h, spd)
         dup.show()
-
-# TODO APHEX TWIN, JEFFREY EPSTEIN, Frank Stella, Sol Lewitt
-
-# TODO I also like what happens when is unequal between rotation slicing. Produces cool effects with the rectangles, espec. when n1 is v. different from n2
-# TODO later steps: do any combination of the following with those slices: rearrange them (reverse phasing), roll them (np.roll), flip them, (ADVANCED) swap them, (ADV.) rotate canvas and repeat
-# TODO should I not call Image.fromarray() until I'm done with all the slicing?

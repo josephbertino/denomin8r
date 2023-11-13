@@ -42,7 +42,9 @@ def chaos_source_transform(img):
     """
 
     # TODO refactor all source transform methods to accept a numpy array and return a numpy array
+    # TODO after refactor all source transforms, need to refactor the calls to those transforms (mainly in main.py)
     # TODO maintain a data structure (list?) of all the transform methods, and during chaos_source_transform, pick from the list.
+    # TODO dont transform to Image.Image until after the bitmask is applied and you are ready to save
 
 
 # I'm thinking that I should first transform the image to an np.array,

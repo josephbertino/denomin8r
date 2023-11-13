@@ -1,5 +1,3 @@
-import enum
-
 from PIL import Image
 import util
 import uuid
@@ -30,8 +28,7 @@ def main(mask:str=MASK,
          ):
     random_id = uuid.uuid4().__str__().split('-')[0]
     mask_img = Image.open(mask)
-    image1 = image2 = bitmask = None
-    crop_shape = (100, 100,)
+    bitmask = None
 
     for x in range(iters):
 

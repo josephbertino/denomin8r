@@ -1,22 +1,21 @@
 """
 Library module of all methods related to transforing a source
 """
-from PIL import Image
-
 from tools import *
 
 
 def get_crop_shape(crop_list, square=True):
     """
-    Returns max dimensions (w, h) that is not larger than any of the images or cropboxes in the passed list
-    :param list crop_list: List of Image.Image OR list of crop_boxes (left, top, right, bottom)
-    :param bool square: If True, crop dimensions should be square
-    :return:
+    Return max dimensions (w, h) that is not larger than any of the image arrays or cropboxes in the passed list
+
+    :param list crop_list:  List of np.ndarray OR list of crop_boxes (left, top, right, bottom)
+    :param bool square:     If True, crop dimensions should be square
+    :return (int, int):     width, height
     """
     w, h = math.inf, math.inf
     for item in crop_list:
-        if isinstance(item, Image.Image):
-            curr_w, curr_h = item.size
+        if isinstance(item, np.ndarray):
+            curr_w, curr_h = get_np_array_shape(item)
         elif isinstance(item, list | tuple) and len(item) == 4:
             l, t, r, b = item
             curr_w = r - l
@@ -32,40 +31,45 @@ def get_crop_shape(crop_list, square=True):
         return w, h
 
 
-def crop_central(image, shape):
+# TODO can refactor this method so that you pass in the function you want to use to get the cropbox! (e.g. square central, random jitter)
+def crop_central(im_arr, shape):
     """
-    Crop the image to the given shape, from the center of the image
-    :param Image.Image image:
-    :param tuple[int] shape:
-    :return Image.Image:
+    Crop the image array to the given shape, from the center of the image
+
+    :param np.ndarray im_arr:
+    :param (int, int) shape:    width, height
+    :return np.ndarray:
     """
-    box = get_cropbox_central(image.size, shape)
-    return image.crop(box)
+    size = get_np_array_shape(im_arr)
+    cropbox = get_cropbox_central(size, shape)
+    left, top, right, bottom = cropbox
+    return im_arr[top:bottom, left:right]
 
 
-def crop_to_square(image):
+def crop_to_square(im_arr):
     """
     Crop an image to a square based on its smaller side
-    :param Image.Image image:
-    :return:
+
+    :param np.ndarray im_arr:
+    :return np.ndarray:
     """
-    w, h = image.size
-    s = w if w < h else h
-    return crop_central(image, (s, s))
+    s = min(im_arr.shape[:2])
+    return crop_central(im_arr, (s, s))
 
 
-def get_random_off_center_cropbox(img:Image=None):
+def get_random_off_center_cropbox(im_arr):
     """
     Get Off-Center cropbox for image based on random "jitter"
-    :param Image.Image img:
-    :return:
+
+    :param np.ndarray im_arr:
+    :return (int, int, int, int):   left, top, right, bottom
     """
     jitter = float(random.choice(range(7,12)) / 100)
     crop_cap = 1.0 - jitter
 
     # Determine size of image
-    w, h = img.size
-    min_side = min(w, h)
+    w, h = im_size = get_np_array_shape(im_arr)
+    min_side = min(im_size)
     max_jitter = min_side * jitter / 2
 
     # Slightly reduce image_shape to make smaller crop_shape,
@@ -73,7 +77,7 @@ def get_random_off_center_cropbox(img:Image=None):
     crop_shape = (math.floor(w * crop_cap), math.floor(h * crop_cap))
 
     # determine origin point for image crops
-    orig_crop_box = get_cropbox_central(img.size, crop_shape)
+    orig_crop_box = get_cropbox_central(im_size, crop_shape)
     jitter_w = ffloor(max_jitter * random.uniform(-1, 1))
     jitter_h = ffloor(max_jitter * random.uniform(-1, 1))
 
@@ -84,157 +88,176 @@ def get_random_off_center_cropbox(img:Image=None):
     return jitter_crop_box
 
 
-def crop_off_center_random(img:Image=None):
-    return img.crop(get_random_off_center_cropbox(img))
+def crop_off_center_random(im_arr):
+    """
+    Crop an np.ndarray by a random margin from the central point
+
+    :param np.ndarray im_arr:
+    :return np.ndarray:
+    """
+    left, top, right, bottom = get_random_off_center_cropbox(im_arr)
+    return im_arr[top:bottom, left:right]
 
 
-def random_transform(image, shape):
+# TODO this method will be scrapped for the chaos_source_transform
+def random_transform(im_arr, shape):
     """
     Apply a series of transforms to an image, determined by chance
         + Flip over vertical axis
         + Crop vs. Resize
-    :param Image.Image image:
-    :param tuple(int) shape:
-    :return Image.Image:
+
+    :param np.ndarray im_arr:
+    :param (int, int) shape:    width, height
+    :return np.ndarray:
     """
     random.seed()
     # Flip Left-Right
     if random.random() > .5:
-        image = image.transpose(Image.FLIP_LEFT_RIGHT)
+        # TODO break out flip to own method
+        im_arr = im_arr.transpose(Image.FLIP_LEFT_RIGHT)
 
     # Crop vs. Resize
     if random.random() > .5:
         # Crop
-        image = crop_central(image, shape)
+        im_arr = crop_central(im_arr, shape)
     else:
         # Resize
-        image = image.resize(shape)
+        # TODO need to fix this
+        im_arr = im_arr.resize(shape)
 
     # Rotate
     if random.random() > 0.75:
-        image = image.rotate(angle=180)
+        # TODO break out rotate to own method
+        im_arr = im_arr.rotate(angle=180)
 
-    return image
+    return im_arr
 
 
-
-def slice_image_uniform(img, num_slices=None):
+def slice_image_uniform(im_arr, num_slices=None):
     """
-    Slice up an image into uniform vertical strips and return an np.array of those slices
-    Number of slices should be a power of 2
-    :param Image.Image img:
-    :param int num_slices: Number of slices to generate
-    :return np.array: Array of image strips, len()==num_slices
+    Slice up an image into uniform vertical strips and return an np.ndarray of those slices
+        Number of slices should be a power of 2
+
+    :param np.ndarray im_arr:
+    :param int num_slices:      Number of slices to generate
+    :return np.ndarray:         Array of image strips, len() == num_slices
     """
-    arr = np.array(img)
     num_slices = num_slices if num_slices else 2 ** random.choice(range(1, 6))
-    w = img.size[0]  # width
+    w, h = get_np_array_shape(im_arr)
     slice_width = math.ceil(w / num_slices)
     slices = []
     for i in range(num_slices):
-        slices.append(arr[:,(i * slice_width):((i + 1) * slice_width)])
+        slices.append(im_arr[:, (i * slice_width):((i + 1) * slice_width)])
     return slices
 
 
-def slice_image_resample_random(img, num_slices=None):
+def slice_image_resample_random(im_arr, num_slices=None):
     """
     Vertically slice up image and rearrange the slices randomly
-        Return image as np.array
-    :param Image.Image img:
-    :param int num_slices: Number of slices to generate
-    :return np.array:
+        Return image as np.ndarray
+
+    :param np.ndarray im_arr:
+    :param int num_slices:      Number of slices to generate
+    :return np.ndarray:
     """
-    slices = slice_image_uniform(img, num_slices)
+    slices = slice_image_uniform(im_arr, num_slices)
     random.shuffle(slices)
     return np.hstack(slices)
 
 
-def slice_image_resample_reverse(img, n=None):
+def slice_image_resample_reverse(im_arr, n=None):
     """
     Vertically slice up image and reverse the order
-    :param Image.Image img:
-    :param int n: Number of slices to generate
-    :return np.array:
+
+    :param np.ndarray im_arr:
+    :param int n:               Number of slices to generate
+    :return np.ndarray:
     """
-    slices = slice_image_uniform(img, n)
+    slices = slice_image_uniform(im_arr, n)
     slices = slices[::-1]
     return np.hstack(slices)
 
 
-def slice_resample_image_vertical(img, num_dups, num_slices):
+def slice_resample_image_vertical(im_arr, num_dups, num_slices):
     """
     Slice up image into vertical strips and reorder strips
         to form <num_dups> samples of original image
-    :param img:
+
+    :param np.ndarray im_arr:
     :param num_dups:
-    :param num_slices: Number of slices to generate
-    :return np.array:
+    :param num_slices:          Number of slices to generate
+    :return np.ndarray:
     """
-    slices = slice_image_uniform(img, num_slices)
+    slices = slice_image_uniform(im_arr, num_slices)
     stack = []
     for dup_i in range(num_dups):
         stack.extend(slices[dup_i::num_dups])
     return np.hstack(stack)
 
 
-def img_resample_stack_vertical(img, num_dups, slices_per_dup):
+def img_resample_stack_vertical(im_arr, num_dups, slices_per_dup):
     """
     Reorder vertical slices of an image into a stack of duplicates via uniform sampling
-    :param img:
+
+    :param np.ndarray im_arr:
     :param num_dups:
     :param slices_per_dup:
-    :return Image.Image:
+    :return np.ndarray:
     """
     slicen = num_dups * slices_per_dup
-    stack = slice_resample_image_vertical(img, num_dups, slicen)
+    stack = slice_resample_image_vertical(im_arr, num_dups, slicen)
     return Image.fromarray(stack)
 
 
-def img_resample_stack_horizontal(img, num_dups, slices_per_dup):
+def img_resample_stack_horizontal(im_arr, num_dups, slices_per_dup):
     """
     Reorder horizontal slices of an image into a stack of duplicates via uniform sampling
-    :param Image.Image img:
+
+    :param np.ndarray im_arr:
     :param num_dups:
     :param slices_per_dup:
-    :return Image.Image:
+    :return np.ndarray:
     """
     slicen = num_dups * slices_per_dup
-    img = img.rotate(angle=90, expand=True)
-    stack = slice_resample_image_vertical(img, num_dups, slicen)
-    dupimg = Image.fromarray(stack)
-    return dupimg.rotate(angle=270, expand=True)
+    # TODO break out method to rotate image
+    im_arr = im_arr.rotate(angle=90, expand=True)
+    stack = slice_resample_image_vertical(im_arr, num_dups, slicen)
+    im_arr = im_arr.rotate(angle=270, expand=True)
+    return im_arr
 
 
-def img_resample_grid(img, dups_v, dups_h, slices_per_dup):
+def img_resample_grid(im_arr, dups_v, dups_h, slices_per_dup):
     """
     Resample crisscrossed slices of an image into a grip of duplicates via uniform sampling
-    :param Image.Image img:
+
+    :param np.ndarray im_arr:
     :param dups_v:
     :param dups_h:
     :param slices_per_dup:
-    :return Image.Image:
+    :return np.ndarray:
     """
     slicen_v = dups_v * slices_per_dup
-    vstack = slice_resample_image_vertical(img, dups_v, slicen_v)
-    img = Image.fromarray(vstack)
-    img = img.rotate(angle=90, expand=True)
+    vstack = slice_resample_image_vertical(im_arr, dups_v, slicen_v)
+    # TODO rotate the vstack
+    im_arr = im_arr.rotate(angle=90, expand=True)
     slicen_h = dups_h * slices_per_dup
-    stack = slice_resample_image_vertical(img, dups_h, slicen_h)
-    dupimg = Image.fromarray(stack)
-    return dupimg.rotate(angle=270, expand=True)
+    stack = slice_resample_image_vertical(im_arr, dups_h, slicen_h)
+    # TODO rotate the stack
+    stack = stack.rotate(angle=270, expand=True)
+    return stack
 
 
-def crop_img_with_shape(img, crop_shape, lefttop):
+# TODO generalize method to crop images. Pass in the cropping function as an argument
+def crop_img_with_shape(im_arr, crop_shape, lefttop):
     """
     Crop an Image from the lefttop coordinate, to the specified crop_shape
-    :param Image.Image img:
+    :param np.ndarray im_arr:
     :param tuple(int) crop_shape:
     :param tuple(int) lefttop:
-    :return:
+    :return np.ndarray:
     """
     left, top = lefttop
     w, h = crop_shape
     right = left + w
     bottom = top + h
-    cropbox = (left, top, right, bottom)
-    return img.crop(cropbox)
+    return im_arr[top:bottom, left:right, :]

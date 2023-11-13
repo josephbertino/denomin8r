@@ -113,8 +113,11 @@ def random_transform(im_arr, shape):
     random.seed()
     # Flip Left-Right
     if random.random() > .5:
-        # TODO break out flip to own method
-        im_arr = im_arr.transpose(Image.FLIP_LEFT_RIGHT)
+        im_arr = np.fliplr(im_arr)
+
+    # Flip Up-Down
+    if random.random() > .5:
+        im_arr = np.flipud(im_arr)
 
     # Crop vs. Resize
     if random.random() > .5:
@@ -126,9 +129,8 @@ def random_transform(im_arr, shape):
         im_arr = im_arr.resize(shape)
 
     # Rotate
-    if random.random() > 0.75:
-        # TODO break out rotate to own method
-        im_arr = im_arr.rotate(angle=180)
+    if random.random() > 0.70:
+        im_arr = np.rot90(m=im_arr, k=2)
 
     return im_arr
 
@@ -219,10 +221,10 @@ def img_resample_stack_horizontal(im_arr, num_dups, slices_per_dup):
     :return np.ndarray:
     """
     slicen = num_dups * slices_per_dup
-    # TODO break out method to rotate image
-    im_arr = im_arr.rotate(angle=90, expand=True)
+    im_arr = np.rot90(m=im_arr, k=1)
+    # TODO fix this stack thing
     stack = slice_resample_image_vertical(im_arr, num_dups, slicen)
-    im_arr = im_arr.rotate(angle=270, expand=True)
+    im_arr = np.rot90(m=im_arr, k=3)
     return im_arr
 
 
@@ -237,13 +239,12 @@ def img_resample_grid(im_arr, dups_v, dups_h, slices_per_dup):
     :return np.ndarray:
     """
     slicen_v = dups_v * slices_per_dup
+    # TODO fix this vstack/stack thing. Just fix the method
     vstack = slice_resample_image_vertical(im_arr, dups_v, slicen_v)
-    # TODO rotate the vstack
-    im_arr = im_arr.rotate(angle=90, expand=True)
+    im_arr = np.rot90(m=im_arr, k=1)
     slicen_h = dups_h * slices_per_dup
     stack = slice_resample_image_vertical(im_arr, dups_h, slicen_h)
-    # TODO rotate the stack
-    stack = stack.rotate(angle=270, expand=True)
+    stack = np.rot90(m=stack, k=3)
     return stack
 
 

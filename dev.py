@@ -43,7 +43,6 @@ def chaos_source_transform(img):
 
     # TODO load_sources should return the np.ndarrays!
     # TODO make a method to save the image arrays, which would also call Image.fromarray()
-    # TODO fix any method that calls np.rot90()
     # TODO take care of all TODOs not in main.py
     # TODO refactor all source transform methods to accept a numpy array and return a numpy array
     # TODO after refactor all source transforms, need to refactor the calls to those transforms (mainly in main.py)

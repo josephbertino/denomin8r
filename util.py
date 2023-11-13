@@ -235,7 +235,7 @@ def draw_handle(img):
     w, h = img.size
     draw = ImageDraw.Draw(img)
 
-    # TODO might need smarter logic to determine position
+    # TODO (later) might need smarter logic to determine position
     position = (math.floor(.71 * w), math.floor(.94 * h))
     ultimate_left, ultimate_top = position
     fontsize = math.floor(h * .03)

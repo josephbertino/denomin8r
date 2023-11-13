@@ -123,12 +123,8 @@ def random_transform(im_arr, shape):
     if random.random() > .5:
         # Crop
         im_arr = crop_central(im_arr, shape)
-    else:
-        # Resize
-        # TODO need to fix this
-        im_arr = im_arr.resize(shape)
 
-    # Rotate
+    # Rotate 180
     if random.random() > 0.70:
         im_arr = np.rot90(m=im_arr, k=2)
 
@@ -213,7 +209,7 @@ def img_resample_stack_vertical(im_arr, num_dups, slices_per_dup):
 
 def img_resample_stack_horizontal(im_arr, num_dups, slices_per_dup):
     """
-    Reorder horizontal slices of an image into a stack of duplicates via uniform sampling
+    Reorder horizontal slices of an image into a stack of duplicates of the original, via uniform sampling
 
     :param np.ndarray im_arr:
     :param num_dups:
@@ -221,16 +217,15 @@ def img_resample_stack_horizontal(im_arr, num_dups, slices_per_dup):
     :return np.ndarray:
     """
     slicen = num_dups * slices_per_dup
-    im_arr = np.rot90(m=im_arr, k=1)
-    # TODO fix this stack thing
-    stack = slice_resample_image_vertical(im_arr, num_dups, slicen)
-    im_arr = np.rot90(m=im_arr, k=3)
-    return im_arr
+    im_arr = np.rot90(m=im_arr, k=1)    # 90
+    new_im = slice_resample_image_vertical(im_arr, num_dups, slicen)
+    new_im = np.rot90(m=new_im, k=3)    # 270
+    return new_im
 
 
 def img_resample_grid(im_arr, dups_v, dups_h, slices_per_dup):
     """
-    Resample crisscrossed slices of an image into a grip of duplicates via uniform sampling
+    Resample crisscrossed slices of an image into a grid of duplicates via uniform sampling
 
     :param np.ndarray im_arr:
     :param dups_v:
@@ -239,13 +234,12 @@ def img_resample_grid(im_arr, dups_v, dups_h, slices_per_dup):
     :return np.ndarray:
     """
     slicen_v = dups_v * slices_per_dup
-    # TODO fix this vstack/stack thing. Just fix the method
-    vstack = slice_resample_image_vertical(im_arr, dups_v, slicen_v)
-    im_arr = np.rot90(m=im_arr, k=1)
+    stack = slice_resample_image_vertical(im_arr, dups_v, slicen_v)
+    rot_im = np.rot90(m=stack, k=1)    # 90
     slicen_h = dups_h * slices_per_dup
-    stack = slice_resample_image_vertical(im_arr, dups_h, slicen_h)
-    stack = np.rot90(m=stack, k=3)
-    return stack
+    stack = slice_resample_image_vertical(rot_im, dups_h, slicen_h)
+    new_im = np.rot90(m=stack, k=3)
+    return new_im
 
 
 # TODO generalize method to crop images. Pass in the cropping function as an argument

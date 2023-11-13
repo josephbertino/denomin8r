@@ -165,5 +165,8 @@ EXHIBIT IDEAS
 + (what else can users submit?)
 + Sell merch
 
+3) 
++ The inception of Denomin8r: Off-Cropping and overlap-masking the same textured source with itself (flowers, fire, water)
+
 
 '''

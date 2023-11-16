@@ -68,10 +68,10 @@ def build_bitmask_to_size(text, fontfile, shape, kern_rate=1.0):
 def simple_bitmask_swap(image1, image2, mask):
     """
     im1, im2, and mask all have to have the same dimensions
-    :param Image.Image image1:
-    :param Image.Image image2:
-    :param mask:
-    :return:
+    :param np.ndarray image1:
+    :param np.ndarray image2:
+    :param np.ndarray mask:
+    :return tuple(np.ndarray) :
     """
 
     img1_over_img2 = np.where(mask, image1, image2)

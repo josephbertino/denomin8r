@@ -27,8 +27,8 @@ Grid:
     Produces cool effects with the rectangles.
 """
 random_id = uuid.uuid4().__str__().split('-')[0]
-img = util.load_sources(latest=False, n=1, specific_srcs=['lewitt1'])
-img = img[0]
+img_arr = util.load_sources(latest=False, n=1, specific_srcs=['lewitt1'])
+img_arr = img_arr[0]
 
 # TODO Big Project 1: "Chaos Source Transforms". Includes Off-cropping, rotating, cropping, slice transformations, flipping, & resizing. Of course, finish off with a stamp.
 
@@ -41,14 +41,13 @@ def chaos_source_transform(img):
     :return:
     """
 
-    # TODO load_sources should return the np.ndarrays!
-    # TODO make a method to save the image arrays, which would also call Image.fromarray()
-    # TODO take care of all TODOs not in main.py
     # TODO refactor all source transform methods to accept a numpy array and return a numpy array
     # TODO after refactor all source transforms, need to refactor the calls to those transforms (mainly in main.py)
     # TODO maintain a data structure (list?) of all the transform methods, and during chaos_source_transform, pick from the list.
     # TODO dont transform to Image.Image until after the bitmask is applied and you are ready to save
-
+    # TODO take care of all TODOs not in main.py
+    # TODO play around with util.slice_image_resample_random
+    # TODO TEST EACH METHOD IN UTIL & SOURCE_OPS
 
 # I'm thinking that I should first transform the image to an np.array,
 # and all the transforms would be really fast bc they are numpy operations,

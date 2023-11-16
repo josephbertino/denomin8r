@@ -9,7 +9,7 @@ MASK = 'D_mask.jpg'  # If I am using a pre-built mask image
 TEXT = 'D'
 BITMASK_METHOD = BitmaskMethod.STATIC_TEXT
 USE_LATEST = True
-ADD_HANDLE = False
+DRAW_HANDLE = False
 OFF_CROPPED = False
 KERN_RATE = 1.0
 ITERS = 5
@@ -20,13 +20,12 @@ def main(mask:str=MASK,
          text:str=TEXT,
          bitmask_method:Enum=BITMASK_METHOD,
          use_latest:bool=USE_LATEST,
-         add_handle:bool=ADD_HANDLE,
+         draw_handle:bool=DRAW_HANDLE,
          off_cropped:bool=OFF_CROPPED,
          kern_rate:float=KERN_RATE,
          iters:int=ITERS,
          spec_srcs:list=SPEC_SRCS,
          ):
-    random_id = uuid.uuid4().__str__().split('-')[0]
     mask_img = Image.open(mask)
     bitmask = None
 
@@ -41,8 +40,8 @@ def main(mask:str=MASK,
             image1 = util.recursive_off_crop(image1)
             image2 = util.recursive_off_crop(image2)
             crop_shape = util.get_crop_shape([image1, image2], square=True)
-            image1 = util.crop_central(image1, crop_shape)
-            image2 = util.crop_central(image2, crop_shape)
+            image1 = util.cropbox_central_shape(image1, crop_shape)
+            image2 = util.cropbox_central_shape(image2, crop_shape)
         else:
             crop_shape = util.get_crop_shape([image1, image2], square=True)
             image1 = util.random_transform(image1, crop_shape)
@@ -60,15 +59,7 @@ def main(mask:str=MASK,
 
         # Apply Bitmask to Source Images
         collage_A, collage_B = util.simple_bitmask_swap(image1, image2, bitmask)
-        collage_A = Image.fromarray(collage_A)
-        collage_B = Image.fromarray(collage_B)
-
-        if add_handle:
-            collage_A = util.draw_handle(collage_A)
-            collage_B = util.draw_handle(collage_B)
-
-        collage_A.save(f'{random_id}_{x}_A.jpg')
-        collage_B.save(f'{random_id}_{x}_B.jpg')
+        util.save_images_from_arrays([collage_A, collage_B], draw_handle=draw_handle)
 
 '''Chaos Source Transforms'''
 # TODO Big Project 1: "Chaos Source Transforms". Includes Off-cropping, rotating, cropping, slice transformations, flipping, & resizing. Of course, finish off with a stamp.
@@ -111,7 +102,7 @@ def main(mask:str=MASK,
 
 '''Uncategorized'''
 # TODO make logo for PUSH
-# TODO Make Totem pole with different heads. Will require to put all portrait sources into separate folder, thus organize sources better. util.img_totem_stack(dupn_h, spd). Heads include APHEX TWIN, JEFFREY EPSTEIN
+# TODO Make Totem pole with different heads. Will require to put all portrait sources into separate folder, thus organize sources better. util.img_totem_stack(dupn_h, spd). Heads include APHEX TWIN, JEFFREY EPSTEIN, Artist's faces, recognizeable faces mixed with obscure faces, totems of people we SHOULD admire and adore but unfortunately dont know all that well
 # TODO random transform of the bitmask! (rotation, tesselation, resizing (stretching) the text_image then converting to bitmask, rather than expanding the bitmask with whitespace. This will fuck with the proportions of the mask, which is cool)
 # TODO if SOURCE_FILES gets large enough or the rendering process starts to slow down, will have to consider refactoring for speed
 # TODO Incoprorate Alpha channel to make the 'boundaries' between source elements blurred

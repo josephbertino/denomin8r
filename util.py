@@ -59,12 +59,12 @@ def get_specific_sources(srcs):
 
 def load_sources(latest=True, n=2, specific_srcs=None):
     """
-    Return 2 images from the sources directory
+    Return images from the '/sources' directory, converted into np.ndarray's
 
-    :param bool latest: If True, get latest images according to name (numeric id)
+    :param bool latest: If True, get latest images according to image filename
     :param int n:       Number of source images to grab
     :param list(str) specific_srcs: If not empty, a list of source files to grab before grabbing the rest
-    :return:
+    :return list(np.ndarray):
     """
     random.seed()
 
@@ -79,54 +79,54 @@ def load_sources(latest=True, n=2, specific_srcs=None):
         else:
             filenames.extend(random.sample(SOURCE_FILES, n))
 
-    sources = [Image.open(os.path.join(SOURCE_DIR, f)) for f in filenames]
-    return sources
+    source_images = [Image.open(os.path.join(SOURCE_DIR, f)) for f in filenames]
+    source_image_arrays = [np.array(img) for img in source_images]
+    return source_image_arrays
 
 
-def recursive_off_crop(img, mask_char:str=None):
+def recursive_off_crop(im_arr, mask_text:str=None):
     """
-    Recursively off-crop an image with itself using a 1-character bitmask
-    :param Image.Image img:
-    :param mask_char: If not None, use that as the bitmask. Otherwise generate a random char for the bitmask.
-    :return:
+    Recursively off-crop an image with itself using a bitmask
+
+    :param np.ndarray im_arr:
+    :param mask_text: If not None, use that as the bitmask. Otherwise generate a random char for the bitmask.
+    :return np.ndarray:
     """
-    img_a = img.copy()
-    img_b = img.copy()
-    CLEAN_COPY = random_bool()
+    USE_CLEAN_COPY = random_bool()
+
+    im_arr_a = im_arr.copy()
+    im_arr_b = im_arr.copy()
 
     # Collage off-cropped image with another off-crop of itself
     times = random.choice(range(1, 6))
     for _ in range(times):
-        cropbox_a = get_random_off_center_cropbox(img_a)
-        cropbox_b = get_random_off_center_cropbox(img_b)
-        # Extract topleft coords from cropboxes
-        topleft_a = (cropbox_a[0], cropbox_a[1])
-        topleft_b = (cropbox_b[0], cropbox_b[1])
+        im_arr_a = crop_im_arr(im_arr_a, cropbox_off_center_random)
+        im_arr_b = crop_im_arr(im_arr_b, cropbox_off_center_random)
 
-        crop_shape = get_crop_shape([cropbox_a, cropbox_b], square=False)
+        # TODO (later) make a method to crop two images according to their shared dimensions
+        crop_shape = get_crop_shape([im_arr_a, im_arr_b], square=False)
+        im_arr_a = cropbox_central_shape(im_arr_a, crop_shape)
+        im_arr_b = cropbox_central_shape(im_arr_b, crop_shape)
 
-        img_a = crop_img_with_shape(img_a, crop_shape, topleft_a)
-        img_b = crop_img_with_shape(img_b, crop_shape, topleft_b)
-
-        if mask_char:
-            bitmask = build_bitmask_to_size(text=mask_char, fontfile=BOOKMAN, shape=crop_shape)
+        if mask_text:
+            bitmask = build_bitmask_to_size(text=mask_text, fontfile=BOOKMAN, shape=crop_shape)
         else:
             bitmask = build_random_text_bitmask(fontfile=BOOKMAN, shape=crop_shape, numchars=1)
-        img_a, img_b = simple_bitmask_swap(img_a, img_b, bitmask)
-        img_a = Image.fromarray(img_a)
-        if CLEAN_COPY:
-            img_b = img.copy()
-        else:
-            img_b = Image.fromarray(img_b)
 
-    return img_a
+        im_arr_a, im_arr_b = simple_bitmask_swap(im_arr_a, im_arr_b, bitmask)
+
+        if USE_CLEAN_COPY:
+            # Reset for next iteration
+            im_arr_b = im_arr.copy()
+
+    return im_arr_a
 
 
 def build_random_string(k=1):
     """
     Build a random string of the given length. Only AlphaNum chars
     :param int k:
-    :return:
+    :return str:
     """
     res = ''.join(random.choices(string.ascii_uppercase + string.digits, k=k))
     return res
@@ -138,7 +138,7 @@ def build_random_text_bitmask(fontfile, shape, numchars:int=None):
     :param fontfile:
     :param shape:
     :param numchars:
-    :return:
+    :return np.ndarray:
     """
     if not numchars:
         numchars = 4
@@ -225,11 +225,11 @@ def fn_runner(func):
         func(**arg_dict)
 
 
-def draw_handle(img):
+def draw_handle_on_img(img):
     """
     Draw the "@denomin8r" handle on bottom right of the image then return the image
-    :param img:
-    :return:
+    :param Image.Image img:
+    :return Image.Image:
     """
     TEXT = "@denomin8r"
     w, h = img.size
@@ -277,8 +277,8 @@ def draw_test_params(img, **kwargs):
     """
     Draw the passed kwargs key:value pairs onto the image and return the image
     Primarily used for debugging purposes
-    :param img:
-    :return:
+    :param Image.Image img:
+    :return Image.Image:
     """
     w, h = img.size
     draw = ImageDraw.Draw(img)
@@ -304,30 +304,42 @@ def draw_test_params(img, **kwargs):
 
     return img
 
-
-def classic_D_swap_random(img1=None, img2=None, force_crop_shape=None):
+# TODO take care of cropping error
+def classic_D_swap_random(im_arr_1=None, im_arr_2=None):
     """
     Make a classic collage with 2 random images and the letter 'D'
-    :param img1:
-    :param img2:
-    :param int force_crop_shape:
+    :param np.ndarray im_arr_1:
+    :param np.ndarray im_arr_2:
+    :return np.ndarray:
+    """
+    imgs = load_sources(latest=False, n=2)
+    if im_arr_1 is None:
+        im_arr_1 = imgs[0]
+    if im_arr_2 is None:
+        im_arr_2 = imgs[1]
+
+    crop_shape = get_crop_shape([im_arr_1, im_arr_2], square=False)
+
+    im_arr_1 = crop_im_arr(im_arr_1, cropbox_central_shape, crop_shape=crop_shape)
+    im_arr_2 = crop_im_arr(im_arr_2, cropbox_central_shape, crop_shape=crop_shape)
+    bitmask = build_bitmask_to_size(text='D', fontfile=BOOKMAN, shape=crop_shape)
+    return simple_bitmask_swap(im_arr_1, im_arr_2, bitmask)
+
+
+def save_images_from_arrays(im_arrs, draw_handle):
+    """
+    Save np.ndarrays to Image.Image with a random ID in the filename
+
+    :param list(np.ndarray) im_arrs:
+    :param bool draw_handle:
     :return:
     """
-    if img1 is None:
-        img1 = load_sources(latest=False, n=1)[0]
-    if img2 is None:
-        img2 = load_sources(latest=False, n=1)[0]
 
-    if force_crop_shape:
-        if force_crop_shape == 1:
-            crop_shape = img1.size
-        elif force_crop_shape == 2:
-            crop_shape = img2.size
-    else:
-        crop_shape = get_crop_shape([img1, img2], square=False)
+    random_id = uuid.uuid4().__str__().split('-')[0]
+    for i, im_arr in enumerate(im_arrs):
+        img = Image.fromarray(im_arr)
 
-    img1 = crop_central(img1, crop_shape)
-    img2 = crop_central(img2, crop_shape)
-    bitmask = build_bitmask_to_size(text='D', fontfile=BOOKMAN, shape=crop_shape)
-    return simple_bitmask_swap(img1, img2, bitmask)
+        if draw_handle:
+            img = draw_handle_on_img(img)
 
+        img.save(f'{random_id}_{i}.jpg')

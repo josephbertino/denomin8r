@@ -60,24 +60,6 @@ def random_bool():
     return random.choice([True, False])
 
 
-def get_cropbox_central(arr_size, crop_shape):
-    """
-    Return the cropbox for an image, where you crop from the center for a given shape
-
-    :param tuple(int) arr_size:     (w, h) of the image array
-    :param tuple(int) crop_shape:   (w, h) of the desired crop shape
-    :return tuple(int):
-    """
-    crop_w, crop_h = crop_shape
-    img_w, img_h = arr_size
-    left = (img_w - crop_w) // 2
-    top = (img_h - crop_h) // 2
-    right = left + crop_w
-    bottom = top + crop_h
-    central_crop_box = (left, top, right, bottom)
-    return central_crop_box
-
-
 def get_char_widths(text, font):
     char_widths = []
     for letter in text:

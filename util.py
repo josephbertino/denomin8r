@@ -1,17 +1,10 @@
-import string
+import uuid
 from PIL import Image
 import pillow_avif
 from sortedcontainers import SortedSet
-import logging
-import inspect
 import PySimpleGUI as sg
 
-from mask_ops import *
 from source_ops import *
-
-
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
 
 SOURCE_FILES = None
 
@@ -82,85 +75,6 @@ def load_sources(latest=True, n=2, specific_srcs=None):
     source_images = [Image.open(os.path.join(SOURCE_DIR, f)) for f in filenames]
     source_image_arrays = [np.array(img) for img in source_images]
     return source_image_arrays
-
-
-def recursive_off_crop(im_arr, mask_text:str=None):
-    """
-    Recursively off-crop an image with itself using a bitmask
-
-    :param np.ndarray im_arr:
-    :param mask_text: If not None, use that as the bitmask. Otherwise generate a random char for the bitmask.
-    :return np.ndarray:
-    """
-    USE_CLEAN_COPY = random_bool()
-
-    im_arr_a = im_arr.copy()
-    im_arr_b = im_arr.copy()
-
-    # Collage off-cropped image with another off-crop of itself
-    times = random.choice(range(1, 6))
-    for _ in range(times):
-        im_arr_a = crop_im_arr(im_arr_a, cropbox_off_center_random)
-        im_arr_b = crop_im_arr(im_arr_b, cropbox_off_center_random)
-
-        # TODO (later) make a method to crop two images according to their shared dimensions
-        crop_shape = get_crop_shape([im_arr_a, im_arr_b], square=False)
-        im_arr_a = cropbox_central_shape(im_arr_a, crop_shape)
-        im_arr_b = cropbox_central_shape(im_arr_b, crop_shape)
-
-        if mask_text:
-            bitmask = build_bitmask_to_size(text=mask_text, fontfile=BOOKMAN, shape=crop_shape)
-        else:
-            bitmask = build_random_text_bitmask(fontfile=BOOKMAN, shape=crop_shape, numchars=1)
-
-        im_arr_a, im_arr_b = simple_bitmask_swap(im_arr_a, im_arr_b, bitmask)
-
-        if USE_CLEAN_COPY:
-            # Reset for next iteration
-            im_arr_b = im_arr.copy()
-
-    return im_arr_a
-
-
-def build_random_string(k=1):
-    """
-    Build a random string of the given length. Only AlphaNum chars
-    :param int k:
-    :return str:
-    """
-    res = ''.join(random.choices(string.ascii_uppercase + string.digits, k=k))
-    return res
-
-
-def build_random_text_bitmask(fontfile, shape, numchars:int=None):
-    """
-
-    :param fontfile:
-    :param shape:
-    :param numchars:
-    :return np.ndarray:
-    """
-    if not numchars:
-        numchars = 4
-    k = math.floor(random.random() * numchars) + 1
-    text = build_random_string(k=k)
-    kern_rate = random.uniform(0.75, 1.0)
-    bitmask = build_bitmask_to_size(text, fontfile=fontfile, shape=shape, kern_rate=kern_rate)
-    return bitmask
-
-
-def get_sig_details(func):
-    """
-    Return list of parameter details for func
-    :param func: Every param must have a type and a default value
-        e.g. arg_one:str="Default"
-    :return: list[(arg_name, arg_type, arg_default)]
-    """
-    spec = inspect.getfullargspec(func)
-    defaults = spec.defaults
-    annots = spec.annotations
-    names, types = list(zip(*annots.items()))
-    return list(zip(names, types, defaults))
 
 
 def fn_runner(func):
@@ -304,21 +218,20 @@ def draw_test_params(img, **kwargs):
 
     return img
 
-# TODO take care of cropping error
 def classic_D_swap_random(im_arr_1=None, im_arr_2=None):
     """
     Make a classic collage with 2 random images and the letter 'D'
     :param np.ndarray im_arr_1:
     :param np.ndarray im_arr_2:
-    :return np.ndarray:
+    :return np.ndarray, np.ndarray:
     """
-    imgs = load_sources(latest=False, n=2)
+    im_arrs = load_sources(latest=False, n=2)
     if im_arr_1 is None:
-        im_arr_1 = imgs[0]
+        im_arr_1 = im_arrs[0]
     if im_arr_2 is None:
-        im_arr_2 = imgs[1]
+        im_arr_2 = im_arrs[1]
 
-    crop_shape = get_crop_shape([im_arr_1, im_arr_2], square=False)
+    crop_shape = get_common_crop_shape([im_arr_1, im_arr_2], square=True)
 
     im_arr_1 = crop_im_arr(im_arr_1, cropbox_central_shape, crop_shape=crop_shape)
     im_arr_2 = crop_im_arr(im_arr_2, cropbox_central_shape, crop_shape=crop_shape)

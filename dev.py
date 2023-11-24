@@ -1,8 +1,8 @@
-import util
+from util import *
 import uuid
 
-util.prep()
-fontfile = util.BOOKMAN
+prep()
+fontfile = BOOKMAN
 kern_rate = 1.0
 
 # -----DO NOT DELETE ABOVE THIS LINE---------------------------
@@ -26,12 +26,14 @@ Grid:
     I like what happens when dup_n is unequal between rotation slicing. 
     Produces cool effects with the rectangles.
 """
-random_id = uuid.uuid4().__str__().split('-')[0]
-img_arr = util.load_sources(latest=False, n=1, specific_srcs=['lewitt1'])
-img_arr = img_arr[0]
+im_arr = load_sources(latest=False, n=1, specific_srcs=[])
+im_arr = im_arr[0]
 
-# TODO Big Project 1: "Chaos Source Transforms". Includes Off-cropping, rotating, cropping, slice transformations, flipping, & resizing. Of course, finish off with a stamp.
+im_arrs = classic_D_swap_random()
+for a in im_arrs:
+    Image.fromarray(a).show()
 
+# TODO Big Project 1: "Chaos Source Transforms"
 def chaos_source_transform(img):
     """
     Take an image and run it through a series of transformations, then return the modified image.
@@ -40,9 +42,16 @@ def chaos_source_transform(img):
     :param img:
     :return:
     """
+    """
+        Apply a series of transforms to an image, determined by chance
+            + Flip over vertical axis
+            + Crop vs. Resize
 
-    # TODO refactor all source transform methods to accept a numpy array and return a numpy array
-    # TODO after refactor all source transforms, need to refactor the calls to those transforms (mainly in main.py)
+        :param np.ndarray im_arr:
+        :param (int, int) shape:    width, height
+        :return np.ndarray:
+    """
+
     # TODO maintain a data structure (list?) of all the transform methods, and during chaos_source_transform, pick from the list.
     # TODO dont transform to Image.Image until after the bitmask is applied and you are ready to save
     # TODO take care of all TODOs not in main.py

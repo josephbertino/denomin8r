@@ -2,8 +2,23 @@
 Library module for mask-related operations
 """
 from PIL import Image, ImageDraw, ImageFont
-
 from tools import *
+
+def build_random_text_bitmask(fontfile, shape, numchars:int=None):
+    """
+
+    :param fontfile:
+    :param shape:
+    :param numchars:
+    :return np.ndarray:
+    """
+    if not numchars:
+        numchars = 4
+    k = math.floor(random.random() * numchars) + 1
+    text = build_random_string(k=k)
+    kern_rate = random.uniform(0.75, 1.0)
+    bitmask = build_bitmask_to_size(text, fontfile=fontfile, shape=shape, kern_rate=kern_rate)
+    return bitmask
 
 
 def build_mask_from_text(text, fontfile, fontsize, kern_rate):

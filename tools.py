@@ -3,11 +3,17 @@ Library module of math-y tools, e.g. conversions
 """
 import os
 import math
+import string
+import inspect
 import random
+import logging
 import numpy as np
 from PIL import Image
 from enum import IntEnum, auto
 
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 ROOT = '/Users/josephbertino/PycharmProjects/denomin8r'
 SOURCE_DIR = os.path.join(ROOT, 'sources')
@@ -26,6 +32,48 @@ class Colors(IntEnum):
     OG_BLUE = 0x2864C8
     WHITE = 0xFFFFFF
     BLACK = 0x000000
+
+
+def get_sig_details(func):
+    """
+    Return list of parameter details for func
+    :param func: It is recommended that every param have a type
+        and a default value.
+        e.g. arg_one:str="Default"
+    :return: list[(arg_names, arg_types, arg_defaults)]
+    """
+    spec = inspect.getfullargspec(func)
+    defaults = spec.defaults if spec.defaults else []
+    annots = spec.annotations
+    names = spec.args
+    if len(annots) == len(names):
+        names, types = list(zip(*annots.items()))
+    else:
+        types = [None] * len(names)
+    if len(types) == len(defaults) and len(defaults) == len(names):
+        return list(zip(names, types, defaults))
+    else:
+        return [names, types, defaults]
+
+
+def get_array_square_shape(im_arr):
+    """
+    Return shape (w, h) where both dimensions equal the shorter of the array's 2 sides, to describe a square
+
+    :param np.ndarray im_arr:
+    :return tuple(int):
+    """
+    return min(im_arr.shape[:2])
+
+
+def build_random_string(k=1):
+    """
+    Build a random string of the given length. Only AlphaNum chars
+    :param int k:
+    :return str:
+    """
+    res = ''.join(random.choices(string.ascii_uppercase + string.digits, k=k))
+    return res
 
 
 def does_image_have_alpha(image):

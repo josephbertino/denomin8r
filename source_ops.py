@@ -1,10 +1,82 @@
 """
 Library module of all methods related to transforing a source
 """
-from tools import *
+from mask_ops import *
+
+# Source Transforms. All must accept only the image np.ndarray, and return an np.ndarray
+def source_flip_lr(im_arr):
+    """
+    Flip L-R an image array
+
+    :param np.ndarray im_arr:
+    :return np.ndarray:
+    """
+    return np.fliplr(im_arr)
 
 
-def get_crop_shape(crop_list, square=True):
+def source_flip_ud(im_arr):
+    """
+    Flip U-D an image array
+
+    :param np.ndarray im_arr:
+    :return np.ndarray:
+    """
+    return np.flipud(im_arr)
+
+
+def source_rotate_180(im_arr):
+    """
+    Rotate 180 degrees an image array
+
+    :param np.ndarray im_arr:
+    :return np.ndarray:
+    """
+    return np.rot90(m=im_arr, k=2)
+
+
+def source_crop_random(im_arr):
+    """
+    Apply cropping to image array with a randomly-selected method
+
+    :param np.ndarray im_arr:
+    :return np.ndarray:
+    """
+    cropbox_method = random.choice(CROPBOX_OPERATIONS)
+    cropped_im_arr = crop_im_arr(im_arr=im_arr, cropbox_meth=cropbox_method)
+    return cropped_im_arr
+
+
+MIN_DUPS = 2
+MAX_DUPS = 7
+
+def source_slice_random(im_arr):
+    """
+    Apply slice-duping to image array with a randomly-selected method
+
+    :param np.ndarray im_arr:
+    :return np.ndarray:
+    """
+    slice_method = random.choice(SLICE_OPERATIONS)
+    method_name = slice_method.__name__
+    logger.info(f"Implementing SLICE method {method_name}")
+
+    arg_names, _, _ = get_sig_details(slice_method)
+    args = []
+    for name in arg_names:
+        if name == 'im_arr':
+            args.append(im_arr)
+        elif 'num_dups' in name:
+            args.append(random.choice(range(MIN_DUPS, MAX_DUPS+1)))
+        elif 'num_slices' in name:
+            args.append(random.choice(range(2, 31)))
+        else:
+            args.append(None)
+
+    sliced_im_arr = slice_method(*args)
+    return sliced_im_arr
+
+
+def get_common_crop_shape(crop_list, square=True):
     """
     Return max dimensions (w, h) that is not larger than any of the image arrays or cropboxes in the passed list
 
@@ -29,38 +101,6 @@ def get_crop_shape(crop_list, square=True):
         return [min(w, h)] * 2
     else:
         return w, h
-
-
-# TODO this method will be scrapped for the chaos_source_transform
-def random_transform(im_arr, shape):
-    """
-    Apply a series of transforms to an image, determined by chance
-        + Flip over vertical axis
-        + Crop vs. Resize
-
-    :param np.ndarray im_arr:
-    :param (int, int) shape:    width, height
-    :return np.ndarray:
-    """
-    random.seed()
-    # Flip Left-Right
-    if random.random() > .5:
-        im_arr = np.fliplr(im_arr)
-
-    # Flip Up-Down
-    if random.random() > .5:
-        im_arr = np.flipud(im_arr)
-
-    # Crop vs. Resize
-    if random.random() > .5:
-        # Crop
-        im_arr = crop_central(im_arr, shape)
-
-    # Rotate 180
-    if random.random() > 0.70:
-        im_arr = np.rot90(m=im_arr, k=2)
-
-    return im_arr
 
 
 def slice_image_uniform(im_arr, num_slices=None):
@@ -95,15 +135,15 @@ def slice_image_resample_random(im_arr, num_slices=None):
     return np.hstack(slices)
 
 
-def slice_image_resample_reverse(im_arr, n=None):
+def slice_image_resample_reverse(im_arr, num_slices=None):
     """
     Vertically slice up image and reverse the order
 
     :param np.ndarray im_arr:
-    :param int n:               Number of slices to generate
+    :param int num_slices:               Number of slices to generate
     :return np.ndarray:
     """
-    slices = slice_image_uniform(im_arr, n)
+    slices = slice_image_uniform(im_arr, num_slices)
     slices = slices[::-1]
     return np.hstack(slices)
 
@@ -125,64 +165,102 @@ def slice_resample_image_vertical(im_arr, num_dups, num_slices):
     return np.hstack(stack)
 
 
-def img_resample_stack_vertical(im_arr, num_dups, slices_per_dup):
+def img_resample_stack_vertical(im_arr, num_dups, num_slices_per_dup):
     """
     Reorder vertical slices of an image into a stack of duplicates via uniform sampling
 
     :param np.ndarray im_arr:
     :param num_dups:
-    :param slices_per_dup:
+    :param num_slices_per_dup:
     :return np.ndarray:
     """
-    num_slices = num_dups * slices_per_dup
+    num_slices = num_dups * num_slices_per_dup
     duped_im_arr = slice_resample_image_vertical(im_arr, num_dups, num_slices)
     return duped_im_arr
 
 
-def img_resample_stack_horizontal(im_arr, num_dups, slices_per_dup):
+def img_resample_stack_horizontal(im_arr, num_dups, num_slices_per_dup):
     """
     Reorder horizontal slices of an image into a stack of duplicates of the original, via uniform sampling
 
     :param np.ndarray im_arr:
     :param num_dups:
-    :param slices_per_dup:
+    :param num_slices_per_dup:
     :return np.ndarray:
     """
-    num_slices = num_dups * slices_per_dup
+    num_slices = num_dups * num_slices_per_dup
     rotated_im_arr = np.rot90(m=im_arr, k=1)    # 90
     duped_rotated_im_arr = slice_resample_image_vertical(rotated_im_arr, num_dups, num_slices)
     final_im_arr = np.rot90(m=duped_rotated_im_arr, k=3)    # 270
     return final_im_arr
 
 
-def img_resample_grid(im_arr, num_dups_vert, num_dups_hor, slices_per_dup):
+def img_resample_grid(im_arr, num_dups_vert, num_dups_hor, num_slices_per_dup):
     """
     Resample crisscrossed slices of an image into a grid of duplicates via uniform sampling
 
     :param np.ndarray im_arr:
     :param num_dups_vert:
     :param num_dups_hor:
-    :param slices_per_dup:
+    :param num_slices_per_dup:
     :return np.ndarray:
     """
-    num_slices_vert = num_dups_vert * slices_per_dup
+    num_slices_vert = num_dups_vert * num_slices_per_dup
     duped_im_arr = slice_resample_image_vertical(im_arr, num_dups_vert, num_slices_vert)
     rotated_duped_im_arr = np.rot90(m=duped_im_arr, k=1)     # 90
 
-    num_slices_hor = num_dups_hor * slices_per_dup
+    num_slices_hor = num_dups_hor * num_slices_per_dup
     grid_im_arr = slice_resample_image_vertical(rotated_duped_im_arr, num_dups_hor, num_slices_hor)
     final_im_arr = np.rot90(m=grid_im_arr, k=3)     # 270
     return final_im_arr
 
 
+def crop_offcrop_recursive(im_arr, mask_text:str=None):
+    """
+    Recursively off-crop an image with itself using a bitmask
+
+    :param np.ndarray im_arr:
+    :param mask_text: If not None, use that as the bitmask. Otherwise generate a random char for the bitmask.
+    :return np.ndarray:
+    """
+    USE_CLEAN_COPY = random_bool()
+
+    im_arr_a = im_arr.copy()
+    im_arr_b = im_arr.copy()
+
+    # Collage off-cropped image with another off-crop of itself
+    times = random.choice(range(1, 6))
+    for _ in range(times):
+        im_arr_a = crop_im_arr(im_arr_a, cropbox_off_center_random)
+        im_arr_b = crop_im_arr(im_arr_b, cropbox_off_center_random)
+
+        # TODO (later) make a method to crop two images according to their shared dimensions
+        crop_shape = get_common_crop_shape([im_arr_a, im_arr_b], square=False)
+        im_arr_a = cropbox_central_shape(im_arr_a, crop_shape)
+        im_arr_b = cropbox_central_shape(im_arr_b, crop_shape)
+
+        if mask_text:
+            bitmask = build_bitmask_to_size(text=mask_text, fontfile=BOOKMAN, shape=crop_shape)
+        else:
+            bitmask = build_random_text_bitmask(fontfile=BOOKMAN, shape=crop_shape, numchars=1)
+
+        im_arr_a, im_arr_b = simple_bitmask_swap(im_arr_a, im_arr_b, bitmask)
+
+        if USE_CLEAN_COPY:
+            # Reset for next iteration
+            im_arr_b = im_arr.copy()
+
+    return im_arr_a
+
+
 def crop_im_arr(im_arr, cropbox_method=None, **kwargs):
     """
-    Crop image np.ndarray according to method passed as parameter.
+    Crop image array according to method passed as parameter.
         If cropbox_method==None, default to tools.cropbox_central_square
 
     :param np.ndarray im_arr:
     :param function cropbox_method:
-    :return:
+    :return np.ndarray:
     """
     if cropbox_method is None:
         cropbox_method = cropbox_central_square
@@ -199,8 +277,7 @@ def cropbox_central_square(im_arr):
     :param np.ndarray im_arr:
     :return tuple(int):
     """
-    s = min(im_arr.shape[:2])
-    return cropbox_central_shape(im_arr, (s, s))
+    return cropbox_central_shape(im_arr, get_array_square_shape(im_arr))
 
 
 def cropbox_off_center_random(im_arr):
@@ -234,7 +311,7 @@ def cropbox_off_center_random(im_arr):
     return jitter_crop_box
 
 
-def cropbox_central_shape(im_arr, crop_shape):
+def cropbox_central_shape(im_arr, crop_shape=None):
     """
     Return the cropbox for an image, where you crop from the center for a given shape
 
@@ -242,6 +319,7 @@ def cropbox_central_shape(im_arr, crop_shape):
     :param tuple(int) crop_shape:   (w, h) of the desired crop shape
     :return tuple(int):
     """
+    crop_shape = get_array_square_shape(im_arr) if not crop_shape else crop_shape
     crop_w, crop_h = crop_shape
     img_w, img_h = get_np_array_shape(im_arr)
     left = (img_w - crop_w) // 2
@@ -250,3 +328,27 @@ def cropbox_central_shape(im_arr, crop_shape):
     bottom = top + crop_h
     central_crop_box = (left, top, right, bottom)
     return central_crop_box
+
+CROPBOX_OPERATIONS = [
+    cropbox_off_center_random,
+    cropbox_central_square
+]
+
+# TODO assign the transforms a cost
+SOURCE_TRANSFORMS = [
+    (source_flip_lr,),
+    (source_flip_ud,),
+    (source_rotate_180,),
+    (source_crop_random,),      # Randomly select a cropping method
+    (source_slice_random,),     # Randomly select a slicing method
+    (crop_offcrop_recursive,)   # Special method
+]
+
+SLICE_OPERATIONS = [
+    slice_image_resample_reverse,
+    slice_image_resample_random,
+    img_resample_stack_vertical,
+    img_resample_stack_horizontal,
+    img_resample_grid
+]
+

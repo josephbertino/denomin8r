@@ -1,8 +1,10 @@
-# minimalist_collage
-Generative Art Algorithm
+# denomin8r
+Generative Art Algorithms
+Public Art Project
 
 Library Import Flow
-tools
+util
  -> mask_ops
  -> source_ops
-     -> util
+     -> tool
+

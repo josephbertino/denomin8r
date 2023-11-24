@@ -37,13 +37,13 @@ def main(mask:str=MASK,
         if off_cropped:
             # Off-crop each image with a simple random bitmask and jitter
             # TODO move this transformation to the "Chaos Source Transforms", and it does not necessarily have to apply to BOTH sources
-            image1 = util.recursive_off_crop(image1)
-            image2 = util.recursive_off_crop(image2)
-            crop_shape = util.get_crop_shape([image1, image2], square=True)
+            image1 = util.crop_offcrop_recursive(image1)
+            image2 = util.crop_offcrop_recursive(image2)
+            crop_shape = util.get_common_crop_shape([image1, image2], square=True)
             image1 = util.cropbox_central_shape(image1, crop_shape)
             image2 = util.cropbox_central_shape(image2, crop_shape)
         else:
-            crop_shape = util.get_crop_shape([image1, image2], square=True)
+            crop_shape = util.get_common_crop_shape([image1, image2], square=True)
             image1 = util.random_transform(image1, crop_shape)
             image2 = util.random_transform(image2, crop_shape)
 
@@ -153,8 +153,13 @@ EXHIBIT IDEAS
 + (what else can users submit?)
 + Sell merch
 
-3) 
+3) NYPD
 + The inception of Denomin8r: Off-Cropping and overlap-masking the same textured source with itself (flowers, fire, water)
 
 
+'''
+
+'''
+Source Ideas
+NYPD Logos and Imagery
 '''

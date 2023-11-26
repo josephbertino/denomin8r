@@ -26,44 +26,51 @@ Grid:
     I like what happens when dup_n is unequal between rotation slicing. 
     Produces cool effects with the rectangles.
 """
-im_arr = load_sources(latest=False, n=1, specific_srcs=[])
-im_arr = im_arr[0]
-
-im_arrs = classic_D_swap_random()
-for a in im_arrs:
-    Image.fromarray(a).show()
-
 # TODO Big Project 1: "Chaos Source Transforms"
-def chaos_source_transform(img):
+SOURCE_TRANSFORM_BUDGET = 9
+SOURCE_TRANSFORMS = [
+    (source_flip_lr, 1),
+    (source_flip_ud, 1),
+    (source_rotate_180, 2),
+    (source_crop_random, 3),  # Randomly select a cropping method
+    (source_slice_random, 6),  # Randomly select a slicing method
+    (crop_offcrop_recursive, 9)  # Special method
+]
+
+def chaos_source_transform(im_arr):
     """
     Take an image and run it through a series of transformations, then return the modified image.
         The number and order of transformations will be determined by chance, but there is a
         "cost" to each transformation, and once the "transform budget" is spent, abort and return.
-    :param img:
-    :return:
-    """
-    """
-        Apply a series of transforms to an image, determined by chance
-            + Flip over vertical axis
-            + Crop vs. Resize
 
-        :param np.ndarray im_arr:
-        :param (int, int) shape:    width, height
-        :return np.ndarray:
+    :param np.ndarray im_arr:
+    :return np.ndarray, operation_list:
     """
+    budget = SOURCE_TRANSFORM_BUDGET
+    operations = 0
+    op_list = []
+    random.shuffle(SOURCE_TRANSFORMS)
+    for transform, cost in SOURCE_TRANSFORMS:
+        if cost > budget:
+            # This operation is too complex
+            continue
+        im_arr = transform(im_arr)
+        op_list.append(transform.__name__)
+        budget -= cost
+        operations += 1
+        if operations == 3 or budget < 1 or random.random() > 0.66:
+            break
+    return im_arr, op_list, 9 - budget
 
-    # TODO maintain a data structure (list?) of all the transform methods, and during chaos_source_transform, pick from the list.
-    # TODO dont transform to Image.Image until after the bitmask is applied and you are ready to save
-    # TODO take care of all TODOs not in main.py
-    # TODO play around with util.slice_image_resample_random
-    # TODO TEST EACH METHOD IN UTIL & SOURCE_OPS
+n = 10
+im_arrs, filenames = load_sources(latest=False, n=n, specific_srcs=[])
+for im_arr, filename in zip(im_arrs, filenames):
+    print(f'{filename}')
+    new_im_arr, op_list, spent = chaos_source_transform(im_arr)
+    img = Image.fromarray(new_im_arr)
+    img = draw_test_params(img, spent=spent, op_list=op_list)
+    img.show()
 
-# I'm thinking that I should first transform the image to an np.array,
-# and all the transforms would be really fast bc they are numpy operations,
-# and finally at the end transform it back to an Image.Image
-# Start standardizing the verbiage "source" for an image that goes into the collage
-# and "mask" for the template for swapping slices between sources.
-# I want each method to be associated with a "cost" or "price"
-# Perhaps I can create a list of tuples such that (method, cost) is the tuple,
-# That way I don't have to turn the methods into classes
-# I mean I CAN see a way to make a class that does this. class chaos_source_transform will be initialized with the source and have a default budget, and there will be a method that runs through all the ... nah my way is easier. I just want to get the shit off the ground
+# TODO profile each source transform method against a control image to get a better idea of what cost to assign them. This includes each method in source_slice random and source_crop_random
+# TODO play around with util.slice_image_resample_random
+# TODO TEST EACH METHOD IN UTIL & SOURCE_OPS

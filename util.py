@@ -74,7 +74,7 @@ def load_sources(latest=True, n=2, specific_srcs=None):
 
     source_images = [Image.open(os.path.join(SOURCE_DIR, f)) for f in filenames]
     source_image_arrays = [np.array(img) for img in source_images]
-    return source_image_arrays
+    return source_image_arrays, filenames
 
 
 def fn_runner(func):
@@ -199,7 +199,7 @@ def draw_test_params(img, **kwargs):
 
     position = (math.floor(.05 * w), math.floor(.95 * h))
     pos_left, pos_top = position
-    fontsize = math.floor(h * .03)
+    fontsize = math.floor(h * .02)
     fontfile = os.path.join(FONT_DIR, BOOKMAN)
     font_obj = ImageFont.truetype(fontfile, fontsize)
 
@@ -225,7 +225,7 @@ def classic_D_swap_random(im_arr_1=None, im_arr_2=None):
     :param np.ndarray im_arr_2:
     :return np.ndarray, np.ndarray:
     """
-    im_arrs = load_sources(latest=False, n=2)
+    im_arrs, _ = load_sources(latest=False, n=2)
     if im_arr_1 is None:
         im_arr_1 = im_arrs[0]
     if im_arr_2 is None:

@@ -63,7 +63,7 @@ def get_array_square_shape(im_arr):
     :param np.ndarray im_arr:
     :return tuple(int):
     """
-    return min(im_arr.shape[:2])
+    return [min(im_arr.shape[:2])] * 2
 
 
 def build_random_string(k=1):

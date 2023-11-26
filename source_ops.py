@@ -42,7 +42,7 @@ def source_crop_random(im_arr):
     :return np.ndarray:
     """
     cropbox_method = random.choice(CROPBOX_OPERATIONS)
-    cropped_im_arr = crop_im_arr(im_arr=im_arr, cropbox_meth=cropbox_method)
+    cropped_im_arr = crop_im_arr(im_arr=im_arr, cropbox_method=cropbox_method)
     return cropped_im_arr
 
 
@@ -236,8 +236,8 @@ def crop_offcrop_recursive(im_arr, mask_text:str=None):
 
         # TODO (later) make a method to crop two images according to their shared dimensions
         crop_shape = get_common_crop_shape([im_arr_a, im_arr_b], square=False)
-        im_arr_a = cropbox_central_shape(im_arr_a, crop_shape)
-        im_arr_b = cropbox_central_shape(im_arr_b, crop_shape)
+        im_arr_a = crop_im_arr(im_arr_a, cropbox_central_shape, crop_shape=crop_shape)
+        im_arr_b = crop_im_arr(im_arr_b, cropbox_central_shape, crop_shape=crop_shape)
 
         if mask_text:
             bitmask = build_bitmask_to_size(text=mask_text, fontfile=BOOKMAN, shape=crop_shape)
@@ -332,16 +332,6 @@ def cropbox_central_shape(im_arr, crop_shape=None):
 CROPBOX_OPERATIONS = [
     cropbox_off_center_random,
     cropbox_central_square
-]
-
-# TODO assign the transforms a cost
-SOURCE_TRANSFORMS = [
-    (source_flip_lr,),
-    (source_flip_ud,),
-    (source_rotate_180,),
-    (source_crop_random,),      # Randomly select a cropping method
-    (source_slice_random,),     # Randomly select a slicing method
-    (crop_offcrop_recursive,)   # Special method
 ]
 
 SLICE_OPERATIONS = [

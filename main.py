@@ -1,6 +1,4 @@
-from PIL import Image
-import util
-import uuid
+from util import *
 from enum import Enum
 from util import BitmaskMethod
 
@@ -32,34 +30,26 @@ def main(mask:str=MASK,
     for x in range(iters):
 
         # Get Source Images
-        image1, image2 = util.load_sources(latest=use_latest, specific_srcs=spec_srcs)
+        imgs, filenames = load_sources(latest=use_latest, specific_srcs=spec_srcs)
+        image1, image2 = imgs
 
-        if off_cropped:
-            # Off-crop each image with a simple random bitmask and jitter
-            # TODO move this transformation to the "Chaos Source Transforms", and it does not necessarily have to apply to BOTH sources
-            image1 = util.crop_offcrop_recursive(image1)
-            image2 = util.crop_offcrop_recursive(image2)
-            crop_shape = util.get_common_crop_shape([image1, image2], square=True)
-            image1 = util.cropbox_central_shape(image1, crop_shape)
-            image2 = util.cropbox_central_shape(image2, crop_shape)
-        else:
-            crop_shape = util.get_common_crop_shape([image1, image2], square=True)
-            image1 = util.random_transform(image1, crop_shape)
-            image2 = util.random_transform(image2, crop_shape)
+        crop_shape = get_common_crop_shape([image1, image2], square=True)
+        image1 = crop_im_arr(image1, cropbox_central_shape, crop_shape=crop_shape)
+        image2 = crop_im_arr(image2, cropbox_central_shape, crop_shape=crop_shape)
 
         # Generate Bitmask
         match bitmask_method:
             case BitmaskMethod.BITMASK_IMG:
                 mask_img = mask_img.resize(crop_shape)
-                bitmask = util.make_bitmask_from_bw_image(mask_img)
+                bitmask = make_bitmask_from_bw_image(mask_img)
             case BitmaskMethod.STATIC_TEXT:
-                bitmask = util.build_bitmask_to_size(text=text, fontfile=util.BOOKMAN, shape=crop_shape, kern_rate=kern_rate)
+                bitmask = build_bitmask_to_size(text=text, fontfile=BOOKMAN, shape=crop_shape, kern_rate=kern_rate)
             case BitmaskMethod.RANDOM_TEXT:
-                bitmask = util.build_random_text_bitmask(fontfile=util.BOOKMAN, shape=crop_shape)
+                bitmask = build_random_text_bitmask(fontfile=BOOKMAN, shape=crop_shape)
 
         # Apply Bitmask to Source Images
-        collage_A, collage_B = util.simple_bitmask_swap(image1, image2, bitmask)
-        util.save_images_from_arrays([collage_A, collage_B], draw_handle=draw_handle)
+        collage_A, collage_B = simple_bitmask_swap(image1, image2, bitmask)
+        save_images_from_arrays([collage_A, collage_B], draw_handle=draw_handle)
 
 '''Chaos Source Transforms'''
 # TODO Big Project 1: "Chaos Source Transforms". Includes Off-cropping, rotating, cropping, slice transformations, flipping, & resizing. Of course, finish off with a stamp.
@@ -112,8 +102,8 @@ def main(mask:str=MASK,
 
 
 if __name__ == '__main__':
-    util.prep()
-    util.fn_runner(main)
+    prep()
+    fn_runner(main)
 
 '''
 Big Goals

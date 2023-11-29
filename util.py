@@ -256,3 +256,50 @@ def save_images_from_arrays(im_arrs, draw_handle):
             img = draw_handle_on_img(img)
 
         img.save(f'{random_id}_{i}.jpg')
+
+SOURCE_TRANSFORM_BUDGET = 3
+
+CHEAP_TRANSFORMS = [
+    # list((operation, cost))
+    (source_flip_lr, 1),
+    (source_flip_ud, 1),
+    (source_crop_random, 1),  # Randomly select a cropping method
+    (source_rotate_180, 1),
+    (source_slice_random, 2),  # Randomly select a slicing method
+]
+
+EXPENSIVE_TRANSFORMS = [
+    crop_offcrop_recursive
+]
+
+
+def chaos_source_transform(im_arr):
+    """
+    Take an image and run it through a series of transformations, then return the modified image.
+        The number and order of transformations will be determined by chance, but there is a
+        "cost" to each transformation, and once the "transform budget" is spent, abort and return.
+
+    :param np.ndarray im_arr:
+    :return np.ndarray, operation_list:
+    """
+    budget = SOURCE_TRANSFORM_BUDGET
+    operations = 0
+    op_list = []
+    random.shuffle(CHEAP_TRANSFORMS)
+    for transform, cost in CHEAP_TRANSFORMS:
+        if cost > budget:
+            # This operation is too complex
+            continue
+        im_arr = transform(im_arr)
+        op_list.append(transform.__name__)
+        budget -= cost
+        operations += 1
+        if operations == 3 or budget < 1 or random.random() > 0.66:
+            break
+
+    if random.random() < 0.125:
+        transform_op = random.choice(EXPENSIVE_TRANSFORMS)
+        im_arr = transform_op(im_arr)
+        op_list.append(transform_op.__name__)
+
+    return im_arr, op_list

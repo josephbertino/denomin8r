@@ -1,5 +1,9 @@
 """
 Library module of all methods related to transforing a source
+
+Notes:
+    1) Please try to enforce the standard where source transform method signatures have 'im_arr'
+        as their first parameter, and all other parameters are kwargs with default values
 """
 from mask_ops import *
 
@@ -60,19 +64,7 @@ def source_slice_random(im_arr):
     method_name = slice_method.__name__
     logger.info(f"Implementing SLICE method {method_name}")
 
-    arg_names, _, _ = get_sig_details(slice_method)
-    args = []
-    for name in arg_names:
-        if name == 'im_arr':
-            args.append(im_arr)
-        elif 'num_dups' in name:
-            args.append(random.choice(range(MIN_DUPS, MAX_DUPS+1)))
-        elif 'num_slices' in name:
-            args.append(random.choice(range(2, 31)))
-        else:
-            args.append(None)
-
-    sliced_im_arr = slice_method(*args)
+    sliced_im_arr = slice_method(im_arr)
     return sliced_im_arr
 
 
@@ -113,6 +105,7 @@ def slice_image_uniform(im_arr, num_slices=None):
     :return np.ndarray:         Array of image strips, len() == num_slices
     """
     num_slices = num_slices if num_slices else 2 ** random.choice(range(1, 6))
+
     w, h = get_np_array_shape(im_arr)
     slice_width = math.ceil(w / num_slices)
     slices = []
@@ -130,6 +123,8 @@ def slice_image_resample_random(im_arr, num_slices=None):
     :param int num_slices:      Number of slices to generate
     :return np.ndarray:
     """
+    num_slices = num_slices if num_slices else 2 ** random.choice(range(1, 6))
+
     slices = slice_image_uniform(im_arr, num_slices)
     random.shuffle(slices)
     return np.hstack(slices)
@@ -143,12 +138,14 @@ def slice_image_resample_reverse(im_arr, num_slices=None):
     :param int num_slices:               Number of slices to generate
     :return np.ndarray:
     """
+    num_slices = num_slices if num_slices else 2 ** random.choice(range(1, 6))
+
     slices = slice_image_uniform(im_arr, num_slices)
     slices = slices[::-1]
     return np.hstack(slices)
 
 
-def slice_resample_image_vertical(im_arr, num_dups, num_slices):
+def slice_resample_image_vertical(im_arr, num_dups=None, num_slices=None):
     """
     Slice up image into vertical strips and reorder strips
         to form <num_dups> samples of original image
@@ -158,6 +155,9 @@ def slice_resample_image_vertical(im_arr, num_dups, num_slices):
     :param num_slices:          Number of slices to generate
     :return np.ndarray:
     """
+    num_slices = num_slices if num_slices else 2 ** random.choice(range(1, 6))
+    num_dups = num_dups if num_dups else random.choice(range(2,8))
+
     slices = slice_image_uniform(im_arr, num_slices)
     stack = []
     for dup_i in range(num_dups):
@@ -165,7 +165,7 @@ def slice_resample_image_vertical(im_arr, num_dups, num_slices):
     return np.hstack(stack)
 
 
-def img_resample_stack_vertical(im_arr, num_dups, num_slices_per_dup):
+def img_resample_stack_vertical(im_arr, num_dups=None, num_slices_per_dup=None):
     """
     Reorder vertical slices of an image into a stack of duplicates via uniform sampling
 
@@ -174,12 +174,15 @@ def img_resample_stack_vertical(im_arr, num_dups, num_slices_per_dup):
     :param num_slices_per_dup:
     :return np.ndarray:
     """
+    num_dups = num_dups if num_dups else random.choice(range(2,8))
+    num_slices_per_dup = num_slices_per_dup if num_slices_per_dup else 2 ** random.choice(range(1, 6))
+
     num_slices = num_dups * num_slices_per_dup
     duped_im_arr = slice_resample_image_vertical(im_arr, num_dups, num_slices)
     return duped_im_arr
 
 
-def img_resample_stack_horizontal(im_arr, num_dups, num_slices_per_dup):
+def img_resample_stack_horizontal(im_arr, num_dups=None, num_slices_per_dup=None):
     """
     Reorder horizontal slices of an image into a stack of duplicates of the original, via uniform sampling
 
@@ -188,6 +191,9 @@ def img_resample_stack_horizontal(im_arr, num_dups, num_slices_per_dup):
     :param num_slices_per_dup:
     :return np.ndarray:
     """
+    num_dups = num_dups if num_dups else random.choice(range(2,8))
+    num_slices_per_dup = num_slices_per_dup if num_slices_per_dup else 2 ** random.choice(range(1, 6))
+
     num_slices = num_dups * num_slices_per_dup
     rotated_im_arr = np.rot90(m=im_arr, k=1)    # 90
     duped_rotated_im_arr = slice_resample_image_vertical(rotated_im_arr, num_dups, num_slices)
@@ -195,7 +201,7 @@ def img_resample_stack_horizontal(im_arr, num_dups, num_slices_per_dup):
     return final_im_arr
 
 
-def img_resample_grid(im_arr, num_dups_vert, num_dups_hor, num_slices_per_dup):
+def img_resample_grid(im_arr, num_dups_vert=None, num_dups_hor=None, num_slices_per_dup=None):
     """
     Resample crisscrossed slices of an image into a grid of duplicates via uniform sampling
 
@@ -205,6 +211,10 @@ def img_resample_grid(im_arr, num_dups_vert, num_dups_hor, num_slices_per_dup):
     :param num_slices_per_dup:
     :return np.ndarray:
     """
+    num_dups_vert = num_dups_vert if num_dups_vert else random.choice(range(2,8))
+    num_dups_hor = num_dups_hor if num_dups_hor else random.choice(range(2, 8))
+    num_slices_per_dup = num_slices_per_dup if num_slices_per_dup else 2 ** random.choice(range(1, 6))
+
     num_slices_vert = num_dups_vert * num_slices_per_dup
     duped_im_arr = slice_resample_image_vertical(im_arr, num_dups_vert, num_slices_vert)
     rotated_duped_im_arr = np.rot90(m=duped_im_arr, k=1)     # 90

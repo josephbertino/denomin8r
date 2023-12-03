@@ -257,21 +257,6 @@ def save_images_from_arrays(im_arrs, draw_handle):
 
         img.save(f'{random_id}_{i}.jpg')
 
-SOURCE_TRANSFORM_BUDGET = 3
-
-CHEAP_TRANSFORMS = [
-    # list((operation, cost))
-    (source_flip_lr, 1),
-    (source_flip_ud, 1),
-    (source_crop_random, 1),  # Randomly select a cropping method
-    (source_rotate_180, 1),
-    (source_slice_random, 2),  # Randomly select a slicing method
-]
-
-EXPENSIVE_TRANSFORMS = [
-    crop_offcrop_recursive
-]
-
 
 def chaos_source_transform(im_arr):
     """

@@ -58,7 +58,6 @@ def main(mask:str=MASK,
 # TODO Slice Transform: flip them
 # TODO Slice Transform: swap them between images
 # TODO Phase a whole image so it spills over to the other side (horizontally or vertically)
-# TODO util to make gifs of sequence images?
 
 '''Masks'''
 # TODO experiment with ImageFont.getmask() for making a bitmask
@@ -68,7 +67,6 @@ def main(mask:str=MASK,
 # TODO swap 2 masks across 2 pictures. Swap X stamps across X pictures
 # TODO as a joke be able to add watermarks to my collages...the watermarks are bitmasked
 # TODO make a method that can crop from center smaller and smaller, using the same char "D" or "O" to produce a tunnel effect
-
 
 '''Text'''
 # TODO allow for line breaks in the mask text
@@ -89,8 +87,8 @@ def main(mask:str=MASK,
 # TODO for NFTs... start coming up with the concept of "Rare" sources. e.g. non-D or non-8's are extremely rare and aberrant
 # TODO autogenerate posts daily so I no longer have to lol
 
-
 '''Uncategorized'''
+# TODO util to make gifs of sequence images?
 # TODO make logo for PUSH
 # TODO Make Totem pole with different heads. Will require to put all portrait sources into separate folder, thus organize sources better. util.img_totem_stack(dupn_h, spd). Heads include APHEX TWIN, JEFFREY EPSTEIN, Artist's faces, recognizeable faces mixed with obscure faces, totems of people we SHOULD admire and adore but unfortunately dont know all that well
 # TODO random transform of the bitmask! (rotation, tesselation, resizing (stretching) the text_image then converting to bitmask, rather than expanding the bitmask with whitespace. This will fuck with the proportions of the mask, which is cool)

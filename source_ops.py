@@ -6,6 +6,8 @@ Notes:
         as their first parameter, and all other parameters are kwargs with default values
 """
 from mask_ops import *
+from tools import slice_up_array_uniform, slice_resample_array_vertical
+
 
 # Source Transforms. All must accept only the image np.ndarray, and return an np.ndarray
 def source_flip_lr(im_arr):
@@ -53,20 +55,6 @@ def source_crop_random(im_arr):
 MIN_DUPS = 2
 MAX_DUPS = 7
 
-def source_slice_random(im_arr):
-    """
-    Apply slice-duping to image array with a randomly-selected method
-
-    :param np.ndarray im_arr:
-    :return np.ndarray:
-    """
-    slice_method = random.choice(SLICE_OPERATIONS)
-    method_name = slice_method.__name__
-    logger.info(f"Implementing SLICE method {method_name}")
-
-    sliced_im_arr = slice_method(im_arr)
-    return sliced_im_arr
-
 
 def get_common_crop_shape(crop_list, square=True):
     """
@@ -95,26 +83,22 @@ def get_common_crop_shape(crop_list, square=True):
         return w, h
 
 
-def slice_image_uniform(im_arr, num_slices=None):
+def source_slice_random(im_arr):
     """
-    Slice up an image into uniform vertical strips and return an np.ndarray of those slices
-        Number of slices should be a power of 2
+    Apply slice-duping to image array with a randomly-selected method
 
     :param np.ndarray im_arr:
-    :param int num_slices:      Number of slices to generate
-    :return np.ndarray:         Array of image strips, len() == num_slices
+    :return np.ndarray:
     """
-    num_slices = num_slices if num_slices else 2 ** random.choice(range(1, 6))
+    slice_method = random.choice(IMG_RESAMPLE_TRANSFORMS)
+    method_name = slice_method.__name__
+    logger.info(f"Implementing SLICE method {method_name}")
 
-    w, h = get_np_array_shape(im_arr)
-    slice_width = math.ceil(w / num_slices)
-    slices = []
-    for i in range(num_slices):
-        slices.append(im_arr[:, (i * slice_width):((i + 1) * slice_width)])
-    return slices
+    sliced_im_arr = slice_method(im_arr)
+    return sliced_im_arr
 
 
-def slice_image_resample_random(im_arr, num_slices=None):
+def source_resample_random(im_arr, num_slices=None):
     """
     Vertically slice up image and rearrange the slices randomly
         Return image as np.ndarray
@@ -125,12 +109,12 @@ def slice_image_resample_random(im_arr, num_slices=None):
     """
     num_slices = num_slices if num_slices else 2 ** random.choice(range(1, 6))
 
-    slices = slice_image_uniform(im_arr, num_slices)
+    slices = slice_up_array_uniform(im_arr, num_slices)
     random.shuffle(slices)
     return np.hstack(slices)
 
 
-def slice_image_resample_reverse(im_arr, num_slices=None):
+def source_resample_reverse(im_arr, num_slices=None):
     """
     Vertically slice up image and reverse the order
 
@@ -140,32 +124,12 @@ def slice_image_resample_reverse(im_arr, num_slices=None):
     """
     num_slices = num_slices if num_slices else 2 ** random.choice(range(1, 6))
 
-    slices = slice_image_uniform(im_arr, num_slices)
+    slices = slice_up_array_uniform(im_arr, num_slices)
     slices = slices[::-1]
     return np.hstack(slices)
 
 
-def slice_resample_image_vertical(im_arr, num_dups=None, num_slices=None):
-    """
-    Slice up image into vertical strips and reorder strips
-        to form <num_dups> samples of original image
-
-    :param np.ndarray im_arr:
-    :param num_dups:
-    :param num_slices:          Number of slices to generate
-    :return np.ndarray:
-    """
-    num_slices = num_slices if num_slices else 2 ** random.choice(range(1, 6))
-    num_dups = num_dups if num_dups else random.choice(range(2,8))
-
-    slices = slice_image_uniform(im_arr, num_slices)
-    stack = []
-    for dup_i in range(num_dups):
-        stack.extend(slices[dup_i::num_dups])
-    return np.hstack(stack)
-
-
-def img_resample_stack_vertical(im_arr, num_dups=None, num_slices_per_dup=None):
+def source_resample_stack_vertical(im_arr, num_dups=None, num_slices_per_dup=None):
     """
     Reorder vertical slices of an image into a stack of duplicates via uniform sampling
 
@@ -178,11 +142,11 @@ def img_resample_stack_vertical(im_arr, num_dups=None, num_slices_per_dup=None):
     num_slices_per_dup = num_slices_per_dup if num_slices_per_dup else 2 ** random.choice(range(1, 6))
 
     num_slices = num_dups * num_slices_per_dup
-    duped_im_arr = slice_resample_image_vertical(im_arr, num_dups, num_slices)
+    duped_im_arr = slice_resample_array_vertical(im_arr, num_dups, num_slices)
     return duped_im_arr
 
 
-def img_resample_stack_horizontal(im_arr, num_dups=None, num_slices_per_dup=None):
+def source_resample_stack_horizontal(im_arr, num_dups=None, num_slices_per_dup=None):
     """
     Reorder horizontal slices of an image into a stack of duplicates of the original, via uniform sampling
 
@@ -196,12 +160,12 @@ def img_resample_stack_horizontal(im_arr, num_dups=None, num_slices_per_dup=None
 
     num_slices = num_dups * num_slices_per_dup
     rotated_im_arr = np.rot90(m=im_arr, k=1)    # 90
-    duped_rotated_im_arr = slice_resample_image_vertical(rotated_im_arr, num_dups, num_slices)
+    duped_rotated_im_arr = slice_resample_array_vertical(rotated_im_arr, num_dups, num_slices)
     final_im_arr = np.rot90(m=duped_rotated_im_arr, k=3)    # 270
     return final_im_arr
 
 
-def img_resample_grid(im_arr, num_dups_vert=None, num_dups_hor=None, num_slices_per_dup=None):
+def source_resample_grid(im_arr, num_dups_vert=None, num_dups_hor=None, num_slices_per_dup=None):
     """
     Resample crisscrossed slices of an image into a grid of duplicates via uniform sampling
 
@@ -216,16 +180,16 @@ def img_resample_grid(im_arr, num_dups_vert=None, num_dups_hor=None, num_slices_
     num_slices_per_dup = num_slices_per_dup if num_slices_per_dup else 2 ** random.choice(range(1, 6))
 
     num_slices_vert = num_dups_vert * num_slices_per_dup
-    duped_im_arr = slice_resample_image_vertical(im_arr, num_dups_vert, num_slices_vert)
+    duped_im_arr = slice_resample_array_vertical(im_arr, num_dups_vert, num_slices_vert)
     rotated_duped_im_arr = np.rot90(m=duped_im_arr, k=1)     # 90
 
     num_slices_hor = num_dups_hor * num_slices_per_dup
-    grid_im_arr = slice_resample_image_vertical(rotated_duped_im_arr, num_dups_hor, num_slices_hor)
+    grid_im_arr = slice_resample_array_vertical(rotated_duped_im_arr, num_dups_hor, num_slices_hor)
     final_im_arr = np.rot90(m=grid_im_arr, k=3)     # 270
     return final_im_arr
 
 
-def crop_offcrop_recursive(im_arr, mask_text:str=None):
+def source_offcrop_recursive(im_arr, mask_text:str=None):
     """
     Recursively off-crop an image with itself using a bitmask
 
@@ -279,7 +243,6 @@ def crop_im_arr(im_arr, cropbox_method=None, **kwargs):
     return im_arr[top:bottom, left:right]
 
 
-# Methods that return cropboxes
 def cropbox_central_square(im_arr):
     """
     Return cropbox for max-square within image array, centralized
@@ -339,16 +302,37 @@ def cropbox_central_shape(im_arr, crop_shape=None):
     central_crop_box = (left, top, right, bottom)
     return central_crop_box
 
-CROPBOX_OPERATIONS = [
-    cropbox_off_center_random,
-    cropbox_central_square
+
+################################################
+
+SOURCE_TRANSFORM_BUDGET = 3
+
+# TODO is there a way to "label" a transform method automatically so I don't have to maintain these lists? I imagine some sort of Class using an Enum attribute...but maybe there is something smarter
+
+CROPBOX_OPERATIONS = [              # relative time, out of 100
+    cropbox_off_center_random,      # 20
+    cropbox_central_square          # 80
 ]
 
-SLICE_OPERATIONS = [
-    slice_image_resample_reverse,
-    slice_image_resample_random,
-    img_resample_stack_vertical,
-    img_resample_stack_horizontal,
-    img_resample_grid
+IMG_RESAMPLE_TRANSFORMS = [         # relative cost, summing to 100
+    source_resample_reverse,           # 5
+    source_resample_random,            # 5
+    source_resample_stack_vertical,    # 10
+    source_resample_stack_horizontal,  # 35
+    source_resample_grid               # 45
 ]
 
+SOURCE_DIRECT_TRANSFORMS = [
+    source_flip_lr,
+    source_flip_ud,
+    source_rotate_180,
+]
+
+SOURCE_RANDOM_TRANSFORMS = [
+    source_crop_random,
+    source_slice_random,
+]
+
+EXPENSIVE_TRANSFORMS = [
+    source_offcrop_recursive
+]

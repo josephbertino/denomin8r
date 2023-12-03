@@ -38,10 +38,26 @@ import time
 
 def fn_timer(fn, im_arr):
     start = time.perf_counter_ns()
-    for _ in range(10):
+    for _ in range(40):
         fn(im_arr)
     end = time.perf_counter_ns()
     return end - start
+
+
+def plot_bars(indices, values):
+    bars = plt.bar(indices, values, color='g', width=0.25, edgecolor='grey')
+    plt.xlabel('Transforms', fontweight='bold', fontsize=15)
+    plt.xticks(rotation=90)
+    plt.ylabel('Relative Time (%)', fontweight='bold', fontsize=15)
+    plt.subplots_adjust(bottom=0.4)
+    plt.bar_label(bars)
+    plt.show()
+
+
+def normalize_times(fn_times):
+    s = sum(fn_times)
+    norm_times = list(map(lambda x: (x / s) * 100, fn_times))
+    return norm_times
 
 
 def run_for_all_fns():
@@ -63,12 +79,7 @@ def run_for_all_fns():
     name_times = sorted(name_times, key=lambda x: x[1])
 
     fn_names, fn_times = list(zip(*name_times))
-    plt.bar(fn_names, fn_times, color='g', width=0.25, edgecolor='grey')
-    plt.xlabel('Transforms', fontweight='bold', fontsize=15)
-    plt.xticks(rotation=45)
-    plt.ylabel('Seconds', fontweight='bold', fontsize=15)
-    plt.subplots_adjust(bottom=1)
-    plt.show()
+    plot_bars(fn_names, fn_times)
 
 
 def run_for_all_fns_2():
@@ -77,21 +88,29 @@ def run_for_all_fns_2():
     im_arr = im_arrs[0]
 
     name_times = []
-    for fn, cost in CHEAP_TRANSFORMS:
+    for fn in CROPBOX_OPERATIONS:
         total_time = fn_timer(fn, im_arr)
         name_times.append((fn.__name__, total_time))
     name_times = sorted(name_times, key=lambda x: x[1])
-
     fn_names, fn_times = list(zip(*name_times))
-    plt.bar(fn_names, fn_times, color='g', width=0.25, edgecolor='grey')
-    plt.xlabel('Transforms', fontweight='bold', fontsize=15)
-    plt.xticks(rotation=45)
-    plt.ylabel('Seconds', fontweight='bold', fontsize=15)
-    plt.subplots_adjust(bottom=0.15)
-    plt.show()
+    norm_times = normalize_times(fn_times)
+    plot_bars(fn_names, norm_times)
+
 
 run_for_all_fns_2()
 
 # TODO Perform Timer analysis on all individual slicing and cropping methods
 # TODO put profiler methods in utils
 # TODO Play around and Test EACH METHOD IN UTIL & SOURCE_OPS
+
+'''
+What am I trying to accomplish?
+Assigning relative costs to each method
+And coming up with a method whereby, once I add new methods, the relative costs re-calculate
+So I'll need the following
+[] a comprehensive list of ALL methods that are considered SOURCE_TRANSFORMS...no middlemen or utility methods, the actual final product
+[] Not only a method, but a way to identify methods as SOURCE transforms, so that if I added a new method I can re-process all relative costs
+    + Could be simply any source_op method that has as its first argument "im_arr"'
+    + I think that works for now, for me. I can always enhance the complexity of this later, by adding some super smart way of categorizing methods
+[] The the chaos_source_transforms method will automatically be able to pick up the new costs for all new methods when running
+'''

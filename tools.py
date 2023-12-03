@@ -7,6 +7,8 @@ import string
 import inspect
 import random
 import logging
+
+import numpy
 import numpy as np
 from PIL import Image
 from enum import IntEnum, auto
@@ -56,14 +58,14 @@ def get_sig_details(func):
         return [names, types, defaults]
 
 
-def get_array_square_shape(im_arr):
+def get_array_square_shape(arr):
     """
     Return shape (w, h) where both dimensions equal the shorter of the array's 2 sides, to describe a square
 
-    :param np.ndarray im_arr:
+    :param np.ndarray arr:
     :return tuple(int):
     """
-    return [min(im_arr.shape[:2])] * 2
+    return [min(arr.shape[:2])] * 2
 
 
 def build_random_string(k=1):
@@ -172,11 +174,50 @@ def darken_rgb(rgb):
     return darker
 
 
-def get_np_array_shape(im_arr):
+def get_np_array_shape(arr):
     """
     Return dimensions of np.ndarray as (w, h)
 
-    :param np.ndarray im_arr:
+    :param np.ndarray arr:
     :return (int, int):         width, height
     """
-    return tuple(list(im_arr.shape[:2])[::-1])
+    return tuple(list(arr.shape[:2])[::-1])
+
+
+def slice_up_array_uniform(arr, num_slices=None):
+    """
+    Slice up an image into uniform vertical strips and return an np.ndarray of those slices
+        Number of slices should be a power of 2
+
+    :param np.ndarray arr:      Array
+    :param int num_slices:      Number of slices to generate
+    :return np.ndarray:         Array of <num_slices> strips
+    """
+    num_slices = num_slices if num_slices else 2 ** random.choice(range(1, 6))
+
+    w, h = get_np_array_shape(arr)
+    slice_width = math.ceil(w / num_slices)
+    slices = []
+    for i in range(num_slices):
+        slices.append(arr[:, (i * slice_width):((i + 1) * slice_width)])
+    return slices
+
+
+def slice_resample_array_vertical(arr, num_dups=None, num_slices=None):
+    """
+    Slice up array into vertical strips and reorder strips
+        to form <num_dups> samples of original image
+
+    :param np.ndarray arr:
+    :param num_dups:
+    :param num_slices:          Number of slices to generate
+    :return np.ndarray:
+    """
+    num_slices = num_slices if num_slices else 2 ** random.choice(range(1, 6))
+    num_dups = num_dups if num_dups else random.choice(range(2,8))
+
+    slices = slice_up_array_uniform(arr, num_slices)
+    stack = []
+    for dup_i in range(num_dups):
+        stack.extend(slices[dup_i::num_dups])
+    return np.hstack(stack)

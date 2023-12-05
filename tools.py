@@ -7,12 +7,14 @@ import string
 import inspect
 import random
 import logging
-
-import numpy
+import time
 import numpy as np
 from PIL import Image
 from enum import IntEnum, auto
 
+from matplotlib import pyplot as plt
+
+from util import load_sources
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -221,3 +223,65 @@ def slice_resample_array_vertical(arr, num_dups=None, num_slices=None):
     for dup_i in range(num_dups):
         stack.extend(slices[dup_i::num_dups])
     return np.hstack(stack)
+
+
+def profile_time_source_transform(fn, im_arr):
+    """
+    :param fn:
+    :param im_arr:
+    :return int: Nanoseconds to complete fn
+    """
+    start = time.perf_counter_ns()
+    for _ in range(40):
+        fn(im_arr)
+    end = time.perf_counter_ns()
+    return end - start
+
+
+
+def profile_normalize_times(fn_times):
+    """
+    Given a list of times (in s or ns), return that list with values representing percentage
+        of total time, out of 100
+    :param fn_times:
+    :return:
+    """
+    s = sum(fn_times)
+    norm_times = list(map(lambda x: (x / s) * 100, fn_times))
+    return norm_times
+
+
+def profile_bar_chart(indices, values, index_label, value_label):
+    """
+
+    :param indices:
+    :param values:
+    :param str index_label:
+    :param str value_label:
+    :return:
+    """
+    bars = plt.bar(indices, values, color='g', width=0.25, edgecolor='grey')
+    plt.xlabel(index_label, fontweight='bold', fontsize=15)
+    plt.xticks(rotation=90)
+    plt.ylabel(value_label, fontweight='bold', fontsize=15)
+    plt.subplots_adjust(bottom=0.4)
+    plt.bar_label(bars)
+    plt.show()
+
+
+def profile_and_plot_fns(fn_list):
+    """
+    :param list fn_list:
+    :return:
+    """
+    im_arrs, filenames = load_sources(latest=False, n=1, specific_srcs=['koons2'])
+    im_arr = im_arrs[0]
+
+    name_times = []
+    for fn in fn_list:
+        total_time = profile_time_source_transform(fn, im_arr)
+        name_times.append((fn.__name__, total_time))
+    name_times = sorted(name_times, key=lambda x: x[1])
+    fn_names, fn_times = list(zip(*name_times))
+    norm_times = profile_normalize_times(fn_times)
+    profile_bar_chart(fn_names, norm_times)

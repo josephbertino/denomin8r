@@ -261,30 +261,20 @@ def save_images_from_arrays(im_arrs, draw_handle):
 def chaos_source_transform(im_arr):
     """
     Take an image and run it through a series of transformations, then return the modified image.
-        The number and order of transformations will be determined by chance, but there is a
-        "cost" to each transformation, and once the "transform budget" is spent, abort and return.
+        The number and order of transformations will be determined by chance, but to constrain
+        resources a max of 1 "complex" transform will be performed
 
     :param np.ndarray im_arr:
     :return np.ndarray, operation_list:
     """
-    budget = SOURCE_TRANSFORM_BUDGET
-    operations = 0
+    # Build list of operations
+    transforms = random.sample(SIMPLE_TRANSFORMS, k=2) + random.sample(COMPLEX_TRANSFORMS, k=1)
+    random.shuffle(transforms)
     op_list = []
-    random.shuffle(CHEAP_TRANSFORMS)
-    for transform, cost in CHEAP_TRANSFORMS:
-        if cost > budget:
-            # This operation is too complex
-            continue
+    for transform in transforms:
         im_arr = transform(im_arr)
         op_list.append(transform.__name__)
-        budget -= cost
-        operations += 1
-        if operations == 3 or budget < 1 or random.random() > 0.66:
+        if random.random() > 0.66:
             break
-
-    if random.random() < 0.125:
-        transform_op = random.choice(EXPENSIVE_TRANSFORMS)
-        im_arr = transform_op(im_arr)
-        op_list.append(transform_op.__name__)
 
     return im_arr, op_list

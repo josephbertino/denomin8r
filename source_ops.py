@@ -83,14 +83,14 @@ def get_common_crop_shape(crop_list, square=True):
         return w, h
 
 
-def source_slice_random(im_arr):
+def source_resample_random(im_arr):
     """
     Apply slice-duping to image array with a randomly-selected method
 
     :param np.ndarray im_arr:
     :return np.ndarray:
     """
-    slice_method = random.choice(IMG_RESAMPLE_TRANSFORMS)
+    slice_method = random.choice(RESAMPLE_TRANSFORMS)
     method_name = slice_method.__name__
     logger.info(f"Implementing SLICE method {method_name}")
 
@@ -98,7 +98,7 @@ def source_slice_random(im_arr):
     return sliced_im_arr
 
 
-def source_resample_random(im_arr, num_slices=None):
+def source_resample_shuffle(im_arr, num_slices=None):
     """
     Vertically slice up image and rearrange the slices randomly
         Return image as np.ndarray
@@ -303,36 +303,32 @@ def cropbox_central_shape(im_arr, crop_shape=None):
     return central_crop_box
 
 
-################################################
-
-SOURCE_TRANSFORM_BUDGET = 3
-
-# TODO is there a way to "label" a transform method automatically so I don't have to maintain these lists? I imagine some sort of Class using an Enum attribute...but maybe there is something smarter
-
+# Operations that compute the cropbox of an array
 CROPBOX_OPERATIONS = [              # relative time, out of 100
     cropbox_off_center_random,      # 20
     cropbox_central_square          # 80
 ]
 
-IMG_RESAMPLE_TRANSFORMS = [         # relative cost, summing to 100
+# Operations that slice up and resample an array (e.g. vertical duping)
+RESAMPLE_TRANSFORMS = [                # relative time, summing to 100
     source_resample_reverse,           # 5
-    source_resample_random,            # 5
+    source_resample_shuffle,           # 5
     source_resample_stack_vertical,    # 10
     source_resample_stack_horizontal,  # 35
     source_resample_grid               # 45
 ]
 
-SOURCE_DIRECT_TRANSFORMS = [
+'''
+Grouping Transforms according to visual complexity
+'''
+SIMPLE_TRANSFORMS = [
     source_flip_lr,
     source_flip_ud,
     source_rotate_180,
-]
-
-SOURCE_RANDOM_TRANSFORMS = [
     source_crop_random,
-    source_slice_random,
 ]
 
-EXPENSIVE_TRANSFORMS = [
-    source_offcrop_recursive
+COMPLEX_TRANSFORMS = [
+    source_offcrop_recursive,
+    source_resample_random,
 ]

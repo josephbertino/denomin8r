@@ -99,18 +99,6 @@ def run_for_all_fns_2():
 
 run_for_all_fns_2()
 
-# TODO Perform Timer analysis on all individual slicing and cropping methods
-# TODO put profiler methods in utils
+# TODO put profiler methods in utils, for later
+# TODO tweak chaos_source_transform's parameters
 # TODO Play around and Test EACH METHOD IN UTIL & SOURCE_OPS
-
-'''
-What am I trying to accomplish?
-Assigning relative costs to each method
-And coming up with a method whereby, once I add new methods, the relative costs re-calculate
-So I'll need the following
-[] a comprehensive list of ALL methods that are considered SOURCE_TRANSFORMS...no middlemen or utility methods, the actual final product
-[] Not only a method, but a way to identify methods as SOURCE transforms, so that if I added a new method I can re-process all relative costs
-    + Could be simply any source_op method that has as its first argument "im_arr"'
-    + I think that works for now, for me. I can always enhance the complexity of this later, by adding some super smart way of categorizing methods
-[] The the chaos_source_transforms method will automatically be able to pick up the new costs for all new methods when running
-'''

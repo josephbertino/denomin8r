@@ -6,8 +6,6 @@ Notes:
         as their first parameter, and all other parameters are kwargs with default values
 """
 from mask_ops import *
-from tools import slice_up_array_uniform, slice_resample_array_vertical
-
 
 # Source Transforms. All must accept only the image np.ndarray, and return an np.ndarray
 def source_flip_lr(im_arr):
@@ -28,6 +26,25 @@ def source_flip_ud(im_arr):
     :return np.ndarray:
     """
     return np.flipud(im_arr)
+
+
+def source_phase(im_arr, axis=None, shift=None):
+    """
+    Phase ('roll') an image according to its width or height axes
+    :param np.ndarray im_arr:
+    :param int axis:
+    :param int shift:
+    :return:
+    """
+    if (axis is None) or (axis > 1):
+        # {0: vertically, 1: horizontally}
+        axis = random.choice([0, 1])
+    if shift is None:
+        # shape == (w, h)
+        shape = get_np_array_shape(im_arr)
+        shift = math.floor(random.random() * shape[axis-1])
+
+    return np.roll(im_arr, axis=axis, shift=shift)
 
 
 def source_rotate_180(im_arr):
@@ -326,6 +343,7 @@ SIMPLE_TRANSFORMS = [
     source_flip_ud,
     source_rotate_180,
     source_crop_random,
+    source_phase,
 ]
 
 COMPLEX_TRANSFORMS = [

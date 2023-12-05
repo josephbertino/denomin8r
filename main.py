@@ -53,11 +53,6 @@ def main(mask:str=MASK,
 
 '''Chaos Source Transforms'''
 # TODO Big Project 1: "Chaos Source Transforms". Includes Off-cropping, rotating, cropping, slice transformations, flipping, & resizing. Of course, finish off with a stamp.
-# TODO Slice Transform: Reverse phasing (possibly just a small modification of regular phasing
-# TODO Slice Transform: np.roll the slices
-# TODO Slice Transform: flip them
-# TODO Slice Transform: swap them between images
-# TODO Phase a whole image so it spills over to the other side (horizontally or vertically)
 
 '''Masks'''
 # TODO experiment with ImageFont.getmask() for making a bitmask

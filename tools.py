@@ -14,7 +14,6 @@ from enum import IntEnum, auto
 
 from matplotlib import pyplot as plt
 
-from util import load_sources
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -269,14 +268,12 @@ def profile_bar_chart(indices, values, index_label, value_label):
     plt.show()
 
 
-def profile_and_plot_fns(fn_list):
+def profile_and_plot_fns(fn_list, im_arr):
     """
     :param list fn_list:
+    :param np.ndarray im_arr:
     :return:
     """
-    im_arrs, filenames = load_sources(latest=False, n=1, specific_srcs=['koons2'])
-    im_arr = im_arrs[0]
-
     name_times = []
     for fn in fn_list:
         total_time = profile_time_source_transform(fn, im_arr)
@@ -284,4 +281,4 @@ def profile_and_plot_fns(fn_list):
     name_times = sorted(name_times, key=lambda x: x[1])
     fn_names, fn_times = list(zip(*name_times))
     norm_times = profile_normalize_times(fn_times)
-    profile_bar_chart(fn_names, norm_times)
+    profile_bar_chart(fn_names, norm_times, "Transform", "Relative Time (%)")

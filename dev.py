@@ -28,17 +28,8 @@ Grid:
 
 # TODO Big Project 1: "Chaos Source Transforms"
 
-# TODO do I want to crop here?
-# TODO it should be sufficient to phase max 1 time in each direction
 im_arrs, filenames = load_sources(latest=True, n=10)
-done = []
-for im_arr in im_arrs:
-    for _ in range(1,random.choice(range(2,7))):
-        im_arr = source_phase(im_arr)
-    done.append(im_arr)
-save_images_from_arrays(done, draw_handle=True)
 
-# TODO Phase a whole image so it spills over to the other side (horizontally or vertically)
 # TODO Slice Transform: Reverse phasing (possibly just a small modification of regular phasing
 # TODO Slice Transform: np.roll the slices by incremental (or random) shifts
 # TODO Slice Transform: flip alternating slices

@@ -28,23 +28,49 @@ def source_flip_ud(im_arr):
     return np.flipud(im_arr)
 
 
-def source_phase(im_arr, axis=None, shift=None):
+def source_phase_vert(im_arr, shift=None):
     """
-    Phase ('roll') an image according to its width or height axes
-    :param np.ndarray im_arr:
-    :param int axis:
+    Phase ('roll') an image according along its vertical axis
+
+    :param im_arr:
     :param int shift:
     :return:
     """
-    if (axis is None) or (axis > 1):
-        # {0: vertically, 1: horizontally}
-        axis = random.choice([0, 1])
     if shift is None:
         # shape == (w, h)
         shape = get_np_array_shape(im_arr)
-        shift = math.floor(random.random() * shape[axis-1])
+        shift = math.floor(random.random() * shape[1])
 
-    return np.roll(im_arr, axis=axis, shift=shift)
+    return np.roll(im_arr, axis=0, shift=shift)
+
+
+def source_phase_hor(im_arr, shift=None):
+    """
+    Phase ('roll') an image according along its horizontal axis
+
+    :param im_arr:
+    :param int shift:
+    :return:
+    """
+    if shift is None:
+        # shape == (w, h)
+        shape = get_np_array_shape(im_arr)
+        shift = math.floor(random.random() * shape[0])
+
+    return np.roll(im_arr, axis=1, shift=shift)
+
+
+def source_phase_complete(im_arr):
+    """
+    Phase ('roll') an image according to both width and height axes
+
+    :param np.ndarray im_arr:
+    :return:
+    """
+    im_arr = source_phase_hor(im_arr)
+    im_arr = source_phase_vert(im_arr)
+
+    return im_arr
 
 
 def source_rotate_180(im_arr):
@@ -343,7 +369,8 @@ SIMPLE_TRANSFORMS = [
     source_flip_ud,
     source_rotate_180,
     source_crop_random,
-    source_phase,
+    source_phase_hor,
+    source_phase_vert,
 ]
 
 COMPLEX_TRANSFORMS = [

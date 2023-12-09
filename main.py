@@ -8,7 +8,6 @@ TEXT = 'D'
 BITMASK_METHOD = BitmaskMethod.STATIC_TEXT
 USE_LATEST = True
 DRAW_HANDLE = False
-OFF_CROPPED = False
 KERN_RATE = 1.0
 ITERS = 5
 SPEC_SRCS = []
@@ -19,7 +18,6 @@ def main(mask:str=MASK,
          bitmask_method:Enum=BITMASK_METHOD,
          use_latest:bool=USE_LATEST,
          draw_handle:bool=DRAW_HANDLE,
-         off_cropped:bool=OFF_CROPPED,
          kern_rate:float=KERN_RATE,
          iters:int=ITERS,
          spec_srcs:list=SPEC_SRCS,
@@ -36,6 +34,9 @@ def main(mask:str=MASK,
         crop_shape = get_common_crop_shape([image1, image2], square=True)
         image1 = crop_im_arr(image1, cropbox_central_shape, crop_shape=crop_shape)
         image2 = crop_im_arr(image2, cropbox_central_shape, crop_shape=crop_shape)
+
+        image1 = source_phase_complete(image1)
+        image2 = source_phase_complete(image2)
 
         # Generate Bitmask
         match bitmask_method:

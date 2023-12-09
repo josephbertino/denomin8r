@@ -150,7 +150,7 @@ def draw_handle_on_img(img):
     draw = ImageDraw.Draw(img)
 
     # TODO (later) might need smarter logic to determine position
-    position = (math.floor(.71 * w), math.floor(.94 * h))
+    position = (math.floor(.73 * w), math.floor(.94 * h))
     ultimate_left, ultimate_top = position
     fontsize = math.floor(h * .03)
     fontfile = os.path.join(FONT_DIR, BOOKMAN)

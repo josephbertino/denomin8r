@@ -207,6 +207,41 @@ def source_resample_stack_horizontal(im_arr, num_dups=None, num_slices_per_dup=N
     final_im_arr = np.rot90(m=duped_rotated_im_arr, k=3)    # 270
     return final_im_arr
 
+def source_resample_phase_vert(im_arr, num_slices=None):
+    """
+    Vertically slice up image and np.roll each slice by an incremental shift
+
+    :param np.ndarray im_arr:
+    :param int num_slices:      Number of slices to generate
+    :return np.ndarray:
+    """
+    num_slices = num_slices if num_slices else random.choice(range(8, 50))
+    _, h = get_np_array_shape(im_arr)
+
+    slices = slice_up_array_uniform(im_arr, num_slices)
+
+    # Have the shifts go in 1 direction
+    shift_rate = random.uniform(0.01, 0.03)
+    direction = random.choice([1, -1])
+    shifts = list(map(lambda x: math.floor(h * x * shift_rate * direction), range(num_slices)))
+
+    slices = [np.roll(slice, axis=0, shift=shift) for slice, shift in zip(slices, shifts)]
+    return np.hstack(slices)
+
+
+def source_resample_phase_hor(im_arr, num_slices=None):
+    """
+    Horizontally slice up image and np.roll each slice by an incremental shift
+
+    :param np.ndarray im_arr:
+    :param int num_slices:      Number of slices to generate
+    :return np.ndarray:
+    """
+    im_arr = np.rot90(im_arr, k=1)
+    im_arr = source_resample_phase_vert(im_arr, num_slices=num_slices)
+    im_arr = np.rot90(im_arr, k=3)
+    return im_arr
+
 
 def source_resample_grid(im_arr, num_dups_vert=None, num_dups_hor=None, num_slices_per_dup=None):
     """
@@ -358,7 +393,9 @@ RESAMPLE_TRANSFORMS = [                # relative time, summing to 100
     source_resample_shuffle,           # 5
     source_resample_stack_vertical,    # 10
     source_resample_stack_horizontal,  # 35
-    source_resample_grid               # 45
+    source_resample_grid,              # 45
+    source_resample_phase_hor,
+    source_resample_phase_vert,
 ]
 
 '''

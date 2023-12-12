@@ -38,6 +38,6 @@ for im in im_arrs:
     ims.extend([im1, im2])
 save_images_from_arrays(ims, draw_handle=True)
 
-# TODO Play around and Test EACH METHOD IN UTIL & SOURCE_OPS
+# TODO Play around and Test EACH METHOD IN UTIL & SOURCE_OPS. In so doing, incorporate and expand upon the notes above, so that I can finally remove them from this module
 # TODO tweak chaos_source_transform's parameters
 # TODO finish off with a stamp

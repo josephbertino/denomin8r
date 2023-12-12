@@ -243,6 +243,37 @@ def source_resample_phase_hor(im_arr, num_slices=None):
     return im_arr
 
 
+def source_resample_flip_slices_vert(im_arr, num_slices=None, axis=None):
+    """
+    Take an image array, slice it up vertically, and np.flip alternating slices
+
+    :param np.ndarray im_arr:
+    :param num_slices:
+    :param axis:
+    :return np.ndarray :
+    """
+    num_slices = num_slices if num_slices else random.choice(range(2, 40))
+    slices = slice_up_array_uniform(im_arr, num_slices=num_slices)
+    axis = axis if isinstance(axis, int) else random.choice([0, 1])  # Flip slices UD or LR
+    slices = list(map(lambda tup: tup[1] if tup[0] % 2 == 0 else np.flip(tup[1], axis=axis), enumerate(slices)))
+    return np.hstack(slices)
+
+
+def source_resample_flip_slices_hor(im_arr, num_slices=None, axis=None):
+    """
+    Take an image array, slice it up horizontally, and np.flip alternating slices
+
+    :param np.ndarray im_arr:
+    :param num_slices:
+    :param axis:
+    :return np.ndarray:
+    """
+    im_arr = np.rot90(im_arr, k=1)
+    im_arr = source_resample_flip_slices_vert(im_arr, num_slices, axis)
+    im_arr = np.rot90(im_arr, k=3)
+    return im_arr
+
+
 def source_resample_grid(im_arr, num_dups_vert=None, num_dups_hor=None, num_slices_per_dup=None):
     """
     Resample crisscrossed slices of an image into a grid of duplicates via uniform sampling
@@ -388,6 +419,7 @@ CROPBOX_OPERATIONS = [              # relative time, out of 100
 ]
 
 # Operations that slice up and resample an array (e.g. vertical duping)
+# TODO this can be formed with a small utility function based on function name...for now
 RESAMPLE_TRANSFORMS = [                # relative time, summing to 100
     source_resample_reverse,           # 5
     source_resample_shuffle,           # 5
@@ -396,6 +428,8 @@ RESAMPLE_TRANSFORMS = [                # relative time, summing to 100
     source_resample_grid,              # 45
     source_resample_phase_hor,
     source_resample_phase_vert,
+    source_resample_flip_slices_vert,
+    source_resample_flip_slices_hor,
 ]
 
 '''

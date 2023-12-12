@@ -55,6 +55,9 @@ def main(mask:str=MASK,
 '''Chaos Source Transforms'''
 # TODO Big Project 1: "Chaos Source Transforms". Includes Off-cropping, rotating, cropping, slice transformations, flipping, & resizing. Of course, finish off with a stamp.
 
+'''Flags'''
+# TODO Slice Transform: swap slices between 2 or more sources
+
 '''Masks'''
 # TODO experiment with ImageFont.getmask() for making a bitmask
 # TODO generate bitmasks from other images, LOVE, I <3 NY... ask Nadia for others
@@ -114,11 +117,18 @@ Big Goals
 
 '''
 Big Project 1: "Chaos Source Transforms"
-    + Modularize all the ways to transform a source. Then repeatedly select those tranformations to apply to a source, kind of like a daisy chain of effects. You can even have the same effect multiple times in a chain. Eventually the chain terminates and the source gets transformed.
-    + Maybe there is a "cost" per transform and you only get a certain "budget" for each source image. Once you spend the budget or you have enough of a particular item, you get kicked out
-    + Flip, Rotate, Crop, Jitter applied to an image, Resize, **Tessellate**, **Warp**
++ Modularize all the ways to transform a source. Then repeatedly select those tranformations to apply to a source, kind of like a daisy chain of effects. You can even have the same effect multiple times in a chain. Eventually the chain terminates and the source gets transformed.
++ Maybe there is a "cost" per transform and you only get a certain "budget" for each source image. Once you spend the budget or you have enough of a particular item, you get kicked out
++ Flip, Rotate, Crop, Jitter applied to an image, Resize, **Tessellate**, **Warp**
 
-Big Project 2: Gradual Transformation a la Philip Glass
+Big Project 2: Flags, Colonialism, Imperialism
+# TODO Slice Transform: swap slices between 2 or more sources
++ Blend flags of colonizing nations (e.g. UK) with flags of the nations they colonized, or fucked over in some way.
++ Will have to keep in mind that flags have different dimensions/aspect ratios, and we don't want to crop a flag
++ Unless! Cropping is an artistic statement to express colonialism / imperialism and stripping / depleting a nation
++ Potential for Gallery Exhibit
+
+Big Project 3: Gradual Transformation a la Philip Glass
 + First draw a canvas then Start of with painting a portion of a source image on the left hand side (or wherever you decide is the start). Then duplicate, reiterate, replicate the source image across the space but shifting and glitching it, transforming, modulating it, until gradually you transition it into a completely different image, or a combination of multiple images
 '''
 

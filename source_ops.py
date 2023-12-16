@@ -7,7 +7,6 @@ Notes:
 """
 from mask_ops import *
 
-# Source Transforms. All must accept only the image np.ndarray, and return an np.ndarray
 def source_flip_lr(im_arr):
     """
     Flip L-R an image array

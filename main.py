@@ -116,11 +116,6 @@ Big Goals
 '''
 
 '''
-Big Project 1: "Chaos Source Transforms"
-+ Modularize all the ways to transform a source. Then repeatedly select those tranformations to apply to a source, kind of like a daisy chain of effects. You can even have the same effect multiple times in a chain. Eventually the chain terminates and the source gets transformed.
-+ Maybe there is a "cost" per transform and you only get a certain "budget" for each source image. Once you spend the budget or you have enough of a particular item, you get kicked out
-+ Flip, Rotate, Crop, Jitter applied to an image, Resize, **Tessellate**, **Warp**
-
 Big Project 2: Flags, Colonialism, Imperialism
 # TODO Slice Transform: swap slices between 2 or more sources
 + Blend flags of colonizing nations (e.g. UK) with flags of the nations they colonized, or fucked over in some way.
@@ -139,7 +134,7 @@ EXHIBIT IDEAS
 + Thesis: Typically national flags are the product of emergence from the hold / ownership of a former colonizer. A nation only earns a flag when it becomes a nation---sovereign, free, and with its own identity. Well what happens when I interweave nations' flags with the flags of their former colonizers or identity? What emerges from this act of visual and political regression? What happens when the symbol of one's pride, culture, heritage, and identity becomes visually massacred, evocative of the bloody wars that were fought to secure new freedom and that very identity which is now once again vulnerable and split open? Moreover, can we ignore the lasting influence that former colonizers might still exert upon "sovereign" nations? Is not part of the nation's identity interwoven already with that of its former possessor
 + Idea: Take images of flags and interweave them with the flags of their former colonizers or oppressors.
 + Idea: Take images of flags and interweave them with random flags to see what happens
-
++ Idea: Interweave symbols of money / currency / commodities / natural resources relevant to the flag's country
 
 1) "Big D Energy"
 + Debut of Denominator plastering itself across all walks of life, art, fake life, fake art, capitalism

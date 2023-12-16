@@ -30,14 +30,13 @@ Grid:
 
 # TODO Big Project 1: "Chaos Source Transforms"
 
-im_arrs, filenames = load_sources(latest=False, n=10)
-ims = []
+im_arrs, filenames = load_sources(latest=False, n=5, specific_srcs=None)
 for im in im_arrs:
-    im1 = source_resample_flip_slices_hor(im, axis=0)
-    im2 = source_resample_flip_slices_hor(im, axis=1)
-    ims.extend([im1, im2])
-save_images_from_arrays(ims, draw_handle=True)
+    img = Image.fromarray(im)
+    img = draw_handle_on_img(img)
+    img.show()
 
 # TODO Play around and Test EACH METHOD IN UTIL & SOURCE_OPS. In so doing, incorporate and expand upon the notes above, so that I can finally remove them from this module
 # TODO tweak chaos_source_transform's parameters
 # TODO finish off with a stamp
+# TODO what effects would be worth considering doing multiple times? (I'm guessing with some transition transform in between)

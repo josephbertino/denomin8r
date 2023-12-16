@@ -18,7 +18,7 @@ from matplotlib import pyplot as plt
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-ROOT = '/Users/josephbertino/PycharmProjects/denomin8r'
+ROOT = '/Users/josephbertino/Desktop/CodeProjects/denomin8r'
 SOURCE_DIR = os.path.join(ROOT, 'sources')
 FONT_DIR = os.path.join(ROOT, 'fonts')
 BOOKMAN = 'bookman.ttf'  # 'Bookman Old Style Bold'

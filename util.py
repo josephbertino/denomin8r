@@ -8,7 +8,7 @@ from source_ops import *
 
 SOURCE_FILES = None
 
-
+# TODO (later) I will have to get smarter about organizing my static source images. Will I have to start naming the files more sensibly? That sounds like a lot of work.
 def prep():
     """
     1) All .webp files converted to .jpg
@@ -138,7 +138,11 @@ def fn_runner(func):
             arg_dict[name] = arg_val
         func(**arg_dict)
 
-
+# TODO test with really wide and really narrow image
+'''
+So right now the problem is that my criteria for determining handle font size
+is ASSUMING that the width and the height are roughly equal. One stupid solution is to base it off the min of the two...
+'''
 def draw_handle_on_img(img):
     """
     Draw the "@denomin8r" handle on bottom right of the image then return the image
@@ -149,16 +153,20 @@ def draw_handle_on_img(img):
     w, h = img.size
     draw = ImageDraw.Draw(img)
 
-    # TODO (later) might need smarter logic to determine position
-    position = (math.floor(.73 * w), math.floor(.94 * h))
-    ultimate_left, ultimate_top = position
-    fontsize = math.floor(h * .03)
+    # Set font object
+    fontsize = math.floor(min(w, h) * .03)
     fontfile = os.path.join(FONT_DIR, BOOKMAN)
     font_obj = ImageFont.truetype(fontfile, fontsize)
 
+    tmp_left, tmp_top, tmp_right, tmp_bottom = draw.textbbox((0,0), TEXT, font=font_obj)
+    handle_h = tmp_bottom - tmp_top
+    handle_w = tmp_right - tmp_left
+    handle_pos = (w - int(1.25 * handle_w), h - int(1.85 * handle_h))
+    ultimate_left, ultimate_top = handle_pos
+
     # Determine key coordinates for placing handle
-    at_left, _, at_right, _ = draw.textbbox(position, "@", font=font_obj)
-    text_left, text_top, text_right, text_bottom = draw.textbbox(position, TEXT, font=font_obj)
+    at_left, _, at_right, _ = draw.textbbox(handle_pos, "@", font=font_obj)
+    text_left, text_top, text_right, text_bottom = draw.textbbox(handle_pos, TEXT, font=font_obj)
     text_width = text_right - text_left
     text_height = text_bottom - text_top
     extra = math.ceil(text_height * 0.1)  # padding

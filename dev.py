@@ -37,6 +37,7 @@ for im in im_arrs:
     Image.fromarray(im).show()
     Image.fromarray(im_transform).show()
 
-# TODO what effects would be worth considering doing multiple times? (I'm guessing with some transition transform in between)
 # TODO tweak chaos_source_transform's, including parameters
+# TODO what effects would be worth considering doing multiple times? (I'm guessing with some transition transform in between)
 # TODO finish off with a stamp
+

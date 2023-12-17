@@ -8,6 +8,8 @@ import inspect
 import random
 import logging
 import time
+
+import numpy
 import numpy as np
 from PIL import Image
 from enum import IntEnum, auto
@@ -282,3 +284,31 @@ def profile_and_plot_fns(fn_list, im_arr):
     fn_names, fn_times = list(zip(*name_times))
     norm_times = profile_normalize_times(fn_times)
     profile_bar_chart(fn_names, norm_times, "Transform", "Relative Time (%)")
+
+
+# TODO can refactor this to just get the min() of all h's and w's from a list of dimensions
+def get_common_crop_shape(crop_list, square=True):
+    """
+    Return max dimensions (w, h) that is not larger than any of the image arrays or cropboxes in the passed list
+
+    :param list crop_list:  List of np.ndarray OR list of crop_boxes (left, top, right, bottom)
+    :param bool square:     If True, crop dimensions should be square
+    :return (int, int):     width, height
+    """
+    w, h = math.inf, math.inf
+    for item in crop_list:
+        if isinstance(item, np.ndarray):
+            curr_w, curr_h = get_np_array_shape(item)
+        elif isinstance(item, list | tuple) and len(item) == 4:
+            l, t, r, b = item
+            curr_w = r - l
+            curr_h = b - t
+        else:
+            raise Exception(f"Unexpected type passed to get_crop_shape: {item}, {type(item)}")
+        w = curr_w if curr_w < w else w
+        h = curr_h if curr_h < h else h
+
+    if square:
+        return [min(w, h)] * 2
+    else:
+        return w, h

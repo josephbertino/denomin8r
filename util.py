@@ -1,10 +1,10 @@
 import uuid
 from PIL import Image
-import pillow_avif
 from sortedcontainers import SortedSet
 import PySimpleGUI as sg
 
 from source_ops import *
+from tools import get_common_crop_shape
 
 SOURCE_FILES = None
 
@@ -28,8 +28,11 @@ def prep():
                 image.save(new_file_path, format="JPEG")
                 os.remove(filepath)
 
+    # TODO will have to refactor this when I reorganize my sources
     os.chdir(SOURCE_DIR)
-    SOURCE_FILES = SortedSet([f for f in os.listdir() if f != '.DS_Store'], key=os.path.getmtime)
+    SOURCE_FILES = SortedSet([f for f in os.listdir() if
+                              (f != '.DS_Store' and os.path.isfile(os.path.join(SOURCE_DIR, f)))],
+                             key=os.path.getmtime)
     os.chdir(ROOT)
 
 
@@ -138,11 +141,7 @@ def fn_runner(func):
             arg_dict[name] = arg_val
         func(**arg_dict)
 
-# TODO test with really wide and really narrow image
-'''
-So right now the problem is that my criteria for determining handle font size
-is ASSUMING that the width and the height are roughly equal. One stupid solution is to base it off the min of the two...
-'''
+
 def draw_handle_on_img(img):
     """
     Draw the "@denomin8r" handle on bottom right of the image then return the image
@@ -158,6 +157,7 @@ def draw_handle_on_img(img):
     fontfile = os.path.join(FONT_DIR, BOOKMAN)
     font_obj = ImageFont.truetype(fontfile, fontsize)
 
+    # Set handle position
     tmp_left, tmp_top, tmp_right, tmp_bottom = draw.textbbox((0,0), TEXT, font=font_obj)
     handle_h = tmp_bottom - tmp_top
     handle_w = tmp_right - tmp_left
@@ -197,17 +197,17 @@ def draw_handle_on_img(img):
 
 def draw_test_params(img, **kwargs):
     """
-    Draw the passed kwargs key:value pairs onto the image and return the image
-    Primarily used for debugging purposes
+    Draw the passed kwargs (key:value pairs) onto the image and return the image
+        Primarily used for debugging purposes
+
     :param Image.Image img:
     :return Image.Image:
     """
     w, h = img.size
     draw = ImageDraw.Draw(img)
 
-    position = (math.floor(.05 * w), math.floor(.95 * h))
-    pos_left, pos_top = position
-    fontsize = math.floor(h * .02)
+    # Set font object
+    fontsize = math.floor(h * .025)
     fontfile = os.path.join(FONT_DIR, BOOKMAN)
     font_obj = ImageFont.truetype(fontfile, fontsize)
 
@@ -215,20 +215,26 @@ def draw_test_params(img, **kwargs):
     text = ""
     for k, v in kwargs.items():
         text += f"{k}={v}, "
-    text_left, text_top, text_right, text_bottom = draw.textbbox(position, text, font=font_obj)
-    text_width = text_right - text_left
-    text_height = text_bottom - text_top
-    extra = math.ceil(text_height * 0.1)  # padding
+
+    # Set test params position
+    text_left, text_top, text_right, text_bottom = draw.textbbox((0, 0), text, font=font_obj)
+    params_w = text_right - text_left
+    params_h = text_bottom - text_top
+    params_pos = (params_h, h - int(2 * params_h))
+    pos_left, pos_top = params_pos
 
     # Draw background
-    draw.rectangle(((pos_left, pos_top), (pos_left + text_width + extra, pos_top + text_height + extra)), fill="black")
-    draw.text((pos_left, pos_top), text, font=font_obj, fill="red")
+    extra = math.ceil(params_h * 0.1)  # padding
+    draw.rectangle(((pos_left, pos_top), (pos_left + params_w + extra, pos_top + params_h + extra)), fill="black")
+    draw.text((pos_left, pos_top), text, font=font_obj, fill=rgb2bgr(Colors.OG_ORANGE))
 
     return img
+
 
 def classic_D_swap_random(im_arr_1=None, im_arr_2=None):
     """
     Make a classic collage with 2 random images and the letter 'D'
+
     :param np.ndarray im_arr_1:
     :param np.ndarray im_arr_2:
     :return np.ndarray, np.ndarray:
@@ -244,6 +250,7 @@ def classic_D_swap_random(im_arr_1=None, im_arr_2=None):
     im_arr_1 = crop_im_arr(im_arr_1, cropbox_central_shape, crop_shape=crop_shape)
     im_arr_2 = crop_im_arr(im_arr_2, cropbox_central_shape, crop_shape=crop_shape)
     bitmask = build_bitmask_to_size(text='D', fontfile=BOOKMAN, shape=crop_shape)
+
     return simple_bitmask_swap(im_arr_1, im_arr_2, bitmask)
 
 
@@ -266,6 +273,7 @@ def save_images_from_arrays(im_arrs, draw_handle):
         img.save(f'{random_id}_{i}.jpg')
 
 
+# TODO resume testing from here!
 def chaos_source_transform(im_arr):
     """
     Take an image and run it through a series of transformations, then return the modified image.

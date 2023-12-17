@@ -30,13 +30,13 @@ Grid:
 
 # TODO Big Project 1: "Chaos Source Transforms"
 
-im_arrs, filenames = load_sources(latest=False, n=5, specific_srcs=None)
-for im in im_arrs:
-    img = Image.fromarray(im)
-    img = draw_handle_on_img(img)
-    img.show()
+im_arrs, filenames = load_sources(latest=False, n=10)
 
-# TODO Play around and Test EACH METHOD IN UTIL & SOURCE_OPS. In so doing, incorporate and expand upon the notes above, so that I can finally remove them from this module
-# TODO tweak chaos_source_transform's parameters
-# TODO finish off with a stamp
+for im in im_arrs:
+    im_transform = source_offcrop_recursive(im)
+    Image.fromarray(im).show()
+    Image.fromarray(im_transform).show()
+
 # TODO what effects would be worth considering doing multiple times? (I'm guessing with some transition transform in between)
+# TODO tweak chaos_source_transform's, including parameters
+# TODO finish off with a stamp

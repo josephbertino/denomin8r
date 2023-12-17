@@ -6,6 +6,8 @@ Notes:
         as their first parameter, and all other parameters are kwargs with default values
 """
 from mask_ops import *
+from tools import get_common_crop_shape
+
 
 def source_flip_lr(im_arr):
     """
@@ -94,37 +96,6 @@ def source_crop_random(im_arr):
     return cropped_im_arr
 
 
-MIN_DUPS = 2
-MAX_DUPS = 7
-
-
-def get_common_crop_shape(crop_list, square=True):
-    """
-    Return max dimensions (w, h) that is not larger than any of the image arrays or cropboxes in the passed list
-
-    :param list crop_list:  List of np.ndarray OR list of crop_boxes (left, top, right, bottom)
-    :param bool square:     If True, crop dimensions should be square
-    :return (int, int):     width, height
-    """
-    w, h = math.inf, math.inf
-    for item in crop_list:
-        if isinstance(item, np.ndarray):
-            curr_w, curr_h = get_np_array_shape(item)
-        elif isinstance(item, list | tuple) and len(item) == 4:
-            l, t, r, b = item
-            curr_w = r - l
-            curr_h = b - t
-        else:
-            raise Exception(f"Unexpected type passed to get_crop_shape: {item}, {type(item)}")
-        w = curr_w if curr_w < w else w
-        h = curr_h if curr_h < h else h
-
-    if square:
-        return [min(w, h)] * 2
-    else:
-        return w, h
-
-
 def source_resample_random(im_arr):
     """
     Apply slice-duping to image array with a randomly-selected method
@@ -205,6 +176,7 @@ def source_resample_stack_horizontal(im_arr, num_dups=None, num_slices_per_dup=N
     duped_rotated_im_arr = slice_resample_array_vertical(rotated_im_arr, num_dups, num_slices)
     final_im_arr = np.rot90(m=duped_rotated_im_arr, k=3)    # 270
     return final_im_arr
+
 
 def source_resample_phase_vert(im_arr, num_slices=None):
     """
@@ -297,12 +269,13 @@ def source_resample_grid(im_arr, num_dups_vert=None, num_dups_hor=None, num_slic
     return final_im_arr
 
 
-def source_offcrop_recursive(im_arr, mask_text:str=None):
+def source_offcrop_recursive(im_arr, mask_text=None):
     """
     Recursively off-crop an image with itself using a bitmask
 
     :param np.ndarray im_arr:
-    :param mask_text: If not None, use that as the bitmask. Otherwise generate a random char for the bitmask.
+    :param str mask_text:       If not None, use that as the bitmask.
+                                Otherwise generate a random char for the bitmask.
     :return np.ndarray:
     """
     USE_CLEAN_COPY = random_bool()
@@ -368,7 +341,7 @@ def cropbox_off_center_random(im_arr):
     :param np.ndarray im_arr:
     :return (int, int, int, int):   left, top, right, bottom
     """
-    jitter = float(random.choice(range(7, 12)) / 100)
+    jitter = float(random.choice(range(5, 10)) / 100)
     crop_cap = 1.0 - jitter
 
     # Determine size of image

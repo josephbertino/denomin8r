@@ -124,6 +124,7 @@ Big Project 2: Flags, Colonialism, Imperialism
 
 Big Project 3: Gradual Transformation a la Philip Glass
 + First draw a canvas then Start of with painting a portion of a source image on the left hand side (or wherever you decide is the start). Then duplicate, reiterate, replicate the source image across the space but shifting and glitching it, transforming, modulating it, until gradually you transition it into a completely different image, or a combination of multiple images
++ Celebrity surgery transitions
 '''
 
 '''
@@ -152,9 +153,18 @@ EXHIBIT IDEAS
 '''
 
 '''
+Series Ideas
+How D8 started to where it got today (more and more fucked and abstracted over time)
+Start doing series on just one idea
+'''
+
+'''
 # Source Ideas
 NYPD Logos and Imagery
 Celebrities doing blackface
+Birds
+Sol Lewitt 10 Geometric Figures
+Grids of Flags
 '''
 
 '''

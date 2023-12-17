@@ -80,6 +80,19 @@ def load_sources(latest=True, n=2, specific_srcs=None):
     return source_image_arrays, filenames
 
 
+def load_sources_half_latest_pairs(n=1):
+    """
+    Return image source pairs, converted into np.ndarray's
+        One of each pair will be 'latest', the other randomly picked
+
+    :param int n:   Number of source image pairs to grab
+    :rtype:         list((np.ndarray, np.ndarray))
+    """
+    latest, _ = load_sources(latest=True, n=n)
+    randos, _ = load_sources(latest=False, n=n)
+    return list(zip(latest, randos))
+
+
 def fn_runner(func):
     sg.set_options(font=("Helvetica", 16))
     sg.theme('dark grey 9')  # Add a touch of color
@@ -284,8 +297,9 @@ def chaos_source_transform(im_arr):
     :return np.ndarray, operation_list:
     """
     # Build list of operations
-    transforms = random.sample(SIMPLE_TRANSFORMS, k=2) + random.sample(COMPLEX_TRANSFORMS, k=1)
+    transforms = random.sample(D_TRANSFORMS_SIMPLE, k=2) + random.sample(D_TRANSFORMS_COMPLEX, k=1)
     random.shuffle(transforms)
+
     op_list = []
     for transform in transforms:
         im_arr = transform(im_arr)

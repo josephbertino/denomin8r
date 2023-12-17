@@ -1,5 +1,3 @@
-import random
-
 from util import *
 
 prep()
@@ -30,14 +28,15 @@ Grid:
 
 # TODO Big Project 1: "Chaos Source Transforms"
 
-im_arrs, filenames = load_sources(latest=False, n=10)
 
-for im in im_arrs:
-    im_transform = source_offcrop_recursive(im)
-    Image.fromarray(im).show()
-    Image.fromarray(im_transform).show()
+for l, r in load_sources_half_latest_pairs(n=20):
+    l, _ = chaos_source_transform(l)
+    r, _ = chaos_source_transform(r)
+    im1, im2 = classic_D_swap_random(l, r)
+
+    Image.fromarray(im1).show()
+    Image.fromarray(im2).show()
 
 # TODO tweak chaos_source_transform's, including parameters
 # TODO what effects would be worth considering doing multiple times? (I'm guessing with some transition transform in between)
 # TODO finish off with a stamp
-

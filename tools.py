@@ -9,11 +9,11 @@ import random
 import logging
 import time
 
-import numpy
 import numpy as np
 from PIL import Image
-from enum import IntEnum, auto
+import pillow_avif  # Don't delete
 
+from enum import IntEnum, auto
 from matplotlib import pyplot as plt
 
 

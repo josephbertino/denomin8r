@@ -6,7 +6,6 @@ Notes:
         as their first parameter, and all other parameters are kwargs with default values
 """
 from mask_ops import *
-from tools import get_common_crop_shape
 
 
 def source_flip_lr(im_arr):
@@ -192,7 +191,7 @@ def source_resample_phase_vert(im_arr, num_slices=None):
     slices = slice_up_array_uniform(im_arr, num_slices)
 
     # Have the shifts go in 1 direction
-    shift_rate = random.uniform(0.01, 0.03)
+    shift_rate = random.uniform(0.005, 0.025)
     direction = random.choice([1, -1])
     shifts = list(map(lambda x: math.floor(h * x * shift_rate * direction), range(num_slices)))
 
@@ -407,7 +406,7 @@ RESAMPLE_TRANSFORMS = [                # relative time, summing to 100
 '''
 Grouping Transforms according to visual complexity
 '''
-SIMPLE_TRANSFORMS = [
+D_TRANSFORMS_SIMPLE = [
     source_flip_lr,
     source_flip_ud,
     source_rotate_180,
@@ -416,7 +415,7 @@ SIMPLE_TRANSFORMS = [
     source_phase_vert,
 ]
 
-COMPLEX_TRANSFORMS = [
+D_TRANSFORMS_COMPLEX = [
     source_offcrop_recursive,
     source_resample_random,
 ]

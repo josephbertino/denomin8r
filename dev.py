@@ -5,6 +5,21 @@ fontfile = BOOKMAN
 kern_rate = 1.0
 
 # -----DO NOT DELETE ABOVE THIS LINE---------------------------
+# TODO Big Project 1: "Chaos Source Transforms"
+
+# TODO re-run profiler methods to determine new costs, and apply costs to all transform methods. Make sure to update / rearrange all lists of transform methods
+# TODO refactor chaos_source_transform to consider function cost once again
+# TODO what effects would be worth considering doing multiple times? (I'm guessing with some transition transform in between)
+# TODO consider "Observation" notes below for method tweaking
+# TODO move cropbox methods to tools.py?
+# TODO finish off with a stamp
+
+'''
+Tweaks
+. source_offcrop_recursive should be less frequent. Maybe have RARE as well as COMPLEX and SIMPLE transforms
+. I might want NOTHING to happen to the image. It doesn't always have to be transformed... that should sort of be a special occurrence
+. Yeah, chance should first dictate whether SOMETHING happens at all, and then chance should dictate which things happen
+'''
 
 """
 Observations:
@@ -25,18 +40,3 @@ Grid:
     I like what happens when dup_n is unequal between rotation slicing.
     Produces cool effects with the rectangles.
 """
-
-# TODO Big Project 1: "Chaos Source Transforms"
-
-
-for l, r in load_sources_half_latest_pairs(n=20):
-    l, _ = chaos_source_transform(l)
-    r, _ = chaos_source_transform(r)
-    im1, im2 = classic_D_swap_random(l, r)
-
-    Image.fromarray(im1).show()
-    Image.fromarray(im2).show()
-
-# TODO tweak chaos_source_transform's, including parameters
-# TODO what effects would be worth considering doing multiple times? (I'm guessing with some transition transform in between)
-# TODO finish off with a stamp

@@ -283,7 +283,7 @@ def save_images_from_arrays(im_arrs, draw_handle):
         if draw_handle:
             img = draw_handle_on_img(img)
 
-        img.save(f'{random_id}_{i}.jpg')
+        img.save(f'/output/{random_id}_{i}.jpg')
 
 
 # TODO resume testing from here!

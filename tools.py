@@ -280,7 +280,7 @@ def profile_and_plot_fns(fn_list, im_arr):
     for fn in fn_list:
         total_time = profile_time_source_transform(fn, im_arr)
         name_times.append((fn.__name__, total_time))
-    name_times = sorted(name_times, key=lambda x: x[1])
+    # name_times = sorted(name_times, key=lambda x: x[1])
     fn_names, fn_times = list(zip(*name_times))
     norm_times = profile_normalize_times(fn_times)
     profile_bar_chart(fn_names, norm_times, "Transform", "Relative Time (%)")

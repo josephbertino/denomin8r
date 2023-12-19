@@ -8,6 +8,23 @@ Notes:
 from mask_ops import *
 
 
+def apply_transform_cost(cost=1):
+    """
+    Decorator method to apply a "cost" attribute to functions
+        that get wrapped by the output wrapper
+    + Credit to PEP-232 [https://peps.python.org/pep-0232/]
+    + Credit dimitris-fasarakis-hilliard @ https://stackoverflow.com/a/47056146
+
+    :param int cost:
+    :return:
+    """
+    def wrapper(fn):
+        fn.transform_cost = cost
+        return fn
+    return wrapper
+
+
+@apply_transform_cost()
 def source_flip_lr(im_arr):
     """
     Flip L-R an image array
@@ -18,6 +35,7 @@ def source_flip_lr(im_arr):
     return np.fliplr(im_arr)
 
 
+@apply_transform_cost()
 def source_flip_ud(im_arr):
     """
     Flip U-D an image array
@@ -28,6 +46,7 @@ def source_flip_ud(im_arr):
     return np.flipud(im_arr)
 
 
+@apply_transform_cost()
 def source_phase_vert(im_arr, shift=None):
     """
     Phase ('roll') an image according along its vertical axis
@@ -44,6 +63,7 @@ def source_phase_vert(im_arr, shift=None):
     return np.roll(im_arr, axis=0, shift=shift)
 
 
+@apply_transform_cost()
 def source_phase_hor(im_arr, shift=None):
     """
     Phase ('roll') an image according along its horizontal axis
@@ -60,6 +80,7 @@ def source_phase_hor(im_arr, shift=None):
     return np.roll(im_arr, axis=1, shift=shift)
 
 
+@apply_transform_cost()
 def source_phase_complete(im_arr):
     """
     Phase ('roll') an image according to both width and height axes
@@ -73,6 +94,7 @@ def source_phase_complete(im_arr):
     return im_arr
 
 
+@apply_transform_cost()
 def source_rotate_180(im_arr):
     """
     Rotate 180 degrees an image array
@@ -83,6 +105,7 @@ def source_rotate_180(im_arr):
     return np.rot90(m=im_arr, k=2)
 
 
+@apply_transform_cost()
 def source_crop_random(im_arr):
     """
     Apply cropping to image array with a randomly-selected method
@@ -95,6 +118,7 @@ def source_crop_random(im_arr):
     return cropped_im_arr
 
 
+@apply_transform_cost()
 def source_resample_random(im_arr):
     """
     Apply slice-duping to image array with a randomly-selected method
@@ -110,6 +134,7 @@ def source_resample_random(im_arr):
     return sliced_im_arr
 
 
+@apply_transform_cost()
 def source_resample_shuffle(im_arr, num_slices=None):
     """
     Vertically slice up image and rearrange the slices randomly
@@ -126,6 +151,7 @@ def source_resample_shuffle(im_arr, num_slices=None):
     return np.hstack(slices)
 
 
+@apply_transform_cost()
 def source_resample_reverse(im_arr, num_slices=None):
     """
     Vertically slice up image and reverse the order
@@ -141,6 +167,7 @@ def source_resample_reverse(im_arr, num_slices=None):
     return np.hstack(slices)
 
 
+@apply_transform_cost()
 def source_resample_stack_vertical(im_arr, num_dups=None, num_slices_per_dup=None):
     """
     Reorder vertical slices of an image into a stack of duplicates via uniform sampling
@@ -158,6 +185,7 @@ def source_resample_stack_vertical(im_arr, num_dups=None, num_slices_per_dup=Non
     return duped_im_arr
 
 
+@apply_transform_cost()
 def source_resample_stack_horizontal(im_arr, num_dups=None, num_slices_per_dup=None):
     """
     Reorder horizontal slices of an image into a stack of duplicates of the original, via uniform sampling
@@ -177,6 +205,7 @@ def source_resample_stack_horizontal(im_arr, num_dups=None, num_slices_per_dup=N
     return final_im_arr
 
 
+@apply_transform_cost()
 def source_resample_phase_vert(im_arr, num_slices=None):
     """
     Vertically slice up image and np.roll each slice by an incremental shift
@@ -199,6 +228,7 @@ def source_resample_phase_vert(im_arr, num_slices=None):
     return np.hstack(slices)
 
 
+@apply_transform_cost()
 def source_resample_phase_hor(im_arr, num_slices=None):
     """
     Horizontally slice up image and np.roll each slice by an incremental shift
@@ -213,6 +243,7 @@ def source_resample_phase_hor(im_arr, num_slices=None):
     return im_arr
 
 
+@apply_transform_cost()
 def source_resample_flip_slices_vert(im_arr, num_slices=None, axis=None):
     """
     Take an image array, slice it up vertically, and np.flip alternating slices
@@ -229,6 +260,7 @@ def source_resample_flip_slices_vert(im_arr, num_slices=None, axis=None):
     return np.hstack(slices)
 
 
+@apply_transform_cost()
 def source_resample_flip_slices_hor(im_arr, num_slices=None, axis=None):
     """
     Take an image array, slice it up horizontally, and np.flip alternating slices
@@ -244,6 +276,7 @@ def source_resample_flip_slices_hor(im_arr, num_slices=None, axis=None):
     return im_arr
 
 
+@apply_transform_cost()
 def source_resample_grid(im_arr, num_dups_vert=None, num_dups_hor=None, num_slices_per_dup=None):
     """
     Resample crisscrossed slices of an image into a grid of duplicates via uniform sampling
@@ -268,6 +301,7 @@ def source_resample_grid(im_arr, num_dups_vert=None, num_dups_hor=None, num_slic
     return final_im_arr
 
 
+@apply_transform_cost()
 def source_offcrop_recursive(im_arr, mask_text=None):
     """
     Recursively off-crop an image with itself using a bitmask
@@ -392,15 +426,15 @@ CROPBOX_OPERATIONS = [              # relative time, out of 100
 # Operations that slice up and resample an array (e.g. vertical duping)
 # TODO this can be formed with a small utility function based on function name...for now
 RESAMPLE_TRANSFORMS = [                # relative time, summing to 100
-    source_resample_reverse,           # 5
-    source_resample_shuffle,           # 5
-    source_resample_stack_vertical,    # 10
-    source_resample_stack_horizontal,  # 35
-    source_resample_grid,              # 45
-    source_resample_phase_hor,
-    source_resample_phase_vert,
-    source_resample_flip_slices_vert,
-    source_resample_flip_slices_hor,
+    source_resample_reverse,           # 1
+    source_resample_shuffle,           # 1
+    source_resample_stack_vertical,    # 1
+    source_resample_stack_horizontal,  # 22
+    source_resample_grid,              # 23
+    source_resample_phase_hor,         # 28
+    source_resample_phase_vert,        # 2
+    source_resample_flip_slices_vert,  # 5
+    source_resample_flip_slices_hor,   # 16
 ]
 
 '''

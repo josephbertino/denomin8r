@@ -7,8 +7,16 @@ Notes:
 """
 from mask_ops import *
 
+CHAOS_BUDGET = 100
+MAGIC_VAL = 2.4992  # Value chosen such that (x ** 5 + x) == 100
+COST_LEVEL_1 = MAGIC_VAL ** 1
+COST_LEVEL_2 = MAGIC_VAL ** 2
+COST_LEVEL_3 = MAGIC_VAL ** 3
+COST_LEVEL_4 = MAGIC_VAL ** 4
+COST_LEVEL_5 = MAGIC_VAL ** 5
 
-def apply_transform_cost(cost=1):
+
+def apply_transform_cost(cost=COST_LEVEL_1):
     """
     Decorator method to apply a "cost" attribute to functions
         that get wrapped by the output wrapper
@@ -24,7 +32,7 @@ def apply_transform_cost(cost=1):
     return wrapper
 
 
-@apply_transform_cost()
+@apply_transform_cost(COST_LEVEL_1)
 def source_flip_lr(im_arr):
     """
     Flip L-R an image array
@@ -35,7 +43,7 @@ def source_flip_lr(im_arr):
     return np.fliplr(im_arr)
 
 
-@apply_transform_cost()
+@apply_transform_cost(COST_LEVEL_1)
 def source_flip_ud(im_arr):
     """
     Flip U-D an image array
@@ -46,10 +54,10 @@ def source_flip_ud(im_arr):
     return np.flipud(im_arr)
 
 
-@apply_transform_cost()
+@apply_transform_cost(COST_LEVEL_1)
 def source_phase_vert(im_arr, shift=None):
     """
-    Phase ('roll') an image according along its vertical axis
+    Phase (np.roll) an image according along its vertical axis
 
     :param im_arr:
     :param int shift:
@@ -63,7 +71,7 @@ def source_phase_vert(im_arr, shift=None):
     return np.roll(im_arr, axis=0, shift=shift)
 
 
-@apply_transform_cost()
+@apply_transform_cost(COST_LEVEL_1)
 def source_phase_hor(im_arr, shift=None):
     """
     Phase ('roll') an image according along its horizontal axis
@@ -80,7 +88,7 @@ def source_phase_hor(im_arr, shift=None):
     return np.roll(im_arr, axis=1, shift=shift)
 
 
-@apply_transform_cost()
+@apply_transform_cost(COST_LEVEL_1)
 def source_phase_complete(im_arr):
     """
     Phase ('roll') an image according to both width and height axes
@@ -94,7 +102,7 @@ def source_phase_complete(im_arr):
     return im_arr
 
 
-@apply_transform_cost()
+@apply_transform_cost(COST_LEVEL_1)
 def source_rotate_180(im_arr):
     """
     Rotate 180 degrees an image array
@@ -105,7 +113,7 @@ def source_rotate_180(im_arr):
     return np.rot90(m=im_arr, k=2)
 
 
-@apply_transform_cost()
+@apply_transform_cost(COST_LEVEL_1)
 def source_crop_random(im_arr):
     """
     Apply cropping to image array with a randomly-selected method
@@ -118,7 +126,7 @@ def source_crop_random(im_arr):
     return cropped_im_arr
 
 
-@apply_transform_cost()
+@apply_transform_cost(COST_LEVEL_1)
 def source_resample_random(im_arr):
     """
     Apply slice-duping to image array with a randomly-selected method
@@ -126,7 +134,7 @@ def source_resample_random(im_arr):
     :param np.ndarray im_arr:
     :return np.ndarray:
     """
-    slice_method = random.choice(RESAMPLE_TRANSFORMS)
+    slice_method = random.choice(SOURCE_RESAMPLE_TRANSFORMS)
     method_name = slice_method.__name__
     logger.info(f"Implementing SLICE method {method_name}")
 
@@ -134,7 +142,7 @@ def source_resample_random(im_arr):
     return sliced_im_arr
 
 
-@apply_transform_cost()
+@apply_transform_cost(COST_LEVEL_1)
 def source_resample_shuffle(im_arr, num_slices=None):
     """
     Vertically slice up image and rearrange the slices randomly
@@ -151,7 +159,7 @@ def source_resample_shuffle(im_arr, num_slices=None):
     return np.hstack(slices)
 
 
-@apply_transform_cost()
+@apply_transform_cost(COST_LEVEL_1)
 def source_resample_reverse(im_arr, num_slices=None):
     """
     Vertically slice up image and reverse the order
@@ -167,7 +175,7 @@ def source_resample_reverse(im_arr, num_slices=None):
     return np.hstack(slices)
 
 
-@apply_transform_cost()
+@apply_transform_cost(COST_LEVEL_1)
 def source_resample_stack_vertical(im_arr, num_dups=None, num_slices_per_dup=None):
     """
     Reorder vertical slices of an image into a stack of duplicates via uniform sampling
@@ -185,7 +193,7 @@ def source_resample_stack_vertical(im_arr, num_dups=None, num_slices_per_dup=Non
     return duped_im_arr
 
 
-@apply_transform_cost()
+@apply_transform_cost(COST_LEVEL_4)
 def source_resample_stack_horizontal(im_arr, num_dups=None, num_slices_per_dup=None):
     """
     Reorder horizontal slices of an image into a stack of duplicates of the original, via uniform sampling
@@ -205,7 +213,7 @@ def source_resample_stack_horizontal(im_arr, num_dups=None, num_slices_per_dup=N
     return final_im_arr
 
 
-@apply_transform_cost()
+@apply_transform_cost(COST_LEVEL_1)
 def source_resample_phase_vert(im_arr, num_slices=None):
     """
     Vertically slice up image and np.roll each slice by an incremental shift
@@ -228,7 +236,7 @@ def source_resample_phase_vert(im_arr, num_slices=None):
     return np.hstack(slices)
 
 
-@apply_transform_cost()
+@apply_transform_cost(COST_LEVEL_4)
 def source_resample_phase_hor(im_arr, num_slices=None):
     """
     Horizontally slice up image and np.roll each slice by an incremental shift
@@ -243,7 +251,7 @@ def source_resample_phase_hor(im_arr, num_slices=None):
     return im_arr
 
 
-@apply_transform_cost()
+@apply_transform_cost(COST_LEVEL_2)
 def source_resample_flip_slices_vert(im_arr, num_slices=None, axis=None):
     """
     Take an image array, slice it up vertically, and np.flip alternating slices
@@ -260,7 +268,7 @@ def source_resample_flip_slices_vert(im_arr, num_slices=None, axis=None):
     return np.hstack(slices)
 
 
-@apply_transform_cost()
+@apply_transform_cost(COST_LEVEL_3)
 def source_resample_flip_slices_hor(im_arr, num_slices=None, axis=None):
     """
     Take an image array, slice it up horizontally, and np.flip alternating slices
@@ -276,7 +284,7 @@ def source_resample_flip_slices_hor(im_arr, num_slices=None, axis=None):
     return im_arr
 
 
-@apply_transform_cost()
+@apply_transform_cost(COST_LEVEL_4)
 def source_resample_grid(im_arr, num_dups_vert=None, num_dups_hor=None, num_slices_per_dup=None):
     """
     Resample crisscrossed slices of an image into a grid of duplicates via uniform sampling
@@ -301,7 +309,7 @@ def source_resample_grid(im_arr, num_dups_vert=None, num_dups_hor=None, num_slic
     return final_im_arr
 
 
-@apply_transform_cost()
+@apply_transform_cost(COST_LEVEL_5)
 def source_offcrop_recursive(im_arr, mask_text=None):
     """
     Recursively off-crop an image with itself using a bitmask
@@ -416,31 +424,31 @@ def cropbox_central_shape(im_arr, crop_shape=None):
     central_crop_box = (left, top, right, bottom)
     return central_crop_box
 
+# -----------------------------------------------------
+# Keep track of the source transform operations defined
 
 # Operations that compute the cropbox of an array
-CROPBOX_OPERATIONS = [              # relative time, out of 100
-    cropbox_off_center_random,      # 20
-    cropbox_central_square          # 80
+CROPBOX_OPERATIONS = [
+    cropbox_off_center_random,
+    cropbox_central_square,
 ]
 
 # Operations that slice up and resample an array (e.g. vertical duping)
-# TODO this can be formed with a small utility function based on function name...for now
-RESAMPLE_TRANSFORMS = [                # relative time, summing to 100
-    source_resample_reverse,           # 1
-    source_resample_shuffle,           # 1
-    source_resample_stack_vertical,    # 1
-    source_resample_stack_horizontal,  # 22
-    source_resample_grid,              # 23
-    source_resample_phase_hor,         # 28
-    source_resample_phase_vert,        # 2
-    source_resample_flip_slices_vert,  # 5
-    source_resample_flip_slices_hor,   # 16
+# TODO (later) This can be formed with a small utility function based on function name.
+SOURCE_RESAMPLE_TRANSFORMS = [
+    source_resample_reverse,
+    source_resample_shuffle,
+    source_resample_stack_vertical,
+    source_resample_stack_horizontal,
+    source_resample_grid,
+    source_resample_phase_hor,
+    source_resample_phase_vert,
+    source_resample_flip_slices_vert,
+    source_resample_flip_slices_hor,
+    source_resample_random,
 ]
 
-'''
-Grouping Transforms according to visual complexity
-'''
-D_TRANSFORMS_SIMPLE = [
+SOURCE_TRANSFORMS_SIMPLE = [
     source_flip_lr,
     source_flip_ud,
     source_rotate_180,
@@ -449,7 +457,6 @@ D_TRANSFORMS_SIMPLE = [
     source_phase_vert,
 ]
 
-D_TRANSFORMS_COMPLEX = [
+SOURCE_TRANSFORMS_COMPLEX = [
     source_offcrop_recursive,
-    source_resample_random,
 ]

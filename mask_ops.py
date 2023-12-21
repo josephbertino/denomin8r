@@ -63,7 +63,6 @@ def build_mask_from_text(text, fontfile, fontsize, kern_rate):
     return text_image
 
 
-
 def build_bitmask_to_size(text, fontfile, shape, kern_rate=1.0):
     """
     Generate Image.Image from text and font, to fit the given shape (w, h)

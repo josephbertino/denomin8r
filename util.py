@@ -93,6 +93,11 @@ def load_sources_half_latest_pairs(n=1):
     return list(zip(latest, randos))
 
 
+def get_random_im_arr():
+    im_arrs, _ = load_sources(latest=False, n=1)
+    return im_arrs[0]
+
+
 def fn_runner(func):
     sg.set_options(font=("Helvetica", 16))
     sg.theme('dark grey 9')  # Add a touch of color
@@ -287,6 +292,10 @@ def save_images_from_arrays(im_arrs, draw_handle):
 
 
 # TODO resume testing from here!
+'''
+. I might want NOTHING to happen to the image. It doesn't always have to be transformed... that should sort of be a special occurrence
+. Yeah, chance should first dictate whether SOMETHING happens at all, and then chance should dictate which things happen
+'''
 def chaos_source_transform(im_arr):
     """
     Take an image and run it through a series of transformations, then return the modified image.
@@ -297,7 +306,7 @@ def chaos_source_transform(im_arr):
     :return np.ndarray, operation_list:
     """
     # Build list of operations
-    transforms = random.sample(D_TRANSFORMS_SIMPLE, k=2) + random.sample(D_TRANSFORMS_COMPLEX, k=1)
+    transforms = random.sample(SOURCE_TRANSFORMS_SIMPLE, k=2) + random.sample(SOURCE_TRANSFORMS_COMPLEX, k=1)
     random.shuffle(transforms)
 
     op_list = []

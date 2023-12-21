@@ -248,7 +248,7 @@ def profile_normalize_times(fn_times):
     :return:
     """
     s = sum(fn_times)
-    norm_times = list(map(lambda x: (x / s) * 100, fn_times))
+    norm_times = list(map(lambda x: math.ceil((x / s) * 100), fn_times))
     return norm_times
 
 
@@ -284,6 +284,7 @@ def profile_and_plot_fns(fn_list, im_arr):
     fn_names, fn_times = list(zip(*name_times))
     norm_times = profile_normalize_times(fn_times)
     profile_bar_chart(fn_names, norm_times, "Transform", "Relative Time (%)")
+    return list(fn_names), list(norm_times)
 
 
 # TODO can refactor this to just get the min() of all h's and w's from a list of dimensions

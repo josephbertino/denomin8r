@@ -88,10 +88,10 @@ def simple_bitmask_swap(image1, image2, mask):
     :return tuple(np.ndarray) :
     """
 
-    img1_over_img2 = np.where(mask, image1, image2)
-    img2_over_img1 = np.where(mask, image2, image1)
+    mask_is_img1 = np.where(mask, image1, image2)
+    mask_is_img2 = np.where(mask, image2, image1)
 
-    return img1_over_img2, img2_over_img1
+    return mask_is_img1, mask_is_img2
 
 
 def make_bitmask_from_bw_image(mask_src):

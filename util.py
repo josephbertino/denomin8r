@@ -289,31 +289,3 @@ def save_images_from_arrays(im_arrs, draw_handle):
             img = draw_handle_on_img(img)
 
         img.save(f'/output/{random_id}_{i}.jpg')
-
-
-# TODO resume testing from here!
-'''
-. I might want NOTHING to happen to the image. It doesn't always have to be transformed... that should sort of be a special occurrence
-. Yeah, chance should first dictate whether SOMETHING happens at all, and then chance should dictate which things happen
-'''
-def chaos_source_transform(im_arr):
-    """
-    Take an image and run it through a series of transformations, then return the modified image.
-        The number and order of transformations will be determined by chance, but to constrain
-        resources a max of 1 "complex" transform will be performed
-
-    :param np.ndarray im_arr:
-    :return np.ndarray, operation_list:
-    """
-    # Build list of operations
-    transforms = random.sample(SOURCE_TRANSFORMS_SIMPLE, k=2) + random.sample(SOURCE_TRANSFORMS_COMPLEX, k=1)
-    random.shuffle(transforms)
-
-    op_list = []
-    for transform in transforms:
-        im_arr = transform(im_arr)
-        op_list.append(transform.__name__)
-        if random.random() > 0.66:
-            break
-
-    return im_arr, op_list

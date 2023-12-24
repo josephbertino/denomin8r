@@ -165,6 +165,7 @@ Celebrities doing blackface
 Birds
 Sol Lewitt 10 Geometric Figures
 Grids of Flags
+Video Game Fight Scenes, esp. Street Fighter
 '''
 
 '''

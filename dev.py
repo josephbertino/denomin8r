@@ -6,8 +6,6 @@ kern_rate = 1.0
 
 # -----DO NOT DELETE ABOVE THIS LINE---------------------------
 # TODO Big Project 1: "Chaos Source Transforms"
-# TODO refactor chaos_source_transform to consider function cost once again
-
 
 def chaos_source_transform(im_arr):
     """
@@ -36,7 +34,7 @@ def chaos_source_transform(im_arr):
 
     return im_arr, transform_list
 
-pairs = load_sources_half_latest_pairs(n=15)
+pairs = load_sources_half_latest_pairs(n=20)
 for pa, pb in pairs:
     pa, pa_transform_list = chaos_source_transform(pa)
     pb, pb_transform_list = chaos_source_transform(pb)
@@ -51,7 +49,7 @@ for pa, pb in pairs:
     mask_is_pa.show()
     mask_is_pb.show()
 
-
+# TODO continue tweaking TRANSFORM_FREQ
 # TODO move cropbox methods to tools.py?
 # TODO consider "Observation" notes below for method tweaking
 # TODO finish off with a stamp

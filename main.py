@@ -161,7 +161,6 @@ Start doing series on just one idea
 '''
 # Source Ideas
 NYPD Logos and Imagery
-Celebrities doing blackface
 Birds
 Sol Lewitt 10 Geometric Figures
 Grids of Flags

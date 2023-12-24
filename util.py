@@ -244,7 +244,7 @@ def draw_test_params(img, **kwargs):
     # Draw background
     extra = math.ceil(params_h * 0.1)  # padding
     draw.rectangle(((pos_left, pos_top), (pos_left + params_w + extra, pos_top + params_h + extra)), fill="black")
-    draw.text((pos_left, pos_top), text, font=font_obj, fill=rgb2bgr(Colors.OG_ORANGE))
+    draw.text((pos_left, pos_top), text, font=font_obj, fill=rgb2bgr(Colors.YELLOW))
 
     return img
 

@@ -37,6 +37,7 @@ class Colors(IntEnum):
     OG_BLUE = 0x2864C8
     WHITE = 0xFFFFFF
     BLACK = 0x000000
+    YELLOW = 0xfffb1c
 
 
 def get_sig_details(func):

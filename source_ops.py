@@ -127,7 +127,7 @@ def source_crop_random(im_arr):
     return cropped_im_arr
 
 
-@apply_transform_cost(COST_LEVEL_1)
+@apply_transform_cost(COST_LEVEL_3)
 def source_resample_random(im_arr):
     """
     Apply slice-duping to image array with a randomly-selected method
@@ -143,7 +143,7 @@ def source_resample_random(im_arr):
     return sliced_im_arr
 
 
-@apply_transform_cost(COST_LEVEL_1)
+@apply_transform_cost(COST_LEVEL_3)
 def source_resample_shuffle(im_arr, num_slices=None):
     """
     Vertically slice up image and rearrange the slices randomly
@@ -160,7 +160,7 @@ def source_resample_shuffle(im_arr, num_slices=None):
     return np.hstack(slices)
 
 
-@apply_transform_cost(COST_LEVEL_1)
+@apply_transform_cost(COST_LEVEL_3)
 def source_resample_reverse(im_arr, num_slices=None):
     """
     Vertically slice up image and reverse the order
@@ -176,7 +176,7 @@ def source_resample_reverse(im_arr, num_slices=None):
     return np.hstack(slices)
 
 
-@apply_transform_cost(COST_LEVEL_1)
+@apply_transform_cost(COST_LEVEL_4)
 def source_resample_stack_vertical(im_arr, num_dups=None, num_slices_per_dup=None):
     """
     Reorder vertical slices of an image into a stack of duplicates via uniform sampling
@@ -214,7 +214,7 @@ def source_resample_stack_horizontal(im_arr, num_dups=None, num_slices_per_dup=N
     return final_im_arr
 
 
-@apply_transform_cost(COST_LEVEL_1)
+@apply_transform_cost(COST_LEVEL_4)
 def source_resample_phase_vert(im_arr, num_slices=None):
     """
     Vertically slice up image and np.roll each slice by an incremental shift
@@ -252,7 +252,7 @@ def source_resample_phase_hor(im_arr, num_slices=None):
     return im_arr
 
 
-@apply_transform_cost(COST_LEVEL_2)
+@apply_transform_cost(COST_LEVEL_3)
 def source_resample_flip_slices_vert(im_arr, num_slices=None, axis=None):
     """
     Take an image array, slice it up vertically, and np.flip alternating slices

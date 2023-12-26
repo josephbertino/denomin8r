@@ -299,7 +299,7 @@ def chaos_source_transform(im_arr):
     :return np.ndarray, list[str]:
     """
     budget = CHAOS_BUDGET  # Caps the number of transforms you can perform
-    TRANSFORM_FREQ = random.uniform(0.30, 0.55)  # Dictates the likelihood of perform a source transform
+    TRANSFORM_FREQ = random.uniform(0.30, 0.53)  # Dictates the likelihood of perform a source transform
 
     transform_list = []
     while random.random() < TRANSFORM_FREQ:

@@ -8,6 +8,7 @@ import inspect
 import random
 import logging
 import time
+from collections import defaultdict
 
 import numpy as np
 from PIL import Image
@@ -253,7 +254,7 @@ def profile_normalize_times(fn_times):
     return norm_times
 
 
-def profile_bar_chart(indices, values, index_label, value_label):
+def profile_bar_chart(indices, values, index_label, value_label, title=''):
     """
 
     :param indices:
@@ -268,6 +269,7 @@ def profile_bar_chart(indices, values, index_label, value_label):
     plt.ylabel(value_label, fontweight='bold', fontsize=15)
     plt.subplots_adjust(bottom=0.4)
     plt.bar_label(bars)
+    plt.title(title)
     plt.show()
 
 

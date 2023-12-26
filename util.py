@@ -289,3 +289,31 @@ def save_images_from_arrays(im_arrs, draw_handle):
             img = draw_handle_on_img(img)
 
         img.save(f'/output/{random_id}_{i}.jpg')
+
+
+def chaos_source_transform(im_arr):
+    """
+    Take an image and run it through a series of transformations, then return the modified image.
+        The number and order of transformations will be determined by chance
+
+    :param np.ndarray im_arr:
+    :return np.ndarray, list[str]:
+    """
+    budget = CHAOS_BUDGET  # Caps the number of transforms you can perform
+    TRANSFORM_FREQ = random.uniform(0.30, 0.55)  # Dictates the likelihood of perform a source transform
+
+    transform_list = []
+    while random.random() < TRANSFORM_FREQ:
+        transform = random.choice(ALL_TRANSFORMS)
+        t_cost = transform.transform_cost if transform.transform_cost else COST_LEVEL_3
+        if t_cost > budget:
+            continue
+
+        budget -= t_cost  # Reduce budget because we perform transform
+        im_arr = transform(im_arr)  # Do the transform
+        transform_list.append(transform.__name__)
+
+        if (budget < 1) or (2 < len(transform_list)):
+            break
+
+    return im_arr, transform_list

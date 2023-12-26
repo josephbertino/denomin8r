@@ -6,6 +6,7 @@ Notes:
         as their first parameter, and all other parameters are kwargs with default values
 """
 from mask_ops import *
+from tools import crop_im_arr
 
 CHAOS_BUDGET = 100
 MAGIC_VAL = 2.4992  # Value chosen such that (x ** 5 + x) == 100
@@ -349,89 +350,8 @@ def source_offcrop_recursive(im_arr, mask_text=None):
     return im_arr_a
 
 
-def crop_im_arr(im_arr, cropbox_method=None, **kwargs):
-    """
-    Crop image array according to method passed as parameter.
-        If cropbox_method==None, default to tools.cropbox_central_square
-
-    :param np.ndarray im_arr:
-    :param function cropbox_method:
-    :return np.ndarray:
-    """
-    if cropbox_method is None:
-        cropbox_method = cropbox_central_square
-
-    left, top, right, bottom = cropbox_method(im_arr, **kwargs)
-    return im_arr[top:bottom, left:right]
-
-
-def cropbox_central_square(im_arr):
-    """
-    Return cropbox for max-square within image array, centralized
-
-    :param np.ndarray im_arr:
-    :return tuple(int):
-    """
-    return cropbox_central_shape(im_arr, get_array_square_shape(im_arr))
-
-
-def cropbox_off_center_random(im_arr):
-    """
-    Get Off-Center cropbox for image based on random "jitter"
-
-    :param np.ndarray im_arr:
-    :return (int, int, int, int):   left, top, right, bottom
-    """
-    jitter = float(random.choice(range(5, 10)) / 100)
-    crop_cap = 1.0 - jitter
-
-    # Determine size of image
-    w, h = im_size = get_np_array_shape(im_arr)
-    min_side = min(im_size)
-    max_jitter = min_side * jitter / 2
-
-    # Slightly reduce image_shape to make smaller crop_shape,
-    #   so there is room for jitter of the crop box
-    crop_shape = (math.floor(w * crop_cap), math.floor(h * crop_cap))
-
-    # determine origin point for image crops
-    orig_crop_box = cropbox_central_shape(im_arr, crop_shape)
-    jitter_w = ffloor(max_jitter * random.uniform(-1, 1))
-    jitter_h = ffloor(max_jitter * random.uniform(-1, 1))
-
-    # apply jitter_w and jitter_h to crop_box
-    left, top, right, bottom = orig_crop_box
-    jitter_crop_box = (left + jitter_w, top + jitter_h, right + jitter_w, bottom + jitter_h)
-
-    return jitter_crop_box
-
-
-def cropbox_central_shape(im_arr, crop_shape=None):
-    """
-    Return the cropbox for an image, where you crop from the center for a given shape
-
-    :param np.ndarray im_arr:       image array
-    :param tuple(int) crop_shape:   (w, h) of the desired crop shape
-    :return tuple(int):
-    """
-    crop_shape = get_array_square_shape(im_arr) if not crop_shape else crop_shape
-    crop_w, crop_h = crop_shape
-    img_w, img_h = get_np_array_shape(im_arr)
-    left = (img_w - crop_w) // 2
-    top = (img_h - crop_h) // 2
-    right = left + crop_w
-    bottom = top + crop_h
-    central_crop_box = (left, top, right, bottom)
-    return central_crop_box
-
 # -----------------------------------------------------
 # Keep track of the source transform operations defined
-
-# Operations that compute the cropbox of an array
-CROPBOX_OPERATIONS = [
-    cropbox_off_center_random,
-    cropbox_central_square,
-]
 
 # Operations that slice up and resample an array (e.g. vertical duping)
 # TODO (later) This can be formed with a small utility function based on function name.

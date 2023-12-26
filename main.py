@@ -125,25 +125,30 @@ Big Project 2: Flags, Colonialism, Imperialism
 Big Project 3: Gradual Transformation a la Philip Glass
 + First draw a canvas then Start of with painting a portion of a source image on the left hand side (or wherever you decide is the start). Then duplicate, reiterate, replicate the source image across the space but shifting and glitching it, transforming, modulating it, until gradually you transition it into a completely different image, or a combination of multiple images
 + Celebrity surgery transitions
+
+Big Project 4:
 '''
 
 '''
 EXHIBIT IDEAS
 
-0) 
+0) Chaos Source Transform
+Just a fun exhibit of everything up to Chaos Source Transform.
+
+1)
 + Flag project showing effects of colonization and imperialism on the identities of the victims / subjected
 + Thesis: Typically national flags are the product of emergence from the hold / ownership of a former colonizer. A nation only earns a flag when it becomes a nation---sovereign, free, and with its own identity. Well what happens when I interweave nations' flags with the flags of their former colonizers or identity? What emerges from this act of visual and political regression? What happens when the symbol of one's pride, culture, heritage, and identity becomes visually massacred, evocative of the bloody wars that were fought to secure new freedom and that very identity which is now once again vulnerable and split open? Moreover, can we ignore the lasting influence that former colonizers might still exert upon "sovereign" nations? Is not part of the nation's identity interwoven already with that of its former possessor
 + Idea: Take images of flags and interweave them with the flags of their former colonizers or oppressors.
 + Idea: Take images of flags and interweave them with random flags to see what happens
 + Idea: Interweave symbols of money / currency / commodities / natural resources relevant to the flag's country
 
-1) "Big D Energy"
+2) "Big D Energy"
 + Debut of Denominator plastering itself across all walks of life, art, fake life, fake art, capitalism
 + Large prints, one-offs, as well as unique projected works that auto-generated and destroyed
 +  (something else cool)
 +  (something else cool)
 
-2) "(Your Text Here)"
+3) "(Your Text Here)"
 + Users scan QR codes, and plug in what they want to be generated. They give prompts for (a) source images and (b) the stamp
 + Users can also submit selfies to get their faces Denominated
 + (what else can users submit?)

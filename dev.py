@@ -6,7 +6,7 @@ kern_rate = 1.0
 
 # -----DO NOT DELETE ABOVE THIS LINE---------------------------
 # TODO Big Project 1: "Chaos Source Transforms"
-# TODO move cropbox methods to tools.py?
+
 # TODO consider "Observation" notes below for method tweaking
 # TODO finish off with a stamp
 

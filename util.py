@@ -4,7 +4,6 @@ from sortedcontainers import SortedSet
 import PySimpleGUI as sg
 
 from source_ops import *
-from tools import get_common_crop_shape
 
 SOURCE_FILES = None
 

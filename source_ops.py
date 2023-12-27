@@ -11,33 +11,40 @@ from tools import crop_im_arr
 CHAOS_BUDGET = 100
 # TODO COST_LEVELS should be tweaked to reflect how much they distort the source from recognition. A MAX level should only be allowed to be paired with 1 MIN level. There should only be 3 LEVEL-4s applied to the same image, etc. I think once I come up with a rule for each of the 5 levels, determining their value will be simple algebra
 
-'''
+"""
 Variables
 a, b, c, d, e       # aka LVL1, LVL2, LVL3, LVL4, LVL5
 BUDGET              # 100 for roundness
 
 Constraints
 a < b < c < d < e < BUDGET
-3b + 2a < BUDGET
-4b > BUDGET
-2c + b + a < BUDGET
-3c > BUDGET
-2d + a < BUDGET
-2d + b > BUDGET
-d + c + a < BUDGET
-d + c + b > BUDGET
-e + c > BUDGET
-2e > BUDGET
-e + 2a < BUDGET
-e + 3a > BUDGET
-e + b < BUDGET
-e + 2b > BUDGET
-e + b + a > BUDGET
 
+# Can have as many A's as you'd like
+5a          < BUDGET
 
+# Can be tripled
+4b          > BUDGET
+3b + 2a     > BUDGET
+3b + a      < BUDGET
+2b + 2a     < BUDGET
 
+# Can have 2, and with 2 B's is fine
+3c          > BUDGET
+2c + 2b     < BUDGET
 
-'''
+# Can have 2 but only with 1 A. If just 1, can be paired with 1 C and 1 A
+3d          > BUDGET
+2d + b      > BUDGET
+d + c + b   > BUDGET
+2d + a      < BUDGET
+d + c + a   < BUDGET
+
+# Can only have 1 E, and it can only be paired with A's
+2e          > BUDGET
+e + b       > BUDGET
+e + 2a      > BUDGET
+e + a       < BUDGET
+"""
 
 MAGIC_VAL = 2.4992  # Value chosen such that (x ** 5 + x) == 100
 COST_LEVEL_1 = MAGIC_VAL ** 1

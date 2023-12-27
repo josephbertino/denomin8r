@@ -22,9 +22,13 @@ for pa, pb in load_sources_half_latest_pairs(n=30):
     mask_is_pa.show()
     mask_is_pb.show()
 
-# TODO COST_LEVELS should be tweaked to reflect how much they distort the source from recognition. A MAX level should only be allowed to be paired with 1 MIN level. There should only be 3 LEVEL-4s applied to the same image, etc. I think once I come up with a rule for each of the 5 levels, determining their value will be simple algebra
 # TODO consider "Observation" notes below for method tweaking
 # TODO finish off with a stamp
+
+'''
+I definitely vibe more with images that are less processed. Have to especially be gentle with source_resample transforms, like grid and vertical/horizontal restacks
+'''
+
 
 """
 # Observations

@@ -9,6 +9,36 @@ from mask_ops import *
 from tools import crop_im_arr
 
 CHAOS_BUDGET = 100
+# TODO COST_LEVELS should be tweaked to reflect how much they distort the source from recognition. A MAX level should only be allowed to be paired with 1 MIN level. There should only be 3 LEVEL-4s applied to the same image, etc. I think once I come up with a rule for each of the 5 levels, determining their value will be simple algebra
+
+'''
+Variables
+a, b, c, d, e       # aka LVL1, LVL2, LVL3, LVL4, LVL5
+BUDGET              # 100 for roundness
+
+Constraints
+a < b < c < d < e < BUDGET
+3b + 2a < BUDGET
+4b > BUDGET
+2c + b + a < BUDGET
+3c > BUDGET
+2d + a < BUDGET
+2d + b > BUDGET
+d + c + a < BUDGET
+d + c + b > BUDGET
+e + c > BUDGET
+2e > BUDGET
+e + 2a < BUDGET
+e + 3a > BUDGET
+e + b < BUDGET
+e + 2b > BUDGET
+e + b + a > BUDGET
+
+
+
+
+'''
+
 MAGIC_VAL = 2.4992  # Value chosen such that (x ** 5 + x) == 100
 COST_LEVEL_1 = MAGIC_VAL ** 1
 COST_LEVEL_2 = MAGIC_VAL ** 2
@@ -55,7 +85,7 @@ def source_flip_ud(im_arr):
     return np.flipud(im_arr)
 
 
-@apply_transform_cost(COST_LEVEL_1)
+@apply_transform_cost(COST_LEVEL_2)
 def source_phase_vert(im_arr, shift=None):
     """
     Phase (np.roll) an image according along its vertical axis
@@ -72,7 +102,7 @@ def source_phase_vert(im_arr, shift=None):
     return np.roll(im_arr, axis=0, shift=shift)
 
 
-@apply_transform_cost(COST_LEVEL_1)
+@apply_transform_cost(COST_LEVEL_2)
 def source_phase_hor(im_arr, shift=None):
     """
     Phase ('roll') an image according along its horizontal axis
@@ -89,7 +119,7 @@ def source_phase_hor(im_arr, shift=None):
     return np.roll(im_arr, axis=1, shift=shift)
 
 
-@apply_transform_cost(COST_LEVEL_1)
+@apply_transform_cost(COST_LEVEL_2)
 def source_phase_complete(im_arr):
     """
     Phase ('roll') an image according to both width and height axes

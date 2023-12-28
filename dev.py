@@ -8,7 +8,7 @@ kern_rate = 1.0
 # TODO Big Project 1: "Chaos Source Transforms"
 
 # dev code
-for pa, pb in load_sources_half_latest_pairs(n=30):
+for pa, pb in load_sources_half_latest_pairs(n=15):
     pa, pa_transform_list = chaos_source_transform(pa)
     pb, pb_transform_list = chaos_source_transform(pb)
     mask_is_pa, mask_is_pb = classic_D_swap_random(pa, pb)
@@ -28,8 +28,6 @@ for pa, pb in load_sources_half_latest_pairs(n=30):
 '''
 I definitely vibe more with images that are less processed. Have to especially be gentle with source_resample transforms, like grid and vertical/horizontal restacks
 '''
-
-
 """
 # Observations
 

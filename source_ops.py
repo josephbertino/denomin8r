@@ -9,52 +9,14 @@ from mask_ops import *
 from tools import crop_im_arr
 
 CHAOS_BUDGET = 100
-# TODO COST_LEVELS should be tweaked to reflect how much they distort the source from recognition. A MAX level should only be allowed to be paired with 1 MIN level. There should only be 3 LEVEL-4s applied to the same image, etc. I think once I come up with a rule for each of the 5 levels, determining their value will be simple algebra
-
-"""
-Variables
-a, b, c, d, e       # aka LVL1, LVL2, LVL3, LVL4, LVL5
-BUDGET              # 100 for roundness
-
-Constraints
-a < b < c < d < e < BUDGET
-
-# Can have as many A's as you'd like
-5a          < BUDGET
-
-# Can be tripled
-4b          > BUDGET
-3b + 2a     > BUDGET
-3b + a      < BUDGET
-2b + 2a     < BUDGET
-
-# Can have 2, and with 2 B's is fine
-3c          > BUDGET
-2c + 2b     < BUDGET
-
-# Can have 2 but only with 1 A. If just 1, can be paired with 1 C and 1 A
-3d          > BUDGET
-2d + b      > BUDGET
-d + c + b   > BUDGET
-2d + a      < BUDGET
-d + c + a   < BUDGET
-
-# Can only have 1 E, and it can only be paired with A's
-2e          > BUDGET
-e + b       > BUDGET
-e + 2a      > BUDGET
-e + a       < BUDGET
-"""
-
-MAGIC_VAL = 2.4992  # Value chosen such that (x ** 5 + x) == 100
-COST_LEVEL_1 = MAGIC_VAL ** 1
-COST_LEVEL_2 = MAGIC_VAL ** 2
-COST_LEVEL_3 = MAGIC_VAL ** 3
-COST_LEVEL_4 = MAGIC_VAL ** 4
-COST_LEVEL_5 = MAGIC_VAL ** 5
+COST_LEVEL_1 = 10
+COST_LEVEL_2 = 20
+COST_LEVEL_3 = 30
+COST_LEVEL_4 = 50
+COST_LEVEL_5 = 80
 
 
-def apply_transform_cost(cost=COST_LEVEL_1):
+def apply_transform_cost(cost=COST_LEVEL_3):
     """
     Decorator method to apply a "cost" attribute to functions
         that get wrapped by the output wrapper
@@ -90,6 +52,30 @@ def source_flip_ud(im_arr):
     :return np.ndarray:
     """
     return np.flipud(im_arr)
+
+
+@apply_transform_cost(COST_LEVEL_1)
+def source_rotate_180(im_arr):
+    """
+    Rotate 180 degrees an image array
+
+    :param np.ndarray im_arr:
+    :return np.ndarray:
+    """
+    return np.rot90(m=im_arr, k=2)
+
+
+@apply_transform_cost(COST_LEVEL_1)
+def source_crop_random(im_arr):
+    """
+    Apply cropping to image array with a randomly-selected method
+
+    :param np.ndarray im_arr:
+    :return np.ndarray:
+    """
+    cropbox_method = random.choice(CROPBOX_OPERATIONS)
+    cropped_im_arr = crop_im_arr(im_arr=im_arr, cropbox_method=cropbox_method)
+    return cropped_im_arr
 
 
 @apply_transform_cost(COST_LEVEL_2)
@@ -140,46 +126,6 @@ def source_phase_complete(im_arr):
     return im_arr
 
 
-@apply_transform_cost(COST_LEVEL_1)
-def source_rotate_180(im_arr):
-    """
-    Rotate 180 degrees an image array
-
-    :param np.ndarray im_arr:
-    :return np.ndarray:
-    """
-    return np.rot90(m=im_arr, k=2)
-
-
-@apply_transform_cost(COST_LEVEL_1)
-def source_crop_random(im_arr):
-    """
-    Apply cropping to image array with a randomly-selected method
-
-    :param np.ndarray im_arr:
-    :return np.ndarray:
-    """
-    cropbox_method = random.choice(CROPBOX_OPERATIONS)
-    cropped_im_arr = crop_im_arr(im_arr=im_arr, cropbox_method=cropbox_method)
-    return cropped_im_arr
-
-
-@apply_transform_cost(COST_LEVEL_3)
-def source_resample_random(im_arr):
-    """
-    Apply slice-duping to image array with a randomly-selected method
-
-    :param np.ndarray im_arr:
-    :return np.ndarray:
-    """
-    slice_method = random.choice(SOURCE_RESAMPLE_TRANSFORMS)
-    method_name = slice_method.__name__
-    logger.info(f"Implementing SLICE method {method_name}")
-
-    sliced_im_arr = slice_method(im_arr)
-    return sliced_im_arr
-
-
 @apply_transform_cost(COST_LEVEL_3)
 def source_resample_shuffle(im_arr, num_slices=None):
     """
@@ -211,6 +157,39 @@ def source_resample_reverse(im_arr, num_slices=None):
     slices = slice_up_array_uniform(im_arr, num_slices)
     slices = slices[::-1]
     return np.hstack(slices)
+
+
+@apply_transform_cost(COST_LEVEL_4)
+def source_resample_flip_slices_vert(im_arr, num_slices=None, axis=None):
+    """
+    Take an image array, slice it up vertically, and np.flip alternating slices
+
+    :param np.ndarray im_arr:
+    :param num_slices:
+    :param axis:
+    :return np.ndarray :
+    """
+    num_slices = num_slices if num_slices else random.choice(range(2, 40))
+    slices = slice_up_array_uniform(im_arr, num_slices=num_slices)
+    axis = axis if isinstance(axis, int) else random.choice([0, 1])  # Flip slices UD or LR
+    slices = list(map(lambda tup: tup[1] if tup[0] % 2 == 0 else np.flip(tup[1], axis=axis), enumerate(slices)))
+    return np.hstack(slices)
+
+
+@apply_transform_cost(COST_LEVEL_4)
+def source_resample_flip_slices_hor(im_arr, num_slices=None, axis=None):
+    """
+    Take an image array, slice it up horizontally, and np.flip alternating slices
+
+    :param np.ndarray im_arr:
+    :param num_slices:
+    :param axis:
+    :return np.ndarray:
+    """
+    im_arr = np.rot90(im_arr, k=1)
+    im_arr = source_resample_flip_slices_vert(im_arr, num_slices, axis)
+    im_arr = np.rot90(im_arr, k=3)
+    return im_arr
 
 
 @apply_transform_cost(COST_LEVEL_4)
@@ -289,39 +268,6 @@ def source_resample_phase_hor(im_arr, num_slices=None):
     return im_arr
 
 
-@apply_transform_cost(COST_LEVEL_3)
-def source_resample_flip_slices_vert(im_arr, num_slices=None, axis=None):
-    """
-    Take an image array, slice it up vertically, and np.flip alternating slices
-
-    :param np.ndarray im_arr:
-    :param num_slices:
-    :param axis:
-    :return np.ndarray :
-    """
-    num_slices = num_slices if num_slices else random.choice(range(2, 40))
-    slices = slice_up_array_uniform(im_arr, num_slices=num_slices)
-    axis = axis if isinstance(axis, int) else random.choice([0, 1])  # Flip slices UD or LR
-    slices = list(map(lambda tup: tup[1] if tup[0] % 2 == 0 else np.flip(tup[1], axis=axis), enumerate(slices)))
-    return np.hstack(slices)
-
-
-@apply_transform_cost(COST_LEVEL_3)
-def source_resample_flip_slices_hor(im_arr, num_slices=None, axis=None):
-    """
-    Take an image array, slice it up horizontally, and np.flip alternating slices
-
-    :param np.ndarray im_arr:
-    :param num_slices:
-    :param axis:
-    :return np.ndarray:
-    """
-    im_arr = np.rot90(im_arr, k=1)
-    im_arr = source_resample_flip_slices_vert(im_arr, num_slices, axis)
-    im_arr = np.rot90(im_arr, k=3)
-    return im_arr
-
-
 @apply_transform_cost(COST_LEVEL_4)
 def source_resample_grid(im_arr, num_dups_vert=None, num_dups_hor=None, num_slices_per_dup=None):
     """
@@ -345,6 +291,22 @@ def source_resample_grid(im_arr, num_dups_vert=None, num_dups_hor=None, num_slic
     grid_im_arr = slice_resample_array_vertical(rotated_duped_im_arr, num_dups_hor, num_slices_hor)
     final_im_arr = np.rot90(m=grid_im_arr, k=3)     # 270
     return final_im_arr
+
+
+@apply_transform_cost(COST_LEVEL_4)
+def source_resample_random(im_arr):
+    """
+    Apply slice-duping to image array with a randomly-selected method
+
+    :param np.ndarray im_arr:
+    :return np.ndarray:
+    """
+    slice_method = random.choice(SOURCE_RESAMPLE_TRANSFORMS)
+    method_name = slice_method.__name__
+    logger.info(f"Implementing SLICE method {method_name}")
+
+    sliced_im_arr = slice_method(im_arr)
+    return sliced_im_arr
 
 
 @apply_transform_cost(COST_LEVEL_5)

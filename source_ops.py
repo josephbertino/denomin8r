@@ -192,18 +192,36 @@ def source_resample_flip_slices_hor(im_arr, num_slices=None, axis=None):
     return im_arr
 
 
+def get_num_slices_per_dup_vert(num_dups, portrait_mode):
+    """
+
+    :param int num_dups:
+    :param bool portrait_mode:
+    :return:
+    """
+    if not portrait_mode or num_dups <= 4:
+        exp = random.choice(range(1, 6))
+    elif num_dups == 5:
+        exp = random.choice([1, 2, 3, 5])
+    else:
+        exp = 5
+    return 2 ** exp
+
+
 @apply_transform_cost(COST_LEVEL_4)
-def source_resample_stack_vertical(im_arr, num_dups=None, num_slices_per_dup=None):
+def source_resample_stack_vertical(im_arr, num_dups=None, num_slices_per_dup=None, portrait_mode=False):
     """
     Reorder vertical slices of an image into a stack of duplicates via uniform sampling
+        Perfect for making creepy thin duplications of faces
 
     :param np.ndarray im_arr:
     :param num_dups:
     :param num_slices_per_dup:
+    :param bool portrait_mode:  Whether the source is a face portrait
     :return np.ndarray:
     """
     num_dups = num_dups if num_dups else random.choice(range(2,8))
-    num_slices_per_dup = num_slices_per_dup if num_slices_per_dup else 2 ** random.choice(range(1, 6))
+    num_slices_per_dup = num_slices_per_dup if num_slices_per_dup else get_num_slices_per_dup_vert(num_dups, portrait_mode)
 
     num_slices = num_dups * num_slices_per_dup
     duped_im_arr = slice_resample_array_vertical(im_arr, num_dups, num_slices)
@@ -211,17 +229,19 @@ def source_resample_stack_vertical(im_arr, num_dups=None, num_slices_per_dup=Non
 
 
 @apply_transform_cost(COST_LEVEL_4)
-def source_resample_stack_horizontal(im_arr, num_dups=None, num_slices_per_dup=None):
+def source_resample_stack_horizontal(im_arr, num_dups=None, num_slices_per_dup=None, portrait_mode=False):
     """
-    Reorder horizontal slices of an image into a stack of duplicates of the original, via uniform sampling
+    Reorder horizontal slices of an image into a stack of duplicates of the original,
+        via uniform sampling
 
     :param np.ndarray im_arr:
     :param num_dups:
     :param num_slices_per_dup:
+    :param bool portrait_mode:  Whether the source is a face portrait
     :return np.ndarray:
     """
-    num_dups = num_dups if num_dups else random.choice(range(2,8))
-    num_slices_per_dup = num_slices_per_dup if num_slices_per_dup else 2 ** random.choice(range(1, 6))
+    num_dups = num_dups if num_dups else random.choice(range(2,5))
+    num_slices_per_dup = num_slices_per_dup if num_slices_per_dup else 2 ** random.choice(range(4, 7))
 
     num_slices = num_dups * num_slices_per_dup
     rotated_im_arr = np.rot90(m=im_arr, k=1)    # 90

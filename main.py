@@ -90,12 +90,14 @@ def main(mask:str=MASK,
 # TODO util to make gifs of sequence images?
 # TODO make logo for PUSH
 # TODO Make Totem pole with different heads. Will require to put all portrait sources into separate folder, thus organize sources better. util.img_totem_stack(dupn_h, spd). Heads include APHEX TWIN, JEFFREY EPSTEIN, Artist's faces, recognizeable faces mixed with obscure faces, totems of people we SHOULD admire and adore but unfortunately dont know all that well
+# TODO can also vertically dup portraits and alternate different faces
 # TODO random transform of the bitmask! (rotation, tesselation, resizing (stretching) the text_image then converting to bitmask, rather than expanding the bitmask with whitespace. This will fuck with the proportions of the mask, which is cool)
 # TODO if SOURCE_FILES gets large enough or the rendering process starts to slow down, will have to consider refactoring for speed
 # TODO Incoprorate Alpha channel to make the 'boundaries' between source elements blurred
 # TODO make a bunch of sources based on a bunch of images, and save the individual pieces derived from masking into separate lists (one for the Inner shape, one for the outer), and recombine randomly
 # TODO if ever I am at a loss for enhancements or experiments, read the docstrings of Image methods I use to get inspiration
 # TODO tesselating multiple images to become a "source"
+# TODO weave two sources by using a checkerboard pattern for the mask
 
 
 if __name__ == '__main__':
@@ -167,9 +169,10 @@ Start doing series on just one idea
 # Source Ideas
 NYPD Logos and Imagery
 Birds
-Sol Lewitt 10 Geometric Figures
+Sol Lewitt: everything (incl. 10 Geometric Figures)
 Grids of Flags
 Video Game Fight Scenes, esp. Street Fighter
+Max Bill: 1970's shapes
 '''
 
 '''

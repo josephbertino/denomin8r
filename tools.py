@@ -12,7 +12,7 @@ from collections import defaultdict
 
 import numpy as np
 from PIL import Image
-import pillow_avif  # Don't delete
+import pillow_avif
 
 from enum import IntEnum, auto
 from matplotlib import pyplot as plt

@@ -22,6 +22,7 @@ def main(mask:str=MASK,
          iters:int=ITERS,
          spec_srcs:list=SPEC_SRCS,
          ):
+
     mask_img = Image.open(mask)
     bitmask = None
 
@@ -29,14 +30,14 @@ def main(mask:str=MASK,
 
         # Get Source Images
         imgs, filenames = load_sources(latest=use_latest, specific_srcs=spec_srcs)
-        image1, image2 = imgs
+        imarr_1, imarr_2 = imgs
 
-        crop_shape = get_common_crop_shape([image1, image2], square=True)
-        image1 = crop_im_arr(image1, cropbox_central_shape, crop_shape=crop_shape)
-        image2 = crop_im_arr(image2, cropbox_central_shape, crop_shape=crop_shape)
+        imarr_1, op_list = chaos_source_transform(imarr_1)
+        imarr_2, op_list = chaos_source_transform(imarr_2)
 
-        image1 = source_phase_complete(image1)
-        image2 = source_phase_complete(image2)
+        crop_shape = get_common_crop_shape([imarr_1, imarr_2], square=True)
+        imarr_1 = crop_im_arr(imarr_1, cropbox_central_shape, crop_shape=crop_shape)
+        imarr_2 = crop_im_arr(imarr_2, cropbox_central_shape, crop_shape=crop_shape)
 
         # Generate Bitmask
         match bitmask_method:
@@ -49,11 +50,8 @@ def main(mask:str=MASK,
                 bitmask = build_random_text_bitmask(fontfile=BOOKMAN, shape=crop_shape)
 
         # Apply Bitmask to Source Images
-        collage_A, collage_B = simple_bitmask_swap(image1, image2, bitmask)
+        collage_A, collage_B = simple_bitmask_swap(imarr_1, imarr_2, bitmask)
         save_images_from_arrays([collage_A, collage_B], draw_handle=draw_handle)
-
-'''Chaos Source Transforms'''
-# TODO Big Project 1: "Chaos Source Transforms". Includes Off-cropping, rotating, cropping, slice transformations, flipping, & resizing. Of course, finish off with a stamp.
 
 '''Flags'''
 # TODO Slice Transform: swap slices between 2 or more sources
@@ -87,6 +85,7 @@ def main(mask:str=MASK,
 # TODO autogenerate posts daily so I no longer have to lol
 
 '''Uncategorized'''
+# TODO play with dup_n being unequal across vertical and horizontal for a grid to get rectangles as atomic elements.
 # TODO util to make gifs of sequence images?
 # TODO make logo for PUSH
 # TODO Make Totem pole with different heads. Will require to put all portrait sources into separate folder, thus organize sources better. util.img_totem_stack(dupn_h, spd). Heads include APHEX TWIN, JEFFREY EPSTEIN, Artist's faces, recognizeable faces mixed with obscure faces, totems of people we SHOULD admire and adore but unfortunately dont know all that well
@@ -118,33 +117,31 @@ Big Goals
 '''
 
 '''
-Big Project 2: Flags, Colonialism, Imperialism
+Big Project: Flags, Colonialism, Imperialism
 # TODO Slice Transform: swap slices between 2 or more sources
 + Blend flags of colonizing nations (e.g. UK) with flags of the nations they colonized, or fucked over in some way.
 + Will have to keep in mind that flags have different dimensions/aspect ratios, and we don't want to crop a flag
 + Unless! Cropping is an artistic statement to express colonialism / imperialism and stripping / depleting a nation
 
-Big Project 3: Gradual Transformation a la Philip Glass
+Big Project: Gradual Transformation a la Philip Glass
 + First draw a canvas then Start of with painting a portion of a source image on the left hand side (or wherever you decide is the start). Then duplicate, reiterate, replicate the source image across the space but shifting and glitching it, transforming, modulating it, until gradually you transition it into a completely different image, or a combination of multiple images
 + Celebrity surgery transitions
-
-Big Project 4:
 '''
 
 '''
 EXHIBIT IDEAS
 
 0) Chaos Source Transform
-Just a fun exhibit of everything up to Chaos Source Transform.
+Just a fun exhibit of everything up to Chaos Source Transform. Playing on a smaller scale with a bunch of different source image motifs and themes.
 
-1)
+1) Dolonialism
 + Flag project showing effects of colonization and imperialism on the identities of the victims / subjected
 + Thesis: Typically national flags are the product of emergence from the hold / ownership of a former colonizer. A nation only earns a flag when it becomes a nation---sovereign, free, and with its own identity. Well what happens when I interweave nations' flags with the flags of their former colonizers or identity? What emerges from this act of visual and political regression? What happens when the symbol of one's pride, culture, heritage, and identity becomes visually massacred, evocative of the bloody wars that were fought to secure new freedom and that very identity which is now once again vulnerable and split open? Moreover, can we ignore the lasting influence that former colonizers might still exert upon "sovereign" nations? Is not part of the nation's identity interwoven already with that of its former possessor
 + Idea: Take images of flags and interweave them with the flags of their former colonizers or oppressors.
 + Idea: Take images of flags and interweave them with random flags to see what happens
 + Idea: Interweave symbols of money / currency / commodities / natural resources relevant to the flag's country
 
-2) "Big D Energy"
+2) Big D Energy
 + Debut of Denominator plastering itself across all walks of life, art, fake life, fake art, capitalism
 + Large prints, one-offs, as well as unique projected works that auto-generated and destroyed
 +  (something else cool)
@@ -156,13 +153,13 @@ Just a fun exhibit of everything up to Chaos Source Transform.
 + (what else can users submit?)
 + (what else can users submit?)
 + Sell merch
-
 '''
 
 '''
-Series Ideas
-How D8 started to where it got today (more and more fucked and abstracted over time)
-Start doing series on just one idea
+# Series Ideas
+
++ How D8 started to where it got today (more and more fucked and abstracted over time)
++ Start doing series on just one idea
 '''
 
 '''
@@ -178,5 +175,5 @@ Max Bill: 1970's shapes
 '''
 # Phrase Ideas
 NYPD
-TBD
+OCD
 '''
